@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-paper text-ink antialiased;
+  }
+}
+
+@layer components {
+  .bottom-nav-tabs [role="tablist"] {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-top: 0;
+    border-bottom: 0;
+  }
+  .bottom-nav-tabs [role="tab"] {
+    width: 100%;
+    height: 64px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    color: inherit;
+    box-shadow: none;
+  }
+  .bottom-nav-tabs [role="tab"]:hover:not([data-active="true"]) {
+    background-color: #eff6ff;
+  }
+  .bottom-nav-tabs [role="tab"][data-active="true"] {
+    background-color: #2563eb;
+    color: #ffffff;
+  }
+  .bottom-nav-tabs [role="tab"][data-active="true"]:hover {
+    background-color: #1d4ed8;
+  }
+}

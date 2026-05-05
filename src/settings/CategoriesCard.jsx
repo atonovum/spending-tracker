@@ -1,0 +1,393 @@
+import { useEffect, useMemo, useState } from "react";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Card,
+  Checkbox,
+  ColorInput,
+  Divider,
+  Group,
+  Modal,
+  Paper,
+  ScrollArea,
+  Select,
+  Stack,
+  Tabs,
+  Text,
+  TextInput,
+  Title,
+} from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
+import {
+  IconArrowsJoin,
+  IconCheck,
+  IconChevronRight,
+  IconPencil,
+  IconPlus,
+  IconTrash,
+  IconX,
+} from "@tabler/icons-react";
+import { CATEGORY_ICON_KEYS, CATEGORY_ICON_LABELS, CategoryIcon, getCategoryIconComponent } from "../lib/categoryIcons.jsx";
+import { buildCategoryStats, usageText } from "./shared.jsx";
+
+const DEFAULT_CATEGORY_COLORS = {
+  expense: "#c62828",
+  income: "#1565c0",
+};
+
+const ICON_OPTIONS = CATEGORY_ICON_KEYS.map((key) => ({
+  value: key,
+  label: CATEGORY_ICON_LABELS[key] || key,
+}));
+
+function IconOption({ option }) {
+  const Cmp = getCategoryIconComponent(option.value);
+  return (
+    <Group gap="xs" wrap="nowrap">
+      <Cmp size={16} stroke={1.8} />
+      <span>{option.label}</span>
+    </Group>
+  );
+}
+
+function InlineCategoryForm({ initial, defaultType, onCancel, onSubmit }) {
+  const isEdit = Boolean(initial?.id);
+  const [name, setName] = useState(initial?.name || "");
+  const [icon, setIcon] = useState(initial?.icon || "spark");
+  const [color, setColor] = useState(initial?.color || DEFAULT_CATEGORY_COLORS[initial?.type || defaultType] || "#1565c0");
+
+  useEffect(() => {
+    setName(initial?.name || "");
+    setIcon(initial?.icon || "spark");
+    setColor(initial?.color || DEFAULT_CATEGORY_COLORS[initial?.type || defaultType] || "#1565c0");
+  }, [initial, defaultType]);
+
+  function handleSubmit() {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const type = initial?.type || defaultType;
+    onSubmit({
+      id: initial?.id,
+      name: trimmed,
+      type,
+      color: color || DEFAULT_CATEGORY_COLORS[type],
+      icon,
+    });
+  }
+
+  return (
+    <Paper withBorder radius="sm" p="sm" className="bg-slate-50">
+      <Stack gap="xs">
+        <Text size="sm" fw={700}>{isEdit ? "카테고리 수정" : "새 카테고리"}</Text>
+        <TextInput label="이름" value={name} onChange={(event) => setName(event.currentTarget.value)} required size="sm" />
+        <Select
+          label="아이콘"
+          data={ICON_OPTIONS}
+          value={icon}
+          onChange={(value) => setIcon(value || "spark")}
+          allowDeselect={false}
+          searchable
+          renderOption={IconOption}
+          leftSection={<CategoryIcon category={{ icon }} size={16} />}
+          size="sm"
+        />
+        <ColorInput
+          label="색상"
+          value={color}
+          onChange={setColor}
+          format="hex"
+          swatches={["#1565c0", "#2e7d32", "#c62828", "#ef6c00", "#6a1b9a", "#4a148c", "#37474f", "#00897b", "#5d4037"]}
+          size="sm"
+        />
+        <Group justify="flex-end" gap="xs">
+          <Button variant="subtle" leftSection={<IconX size={14} />} size="xs" onClick={onCancel}>취소</Button>
+          <Button leftSection={<IconCheck size={14} />} size="xs" onClick={handleSubmit} disabled={!name.trim()}>저장</Button>
+        </Group>
+      </Stack>
+    </Paper>
+  );
+}
+
+function MergeModal({ opened, sources, candidates, onClose, onConfirm }) {
+  const [target, setTarget] = useState("");
+  useEffect(() => { if (!opened) setTarget(""); }, [opened]);
+  const data = candidates.map((category) => ({ value: category.id, label: category.name }));
+
+  return (
+    <Modal opened={opened} onClose={onClose} title="카테고리 병합" centered size="md">
+      <Stack gap="sm">
+        <Text size="sm">
+          선택한 {sources.length}개 카테고리의 모든 거래를 아래 대상 카테고리로 옮긴 뒤, 원본 카테고리는 삭제됩니다.
+        </Text>
+        <Stack gap={4}>
+          {sources.map((source) => (
+            <Group key={source.id} gap="xs">
+              <span style={{ color: source.color }} className="inline-flex items-center">
+                <CategoryIcon category={source} size={14} />
+              </span>
+              <Text size="sm">{source.name}</Text>
+            </Group>
+          ))}
+        </Stack>
+        <Select
+          label="병합 대상"
+          placeholder="대상 카테고리 선택"
+          data={data}
+          value={target}
+          onChange={(value) => setTarget(value || "")}
+          allowDeselect={false}
+        />
+        <Group justify="flex-end" pt="sm">
+          <Button color="indigo" leftSection={<IconCheck size={16} />} onClick={() => onConfirm(target)} disabled={!target}>
+            병합
+          </Button>
+        </Group>
+      </Stack>
+    </Modal>
+  );
+}
+
+function CategoryRow({ category, stat, checked, onToggle, onEdit, onDelete }) {
+  return (
+    <Paper withBorder p="sm" radius="sm">
+      <Group justify="space-between" wrap="nowrap" gap="sm">
+        <Group gap="sm" wrap="nowrap" className="min-w-0 flex-1">
+          <Checkbox
+            checked={checked}
+            onChange={(event) => onToggle(event.currentTarget.checked)}
+            onClick={(event) => event.stopPropagation()}
+          />
+          <span
+            aria-hidden="true"
+            className="grid h-9 w-9 place-items-center rounded-full"
+            style={{ background: `${category.color}1a`, color: category.color }}
+          >
+            <CategoryIcon category={category} size={18} />
+          </span>
+          <div className="min-w-0">
+            <Text fw={600} className="truncate" style={{ color: category.color }}>{category.name}</Text>
+            <Text size="xs" c="dimmed">{usageText(stat)}</Text>
+          </div>
+        </Group>
+        <Group gap={4} wrap="nowrap">
+          <ActionIcon variant="subtle" onClick={onEdit} aria-label="수정">
+            <IconPencil size={16} />
+          </ActionIcon>
+          <ActionIcon variant="subtle" color="red" onClick={onDelete} aria-label="삭제">
+            <IconTrash size={16} />
+          </ActionIcon>
+        </Group>
+      </Group>
+    </Paper>
+  );
+}
+
+function CategoriesManager({
+  opened,
+  onClose,
+  categories,
+  stats,
+  onSave,
+  onDelete,
+  onMerge,
+  onConfirm,
+}) {
+  const isMobile = useMediaQuery("(max-width: 48em)");
+  const [tab, setTab] = useState("expense");
+  const [checked, setChecked] = useState({ expense: new Set(), income: new Set() });
+  const [form, setForm] = useState({ open: false, initial: null });
+  const [mergeModal, setMergeModal] = useState({ open: false });
+
+  useEffect(() => { if (!opened) setForm({ open: false, initial: null }); }, [opened]);
+
+  const grouped = useMemo(() => ({
+    expense: categories.filter((category) => category.type === "expense"),
+    income: categories.filter((category) => category.type === "income"),
+  }), [categories]);
+
+  const checkedSet = checked[tab];
+  const checkedCategories = grouped[tab].filter((category) => checkedSet.has(category.id));
+  const mergeCandidates = grouped[tab].filter((category) => !checkedSet.has(category.id));
+
+  function toggleChecked(id, value) {
+    setChecked((prev) => {
+      const nextSet = new Set(prev[tab]);
+      if (value) nextSet.add(id); else nextSet.delete(id);
+      return { ...prev, [tab]: nextSet };
+    });
+  }
+
+  function clearChecked(typeToClear = tab) {
+    setChecked((prev) => ({ ...prev, [typeToClear]: new Set() }));
+  }
+
+  function requestDelete(category) {
+    const stat = stats.get(category.id);
+    const count = stat?.count || 0;
+    if (categories.length <= 1) {
+      onConfirm({
+        title: "카테고리 삭제 불가",
+        message: "최소 1개의 카테고리는 남겨두어야 합니다.",
+        confirmLabel: "확인",
+        confirmColor: "blue",
+        action: null,
+      });
+      return;
+    }
+    const message = count
+      ? `"${category.name}" 카테고리를 삭제하면 ${count}건의 거래도 함께 삭제됩니다. 계속하시겠습니까?`
+      : `"${category.name}" 카테고리를 삭제하시겠습니까?`;
+    onConfirm({
+      title: "카테고리 삭제",
+      message,
+      action: () => {
+        onDelete(category.id);
+        clearChecked();
+      },
+    });
+  }
+
+  function startMerge() {
+    if (checkedCategories.length < 1 || mergeCandidates.length === 0) return;
+    setMergeModal({ open: true });
+  }
+
+  function confirmMerge(targetId) {
+    const sourceIds = checkedCategories.map((category) => category.id);
+    if (!sourceIds.length || !targetId) return;
+    onConfirm({
+      title: "카테고리 병합",
+      message: `${sourceIds.length}개 카테고리의 모든 거래를 대상으로 옮기고, 원본 카테고리를 삭제합니다.`,
+      confirmLabel: "병합",
+      confirmColor: "indigo",
+      action: () => {
+        onMerge(sourceIds, targetId);
+        setMergeModal({ open: false });
+        clearChecked();
+      },
+    });
+  }
+
+  function handleFormSubmit(payload) {
+    onSave(payload);
+    setForm({ open: false, initial: null });
+  }
+
+  return (
+    <>
+      <Modal
+        opened={opened}
+        onClose={onClose}
+        title="카테고리 관리"
+        centered
+        size="lg"
+        fullScreen={isMobile}
+      >
+        <Stack gap="sm" h={isMobile ? "calc(100dvh - 110px)" : undefined}>
+          <Tabs value={tab} onChange={(value) => setTab(value || "expense")}>
+            <Tabs.List grow>
+              <Tabs.Tab value="expense">지출 ({grouped.expense.length})</Tabs.Tab>
+              <Tabs.Tab value="income">수입 ({grouped.income.length})</Tabs.Tab>
+            </Tabs.List>
+          </Tabs>
+          <ScrollArea.Autosize mah={isMobile ? "100%" : 380} style={{ flex: 1, minHeight: 0 }}>
+            <Stack gap="xs" pr={4}>
+              {grouped[tab].length === 0 ? (
+                <Text size="sm" c="dimmed">카테고리가 없습니다.</Text>
+              ) : (
+                grouped[tab].map((category) => (
+                  <CategoryRow
+                    key={category.id}
+                    category={category}
+                    stat={stats.get(category.id)}
+                    checked={checkedSet.has(category.id)}
+                    onToggle={(value) => toggleChecked(category.id, value)}
+                    onEdit={() => setForm({ open: true, initial: category })}
+                    onDelete={() => requestDelete(category)}
+                  />
+                ))
+              )}
+            </Stack>
+          </ScrollArea.Autosize>
+          {form.open ? (
+            <>
+              <Divider />
+              <InlineCategoryForm
+                initial={form.initial}
+                defaultType={tab}
+                onCancel={() => setForm({ open: false, initial: null })}
+                onSubmit={handleFormSubmit}
+              />
+            </>
+          ) : (
+            <Group justify="space-between">
+              <Text size="xs" c="dimmed">
+                선택 {checkedCategories.length}개
+                {checkedCategories.length > 0 && mergeCandidates.length === 0 ? " · 병합 대상 없음" : ""}
+              </Text>
+              <Group gap="xs">
+                <Button
+                  size="xs"
+                  variant="light"
+                  color="indigo"
+                  leftSection={<IconArrowsJoin size={14} />}
+                  onClick={startMerge}
+                  disabled={checkedCategories.length < 1 || mergeCandidates.length === 0}
+                >
+                  선택 병합
+                </Button>
+                <Button
+                  size="xs"
+                  leftSection={<IconPlus size={14} />}
+                  onClick={() => setForm({ open: true, initial: null })}
+                >
+                  카테고리 추가
+                </Button>
+              </Group>
+            </Group>
+          )}
+        </Stack>
+      </Modal>
+
+      <MergeModal
+        opened={mergeModal.open}
+        sources={checkedCategories}
+        candidates={mergeCandidates}
+        onClose={() => setMergeModal({ open: false })}
+        onConfirm={confirmMerge}
+      />
+    </>
+  );
+}
+
+export function CategoriesCard({ state, onSaveCategory, onDeleteCategory, onMergeCategories, onConfirm }) {
+  const [open, setOpen] = useState(false);
+  const stats = useMemo(() => buildCategoryStats(state.wallets), [state.wallets]);
+
+  return (
+    <>
+      <Card withBorder radius="sm" shadow="sm" className="cursor-pointer" onClick={() => setOpen(true)}>
+        <Group justify="space-between" wrap="nowrap">
+          <Title order={4}>Categories</Title>
+          <Group gap="xs">
+            <Badge variant="light">{state.categories.length}</Badge>
+            <IconChevronRight size={18} />
+          </Group>
+        </Group>
+      </Card>
+
+      <CategoriesManager
+        opened={open}
+        onClose={() => setOpen(false)}
+        categories={state.categories}
+        stats={stats}
+        onSave={onSaveCategory}
+        onDelete={onDeleteCategory}
+        onMerge={onMergeCategories}
+        onConfirm={onConfirm}
+      />
+    </>
+  );
+}
