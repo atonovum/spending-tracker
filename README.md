@@ -1,1 +1,3 @@
 # SpendingTracker
+
+personal spending tracker
