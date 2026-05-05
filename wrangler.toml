@@ -1,7 +1,0 @@
-name = "spending-tracker"
-compatibility_date = "2024-09-23"
-pages_build_output_dir = "dist"
-
-[[kv_namespaces]]
-binding = "STATE_KV"
-id = "ce5e71147026485b9b8d5c2978184368"
