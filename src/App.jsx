@@ -1559,7 +1559,17 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
     <Stack>
       <SimpleGrid cols={2}>
         <TextInput label={t("entry.field.date")} type="date" value={date} onChange={(e) => setDate(e.currentTarget.value)} />
-        <NumberInput label={t("entry.field.amount")} value={amount} onChange={(value) => setAmount(Number(value || 0))} min={0} />
+        <NumberInput
+          label={t("entry.field.amount")}
+          value={amount}
+          onChange={(value) => setAmount(Number(value || 0))}
+          min={0}
+          allowDecimal={false}
+          allowNegative={false}
+          thousandSeparator=","
+          hideControls
+          inputMode="numeric"
+        />
       </SimpleGrid>
 
       <Stack gap={6}>
