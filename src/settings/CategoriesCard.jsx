@@ -29,18 +29,14 @@ import {
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
-import { CATEGORY_ICON_KEYS, CATEGORY_ICON_LABELS, CategoryIcon, getCategoryIconComponent } from "../lib/categoryIcons.jsx";
+import { CATEGORY_ICON_KEYS, CategoryIcon, getCategoryIconComponent } from "../lib/categoryIcons.jsx";
+import { useT } from "../lib/i18n.jsx";
 import { buildCategoryStats, usageText } from "./shared.jsx";
 
 const DEFAULT_CATEGORY_COLORS = {
   expense: "#c62828",
   income: "#1565c0",
 };
-
-const ICON_OPTIONS = CATEGORY_ICON_KEYS.map((key) => ({
-  value: key,
-  label: CATEGORY_ICON_LABELS[key] || key,
-}));
 
 function IconOption({ option }) {
   const Cmp = getCategoryIconComponent(option.value);
@@ -53,6 +49,7 @@ function IconOption({ option }) {
 }
 
 function InlineCategoryForm({ initial, defaultType, onCancel, onSubmit }) {
+  const t = useT();
   const isEdit = Boolean(initial?.id);
   const [name, setName] = useState(initial?.name || "");
   const [icon, setIcon] = useState(initial?.icon || "spark");
@@ -77,14 +74,16 @@ function InlineCategoryForm({ initial, defaultType, onCancel, onSubmit }) {
     });
   }
 
+  const iconOptions = CATEGORY_ICON_KEYS.map((key) => ({ value: key, label: t(`iconKey.${key}`) }));
+
   return (
     <Paper withBorder radius="sm" p="sm" className="bg-slate-50">
       <Stack gap="xs">
-        <Text size="sm" fw={700}>{isEdit ? "카테고리 수정" : "새 카테고리"}</Text>
-        <TextInput label="이름" value={name} onChange={(event) => setName(event.currentTarget.value)} required size="sm" />
+        <Text size="sm" fw={700}>{isEdit ? t("settings.categories.editTitle") : t("settings.categories.newTitle")}</Text>
+        <TextInput label={t("settings.categories.field.name")} value={name} onChange={(event) => setName(event.currentTarget.value)} required size="sm" />
         <Select
-          label="아이콘"
-          data={ICON_OPTIONS}
+          label={t("settings.categories.field.icon")}
+          data={iconOptions}
           value={icon}
           onChange={(value) => setIcon(value || "spark")}
           allowDeselect={false}
@@ -94,7 +93,7 @@ function InlineCategoryForm({ initial, defaultType, onCancel, onSubmit }) {
           size="sm"
         />
         <ColorInput
-          label="색상"
+          label={t("settings.categories.field.color")}
           value={color}
           onChange={setColor}
           format="hex"
@@ -102,8 +101,8 @@ function InlineCategoryForm({ initial, defaultType, onCancel, onSubmit }) {
           size="sm"
         />
         <Group justify="flex-end" gap="xs">
-          <Button variant="subtle" leftSection={<IconX size={14} />} size="xs" onClick={onCancel}>취소</Button>
-          <Button leftSection={<IconCheck size={14} />} size="xs" onClick={handleSubmit} disabled={!name.trim()}>저장</Button>
+          <Button variant="subtle" leftSection={<IconX size={14} />} size="xs" onClick={onCancel}>{t("entry.action.cancel")}</Button>
+          <Button leftSection={<IconCheck size={14} />} size="xs" onClick={handleSubmit} disabled={!name.trim()}>{t("entry.action.save")}</Button>
         </Group>
       </Stack>
     </Paper>
@@ -111,15 +110,16 @@ function InlineCategoryForm({ initial, defaultType, onCancel, onSubmit }) {
 }
 
 function MergeModal({ opened, sources, candidates, onClose, onConfirm }) {
+  const t = useT();
   const [target, setTarget] = useState("");
   useEffect(() => { if (!opened) setTarget(""); }, [opened]);
   const data = candidates.map((category) => ({ value: category.id, label: category.name }));
 
   return (
-    <Modal opened={opened} onClose={onClose} title="카테고리 병합" centered size="md">
+    <Modal opened={opened} onClose={onClose} title={t("settings.categories.mergeTitle")} centered size="md">
       <Stack gap="sm">
         <Text size="sm">
-          선택한 {sources.length}개 카테고리의 모든 거래를 아래 대상 카테고리로 옮긴 뒤, 원본 카테고리는 삭제됩니다.
+          {t("settings.categories.mergeIntro", { count: sources.length })}
         </Text>
         <Stack gap={4}>
           {sources.map((source) => (
@@ -132,8 +132,8 @@ function MergeModal({ opened, sources, candidates, onClose, onConfirm }) {
           ))}
         </Stack>
         <Select
-          label="병합 대상"
-          placeholder="대상 카테고리 선택"
+          label={t("settings.categories.mergeTarget")}
+          placeholder={t("settings.categories.mergeTargetPlaceholder")}
           data={data}
           value={target}
           onChange={(value) => setTarget(value || "")}
@@ -141,7 +141,7 @@ function MergeModal({ opened, sources, candidates, onClose, onConfirm }) {
         />
         <Group justify="flex-end" pt="sm">
           <Button color="indigo" leftSection={<IconCheck size={16} />} onClick={() => onConfirm(target)} disabled={!target}>
-            병합
+            {t("settings.categories.mergeBtn")}
           </Button>
         </Group>
       </Stack>
@@ -150,6 +150,7 @@ function MergeModal({ opened, sources, candidates, onClose, onConfirm }) {
 }
 
 function CategoryRow({ category, stat, checked, onToggle, onEdit, onDelete }) {
+  const t = useT();
   return (
     <Paper withBorder p="sm" radius="sm">
       <Group justify="space-between" wrap="nowrap" gap="sm">
@@ -168,14 +169,14 @@ function CategoryRow({ category, stat, checked, onToggle, onEdit, onDelete }) {
           </span>
           <div className="min-w-0">
             <Text fw={600} className="truncate" style={{ color: category.color }}>{category.name}</Text>
-            <Text size="xs" c="dimmed">{usageText(stat)}</Text>
+            <Text size="xs" c="dimmed">{usageText(stat, t)}</Text>
           </div>
         </Group>
         <Group gap={4} wrap="nowrap">
-          <ActionIcon variant="subtle" onClick={onEdit} aria-label="수정">
+          <ActionIcon variant="subtle" onClick={onEdit} aria-label={t("settings.editAria")}>
             <IconPencil size={16} />
           </ActionIcon>
-          <ActionIcon variant="subtle" color="red" onClick={onDelete} aria-label="삭제">
+          <ActionIcon variant="subtle" color="red" onClick={onDelete} aria-label={t("settings.deleteAria")}>
             <IconTrash size={16} />
           </ActionIcon>
         </Group>
@@ -194,6 +195,7 @@ function CategoriesManager({
   onMerge,
   onConfirm,
 }) {
+  const t = useT();
   const isMobile = useMediaQuery("(max-width: 48em)");
   const [tab, setTab] = useState("expense");
   const [checked, setChecked] = useState({ expense: new Set(), income: new Set() });
@@ -228,19 +230,19 @@ function CategoriesManager({
     const count = stat?.count || 0;
     if (categories.length <= 1) {
       onConfirm({
-        title: "카테고리 삭제 불가",
-        message: "최소 1개의 카테고리는 남겨두어야 합니다.",
-        confirmLabel: "확인",
+        title: t("settings.categories.deleteCannot"),
+        message: t("settings.categories.minimum"),
+        confirmLabel: t("settings.confirm.confirm"),
         confirmColor: "blue",
         action: null,
       });
       return;
     }
     const message = count
-      ? `"${category.name}" 카테고리를 삭제하면 ${count}건의 거래도 함께 삭제됩니다. 계속하시겠습니까?`
-      : `"${category.name}" 카테고리를 삭제하시겠습니까?`;
+      ? t("settings.categories.deleteWithEntries", { name: category.name, count })
+      : t("settings.categories.deleteSimple", { name: category.name });
     onConfirm({
-      title: "카테고리 삭제",
+      title: t("settings.categories.deleteTitle"),
       message,
       action: () => {
         onDelete(category.id);
@@ -258,9 +260,9 @@ function CategoriesManager({
     const sourceIds = checkedCategories.map((category) => category.id);
     if (!sourceIds.length || !targetId) return;
     onConfirm({
-      title: "카테고리 병합",
-      message: `${sourceIds.length}개 카테고리의 모든 거래를 대상으로 옮기고, 원본 카테고리를 삭제합니다.`,
-      confirmLabel: "병합",
+      title: t("settings.categories.mergeTitle"),
+      message: t("settings.categories.mergeConfirm", { count: sourceIds.length }),
+      confirmLabel: t("settings.categories.mergeBtn"),
       confirmColor: "indigo",
       action: () => {
         onMerge(sourceIds, targetId);
@@ -280,22 +282,22 @@ function CategoriesManager({
       <Modal
         opened={opened}
         onClose={onClose}
-        title="카테고리 관리"
+        title={t("settings.categories.title")}
         centered
-        size="lg"
+        size={isMobile ? "lg" : "80%"}
         fullScreen={isMobile}
       >
-        <Stack gap="sm" h={isMobile ? "calc(100dvh - 110px)" : undefined}>
+        <Stack gap="sm" h={isMobile ? "calc(100dvh - 110px)" : 700}>
           <Tabs value={tab} onChange={(value) => setTab(value || "expense")}>
             <Tabs.List grow>
-              <Tabs.Tab value="expense">지출 ({grouped.expense.length})</Tabs.Tab>
-              <Tabs.Tab value="income">수입 ({grouped.income.length})</Tabs.Tab>
+              <Tabs.Tab value="expense">{t("settings.categories.tab.expense", { count: grouped.expense.length })}</Tabs.Tab>
+              <Tabs.Tab value="income">{t("settings.categories.tab.income", { count: grouped.income.length })}</Tabs.Tab>
             </Tabs.List>
           </Tabs>
-          <ScrollArea.Autosize mah={isMobile ? "100%" : 380} style={{ flex: 1, minHeight: 0 }}>
+          <ScrollArea.Autosize mah={isMobile ? "100%" : 560} style={{ flex: 1, minHeight: 0 }}>
             <Stack gap="xs" pr={4}>
               {grouped[tab].length === 0 ? (
-                <Text size="sm" c="dimmed">카테고리가 없습니다.</Text>
+                <Text size="sm" c="dimmed">{t("settings.categories.empty")}</Text>
               ) : (
                 grouped[tab].map((category) => (
                   <CategoryRow
@@ -324,8 +326,10 @@ function CategoriesManager({
           ) : (
             <Group justify="space-between">
               <Text size="xs" c="dimmed">
-                선택 {checkedCategories.length}개
-                {checkedCategories.length > 0 && mergeCandidates.length === 0 ? " · 병합 대상 없음" : ""}
+                {t("settings.categories.selected", { count: checkedCategories.length })}
+                {checkedCategories.length > 0 && mergeCandidates.length === 0
+                  ? ` · ${t("settings.categories.noMergeTarget")}`
+                  : ""}
               </Text>
               <Group gap="xs">
                 <Button
@@ -336,14 +340,14 @@ function CategoriesManager({
                   onClick={startMerge}
                   disabled={checkedCategories.length < 1 || mergeCandidates.length === 0}
                 >
-                  선택 병합
+                  {t("settings.categories.merge")}
                 </Button>
                 <Button
                   size="xs"
                   leftSection={<IconPlus size={14} />}
                   onClick={() => setForm({ open: true, initial: null })}
                 >
-                  카테고리 추가
+                  {t("settings.categories.add")}
                 </Button>
               </Group>
             </Group>
@@ -363,6 +367,7 @@ function CategoriesManager({
 }
 
 export function CategoriesCard({ state, onSaveCategory, onDeleteCategory, onMergeCategories, onConfirm }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const stats = useMemo(() => buildCategoryStats(state.wallets), [state.wallets]);
 
@@ -370,7 +375,7 @@ export function CategoriesCard({ state, onSaveCategory, onDeleteCategory, onMerg
     <>
       <Card withBorder radius="sm" shadow="sm" className="cursor-pointer" onClick={() => setOpen(true)}>
         <Group justify="space-between" wrap="nowrap">
-          <Title order={4}>Categories</Title>
+          <Title order={4}>{t("settings.categories")}</Title>
           <Group gap="xs">
             <Badge variant="light">{state.categories.length}</Badge>
             <IconChevronRight size={18} />

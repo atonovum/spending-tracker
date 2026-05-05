@@ -39,7 +39,8 @@ export function buildLabelStats(wallets) {
   return map;
 }
 
-export function usageText(stat) {
-  if (!stat || !stat.count) return "사용 0건";
+export function usageText(stat, t) {
+  if (!stat || !stat.count) return t ? t("settings.usage.zero") : "사용 0건";
+  if (t) return t("settings.usage.text", { wallets: stat.walletIds.size, count: stat.count });
   return `${stat.walletIds.size}개 지갑의 ${stat.count}개 거래`;
 }

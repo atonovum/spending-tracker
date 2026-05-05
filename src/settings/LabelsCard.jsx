@@ -17,12 +17,14 @@ import {
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconCheck, IconChevronRight, IconPencil, IconPlus, IconTrash } from "@tabler/icons-react";
+import { useT } from "../lib/i18n.jsx";
 import { buildLabelStats, usageText } from "./shared.jsx";
 
 const DEFAULT_LABEL_COLOR = "#64748b";
 const SWATCHES = ["#64748b", "#0f766e", "#9333ea", "#dc2626", "#ea580c", "#ca8a04", "#16a34a", "#2563eb", "#0891b2"];
 
 function LabelEditModal({ opened, initial, onClose, onSubmit }) {
+  const t = useT();
   const [name, setName] = useState(initial?.name || "");
   const [color, setColor] = useState(initial?.color || DEFAULT_LABEL_COLOR);
 
@@ -33,12 +35,12 @@ function LabelEditModal({ opened, initial, onClose, onSubmit }) {
   }
 
   return (
-    <Modal opened={opened} onClose={onClose} title="레이블 수정" centered size="md">
+    <Modal opened={opened} onClose={onClose} title={t("settings.labels.editTitle")} centered size="md">
       <Stack gap="sm">
-        <TextInput label="이름" value={name} onChange={(event) => setName(event.currentTarget.value)} required />
-        <ColorInput label="색상" value={color} onChange={setColor} format="hex" swatches={SWATCHES} />
+        <TextInput label={t("settings.labels.field.name")} value={name} onChange={(event) => setName(event.currentTarget.value)} required />
+        <ColorInput label={t("settings.labels.field.color")} value={color} onChange={setColor} format="hex" swatches={SWATCHES} />
         <Group justify="flex-end" pt="sm">
-          <Button leftSection={<IconCheck size={16} />} onClick={handleSave} disabled={!name.trim()}>저장</Button>
+          <Button leftSection={<IconCheck size={16} />} onClick={handleSave} disabled={!name.trim()}>{t("entry.action.save")}</Button>
         </Group>
       </Stack>
     </Modal>
@@ -46,6 +48,7 @@ function LabelEditModal({ opened, initial, onClose, onSubmit }) {
 }
 
 function LabelRow({ label, stat, onEdit, onDelete }) {
+  const t = useT();
   return (
     <Paper withBorder p="sm" radius="sm">
       <Group justify="space-between" wrap="nowrap" gap="sm">
@@ -53,14 +56,14 @@ function LabelRow({ label, stat, onEdit, onDelete }) {
           <span className="inline-block h-3 w-3 rounded-full" style={{ background: label.color }} />
           <div className="min-w-0">
             <Text fw={600} className="truncate">{label.name}</Text>
-            <Text size="xs" c="dimmed">{usageText(stat)}</Text>
+            <Text size="xs" c="dimmed">{usageText(stat, t)}</Text>
           </div>
         </Group>
         <Group gap={4} wrap="nowrap">
-          <ActionIcon variant="subtle" onClick={onEdit} aria-label="수정">
+          <ActionIcon variant="subtle" onClick={onEdit} aria-label={t("settings.editAria")}>
             <IconPencil size={16} />
           </ActionIcon>
-          <ActionIcon variant="subtle" color="red" onClick={onDelete} aria-label="삭제">
+          <ActionIcon variant="subtle" color="red" onClick={onDelete} aria-label={t("settings.deleteAria")}>
             <IconTrash size={16} />
           </ActionIcon>
         </Group>
@@ -70,6 +73,7 @@ function LabelRow({ label, stat, onEdit, onDelete }) {
 }
 
 function LabelsManager({ opened, onClose, labels, stats, onSave, onDelete, onConfirm }) {
+  const t = useT();
   const isMobile = useMediaQuery("(max-width: 48em)");
   const [draft, setDraft] = useState({ name: "", color: DEFAULT_LABEL_COLOR });
   const [editModal, setEditModal] = useState({ open: false, initial: null });
@@ -84,21 +88,21 @@ function LabelsManager({ opened, onClose, labels, stats, onSave, onDelete, onCon
   function requestDelete(label) {
     const stat = stats.get(label.id);
     const count = stat?.count || 0;
-    const message = count
-      ? `"${label.name}" 레이블을 삭제하면 ${count}건의 거래도 함께 삭제됩니다. 계속하시겠습니까?`
-      : `"${label.name}" 레이블을 삭제하시겠습니까?`;
     if (labels.length <= 1) {
       onConfirm({
-        title: "레이블 삭제 불가",
-        message: "최소 1개의 레이블은 남겨두어야 합니다.",
-        confirmLabel: "확인",
+        title: t("settings.labels.deleteCannot"),
+        message: t("settings.labels.minimum"),
+        confirmLabel: t("settings.confirm.confirm"),
         confirmColor: "blue",
         action: null,
       });
       return;
     }
+    const message = count
+      ? t("settings.labels.deleteWithEntries", { name: label.name, count })
+      : t("settings.labels.deleteSimple", { name: label.name });
     onConfirm({
-      title: "레이블 삭제",
+      title: t("settings.labels.deleteTitle"),
       message,
       action: () => onDelete(label.id),
     });
@@ -109,16 +113,16 @@ function LabelsManager({ opened, onClose, labels, stats, onSave, onDelete, onCon
       <Modal
         opened={opened}
         onClose={onClose}
-        title="레이블 관리"
+        title={t("settings.labels.title")}
         centered
-        size="lg"
+        size={isMobile ? "lg" : "80%"}
         fullScreen={isMobile}
       >
-        <Stack gap="sm" h={isMobile ? "calc(100dvh - 110px)" : undefined}>
-          <ScrollArea.Autosize mah={isMobile ? "100%" : 380} style={{ flex: 1, minHeight: 0 }}>
+        <Stack gap="sm" h={isMobile ? "calc(100dvh - 110px)" : 700}>
+          <ScrollArea.Autosize mah={isMobile ? "100%" : 560} style={{ flex: 1, minHeight: 0 }}>
             <Stack gap="xs" pr={4}>
               {labels.length === 0 ? (
-                <Text size="sm" c="dimmed">레이블이 없습니다.</Text>
+                <Text size="sm" c="dimmed">{t("settings.labels.empty")}</Text>
               ) : (
                 labels.map((label) => (
                   <LabelRow
@@ -133,13 +137,13 @@ function LabelsManager({ opened, onClose, labels, stats, onSave, onDelete, onCon
             </Stack>
           </ScrollArea.Autosize>
           <Box>
-            <Text size="xs" fw={600} c="dimmed" mb={4}>레이블 추가</Text>
+            <Text size="xs" fw={600} c="dimmed" mb={4}>{t("settings.labels.add")}</Text>
             <Group gap="xs" wrap="nowrap" align="flex-end">
               <TextInput
                 value={draft.name}
                 onChange={(event) => setDraft((prev) => ({ ...prev, name: event.currentTarget.value }))}
                 onKeyDown={(event) => { if (event.key === "Enter") commitNew(); }}
-                placeholder="이름"
+                placeholder={t("settings.labels.namePlaceholder")}
                 className="flex-1"
               />
               <ColorInput
@@ -150,7 +154,7 @@ function LabelsManager({ opened, onClose, labels, stats, onSave, onDelete, onCon
                 w={140}
               />
               <Button leftSection={<IconPlus size={14} />} onClick={commitNew} disabled={!draft.name.trim()}>
-                추가
+                {t("settings.labels.addBtn")}
               </Button>
             </Group>
           </Box>
@@ -171,6 +175,7 @@ function LabelsManager({ opened, onClose, labels, stats, onSave, onDelete, onCon
 }
 
 export function LabelsCard({ state, onSaveLabel, onDeleteLabel, onConfirm }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const stats = useMemo(() => buildLabelStats(state.wallets), [state.wallets]);
 
@@ -178,7 +183,7 @@ export function LabelsCard({ state, onSaveLabel, onDeleteLabel, onConfirm }) {
     <>
       <Card withBorder radius="sm" shadow="sm" className="cursor-pointer" onClick={() => setOpen(true)}>
         <Group justify="space-between" wrap="nowrap">
-          <Title order={4}>Labels</Title>
+          <Title order={4}>{t("settings.labels")}</Title>
           <Group gap="xs">
             <Badge variant="light">{state.labels.length}</Badge>
             <IconChevronRight size={18} />

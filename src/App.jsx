@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActionIcon,
   Badge,
@@ -26,6 +26,8 @@ import {
   IconArrowLeft,
   IconArrowRight,
   IconCheck,
+  IconChevronDown,
+  IconChevronUp,
   IconPlus,
   IconPencil,
   IconSearch,
@@ -39,12 +41,13 @@ import {
   buildOccurrences,
   buildPendingScheduledOccurrences,
   formatAxisTick,
-  formatMoney,
   formatShortDate,
   fromDateInput,
   groupOccurrences,
   inRangeOccurrences,
   MAX_WALLETS,
+  nextOccurrenceOnOrAfter,
+  REPEAT_OPTIONS as REPEAT_OPTIONS_DATA,
   resolveFlowRange,
   resolveFullRange,
   roundedAxisMax,
@@ -55,14 +58,10 @@ import {
   uid,
 } from "./lib/finance.js";
 import { CategoryIcon, getCategoryIconComponent } from "./lib/categoryIcons.jsx";
+import { I18nProvider, useI18n, useT, DEFAULT_LANGUAGE } from "./lib/i18n.jsx";
 import Settings from "./settings/Settings.jsx";
 
-const TAB_ITEMS = [
-  { value: "ledger", label: "Ledger" },
-  { value: "stats", label: "Stats" },
-  { value: "search", label: "Search" },
-  { value: "settings", label: "Settings" },
-];
+const TAB_KEYS = ["ledger", "stats", "search", "settings"];
 
 function groupByDate(occurrences) {
   const map = new Map();
@@ -94,6 +93,7 @@ function donutSlicePath(cx, cy, r, startAngle, endAngle) {
 }
 
 function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSelectBar, selection }) {
+  const t = useT();
   const width = 640;
   const height = 240;
   const padX = 42;
@@ -104,7 +104,7 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
   const graphW = width - padX * 2;
 
   if (!page.length) {
-    return <Center h={220} c="dimmed">데이터가 없습니다.</Center>;
+    return <Center h={220} c="dimmed">{t("chart.empty")}</Center>;
   }
 
   if (chartMode === "balance") {
@@ -248,11 +248,15 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
 }
 
 function PieChart({ items, type }) {
-  const width = 640;
-  const height = 260;
+  const t = useT();
+  const width = 400;
+  const height = 400;
   const cx = width / 2;
-  const cy = height * 0.5;
-  const radius = Math.min(width, height) * 0.32;
+  const cy = height / 2;
+  const radius = 110;
+  const iconRadius = radius + 24;
+  const percentRadius = iconRadius + 22;
+  const iconSize = 24;
   const totals = new Map();
   for (const item of items) {
     if (item.category.type !== type) continue;
@@ -263,7 +267,7 @@ function PieChart({ items, type }) {
     value,
   }));
   const sum = slices.reduce((acc, item) => acc + item.value, 0);
-  if (!sum) return <Center h={260} c="dimmed">표시할 데이터가 없습니다.</Center>;
+  if (!sum) return <Center h={260} c="dimmed">{t("chart.noData")}</Center>;
 
   let start = -Math.PI / 2;
   const entries = slices.map((slice) => {
@@ -275,25 +279,47 @@ function PieChart({ items, type }) {
   });
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-[260px] overflow-visible">
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="xMidYMid meet"
+      className="block overflow-visible select-none"
+      style={{ width: "100%", height: "auto", maxWidth: 520 }}
+    >
       {entries.map((slice) => (
         <path key={slice.category.id} d={donutSlicePath(cx, cy, radius, slice.start, slice.end)} fill={slice.category.color} stroke="#fff" strokeWidth="1" />
       ))}
       {entries.map((slice) => {
         const Cmp = getCategoryIconComponent(slice.category.icon);
-        const x1 = cx + Math.cos(slice.mid) * radius;
-        const y1 = cy + Math.sin(slice.mid) * radius;
-        const rightSide = Math.cos(slice.mid) >= 0;
-        const elbowX = cx + (rightSide ? radius + 14 : -(radius + 14));
-        const iconX = cx + (rightSide ? radius + 30 : -(radius + 30));
-        const iconSize = 22;
+        const cosA = Math.cos(slice.mid);
+        const sinA = Math.sin(slice.mid);
+        const sx = cx + cosA * radius;
+        const sy = cy + sinA * radius;
+        const lineEndR = iconRadius - iconSize / 2 - 2;
+        const lx = cx + cosA * lineEndR;
+        const ly = cy + sinA * lineEndR;
+        const ix = cx + cosA * iconRadius;
+        const iy = cy + sinA * iconRadius;
+        const px = cx + cosA * percentRadius;
+        const py = cy + sinA * percentRadius;
+        const percent = (slice.value / sum) * 100;
+        const percentText = percent >= 10 ? `${Math.round(percent)}%` : `${percent.toFixed(1)}%`;
         return (
           <g key={`${slice.category.id}-callout`}>
-            <polyline points={`${x1},${y1} ${elbowX},${y1} ${iconX},${y1}`} fill="none" stroke={slice.category.color} strokeWidth="1.2" />
-            <circle cx={x1} cy={y1} r="3.5" fill={slice.category.color} />
-            <g transform={`translate(${iconX - iconSize / 2}, ${y1 - iconSize / 2})`} style={{ color: slice.category.color }}>
+            <line x1={sx} y1={sy} x2={lx} y2={ly} stroke={slice.category.color} strokeWidth="1.2" />
+            <circle cx={sx} cy={sy} r="2.5" fill={slice.category.color} />
+            <g transform={`translate(${ix - iconSize / 2}, ${iy - iconSize / 2})`} style={{ color: slice.category.color }}>
               <Cmp size={iconSize} stroke={2} />
             </g>
+            <text
+              x={px}
+              y={py}
+              textAnchor="middle"
+              dominantBaseline="central"
+              className="text-[11px]"
+              style={{ fill: slice.category.color, fontWeight: 700 }}
+            >
+              {percentText}
+            </text>
           </g>
         );
       })}
@@ -302,15 +328,19 @@ function PieChart({ items, type }) {
 }
 
 function EntryList({ items, onEdit }) {
+  const { t, formatMoney } = useI18n();
   const groups = groupByDate(items);
-  if (!groups.length) return <Text c="dimmed" size="sm">표시할 거래가 없습니다.</Text>;
+  if (!groups.length) return <Text c="dimmed" size="sm">{t("chart.noEntries")}</Text>;
   return (
     <Stack gap="sm">
-      {groups.map(([date, rows]) => (
+      {groups.map(([date, rows]) => {
+        const dailyTotal = rows.reduce((sum, item) => sum + signedAmount(item), 0);
+        return (
         <Box key={date}>
-          <Text fw={700} size="sm" className="text-slate-700 mb-2">
-            {date}
-          </Text>
+          <Group justify="space-between" mb={6} wrap="nowrap">
+            <Text fw={700} size="sm" className="text-slate-700">{date}</Text>
+            <Text fw={700} size="sm" className="text-slate-700">{formatMoney(dailyTotal)}</Text>
+          </Group>
           <Stack gap="xs">
             {rows.map((item) => {
               const category = item.category;
@@ -343,13 +373,109 @@ function EntryList({ items, onEdit }) {
             })}
           </Stack>
         </Box>
-      ))}
+        );
+      })}
     </Stack>
   );
 }
 
-function App() {
-  const [state, setState] = useState(() => loadState());
+function BucketScroller({ buckets, selectedKey, onSelect, statsBucketLabel, active }) {
+  const t = useT();
+  const scrollerRef = useRef(null);
+  const selectedRef = useRef(null);
+  const selectedIndex = buckets.findIndex((bucket) => bucket.key === selectedKey);
+
+  useEffect(() => {
+    if (!active) return;
+    if (selectedRef.current) {
+      selectedRef.current.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+    }
+  }, [selectedKey, buckets.length, active]);
+
+  function shift(delta) {
+    const next = buckets[selectedIndex + delta];
+    if (next) onSelect(next.key);
+  }
+
+  return (
+    <Stack gap="xs" mb="sm">
+      <Group gap="xs" wrap="nowrap" w="100%">
+        <ActionIcon variant="default" onClick={() => shift(-1)} disabled={selectedIndex <= 0}>
+          <IconArrowLeft size={16} />
+        </ActionIcon>
+        <Box
+          ref={scrollerRef}
+          className="bucket-scroller"
+          style={{ flex: 1, minWidth: 0, overflowX: "auto", overflowY: "hidden" }}
+        >
+          <Group gap="xs" wrap="nowrap" px={4}>
+            {buckets.map((bucket) => {
+              const isSelected = bucket.key === selectedKey;
+              return (
+                <Button
+                  key={bucket.key}
+                  ref={isSelected ? selectedRef : null}
+                  size="xs"
+                  variant={isSelected ? "filled" : "light"}
+                  color={isSelected ? "dark" : "gray"}
+                  onClick={() => onSelect(bucket.key)}
+                  style={{ flexShrink: 0 }}
+                >
+                  {bucket.label}
+                </Button>
+              );
+            })}
+          </Group>
+        </Box>
+        <ActionIcon variant="default" onClick={() => shift(1)} disabled={selectedIndex < 0 || selectedIndex >= buckets.length - 1}>
+          <IconArrowRight size={16} />
+        </ActionIcon>
+      </Group>
+      <Text size="xs" c="dimmed" ta="center">
+        {statsBucketLabel ? t("stats.selectedRange", { label: statsBucketLabel }) : t("stats.noRange")}
+      </Text>
+    </Stack>
+  );
+}
+
+const PAGE_SIZE = 20;
+
+function PaginatedEntryList({ items, onEdit, resetKey }) {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const sentinelRef = useRef(null);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [resetKey]);
+
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+    if (visibleCount >= items.length) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((count) => Math.min(count + PAGE_SIZE, items.length));
+        }
+      },
+      { rootMargin: "120px" }
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [visibleCount, items.length]);
+
+  const visible = items.slice(0, visibleCount);
+  const hasMore = items.length > visibleCount;
+
+  return (
+    <>
+      <EntryList items={visible} onEdit={onEdit} />
+      {hasMore ? <div ref={sentinelRef} className="h-6" aria-hidden="true" /> : null}
+    </>
+  );
+}
+
+function App({ state, setState }) {
+  const { t, formatMoney } = useI18n();
   const [activeTab, setActiveTab] = useState("ledger");
   const [ledgerMode, setLedgerMode] = useState("month");
   const [ledgerChartMode, setLedgerChartMode] = useState("flow");
@@ -365,9 +491,11 @@ function App() {
   const [searchText, setSearchText] = useState("");
   const [searchStartDate, setSearchStartDate] = useState("");
   const [searchEndDate, setSearchEndDate] = useState("");
+  const [searchActive, setSearchActive] = useState(false);
   const [entryModalOpen, setEntryModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [statsCategoryModalId, setStatsCategoryModalId] = useState(null);
+  const [pendingExpanded, setPendingExpanded] = useState(false);
 
   useEffect(() => {
     saveState(state);
@@ -387,8 +515,9 @@ function App() {
     return buckets.find((bucket) => bucket.key === selectedKey) || buckets[buckets.length - 1] || null;
   }, [ledgerSelectedByMode, ledgerMode, buckets]);
 
-  const totalBalance = useMemo(() => sumSigned(allOccurrences), [allOccurrences]);
+  const totalBalance = selectedBucket?.cumulative ?? 0;
   const periodFlow = useMemo(() => (selectedBucket ? sumSigned(selectedBucket.items) : 0), [selectedBucket]);
+  const ledgerPeriodLabel = t(`modeLabel.${ledgerMode}`);
 
   const statsBucket = useMemo(() => {
     const selectedKey = statsSelectedByMode[ledgerMode] || selectedBucket?.key || null;
@@ -397,11 +526,18 @@ function App() {
 
   const statsItems = statsBucket?.items || [];
   const statsFlow = useMemo(() => (statsBucket ? sumSigned(statsBucket.items) : 0), [statsBucket]);
+  const statsTotalBalance = statsBucket?.cumulative ?? 0;
 
   const selectedLedgerPageStart = ledgerPageByMode[ledgerMode] ?? Math.max(0, buckets.length - visibleCountForMode(ledgerMode));
   const ledgerPage = buckets.slice(selectedLedgerPageStart, selectedLedgerPageStart + visibleCountForMode(ledgerMode));
   const ledgerValueText = ledgerSelection && ledgerSelection.mode === ledgerMode
-    ? `${ledgerSelection.label} · ${ledgerSelection.metric === "income" ? "수입" : ledgerSelection.metric === "expense" ? "지출" : "현금 흐름"}: ${formatMoney(ledgerSelection.amount)}`
+    ? `${ledgerSelection.label} · ${
+        ledgerSelection.metric === "income"
+          ? t("chart.income")
+          : ledgerSelection.metric === "expense"
+            ? t("chart.expense")
+            : t("chart.cashFlow")
+      }: ${formatMoney(ledgerSelection.amount)}`
     : "";
 
   const pendingScheduled = useMemo(() => buildPendingScheduledOccurrences(currentWallet, selectedBucket ? { start: selectedBucket.start, end: selectedBucket.end } : resolveFlowRange(ledgerMode)), [currentWallet, selectedBucket, ledgerMode]);
@@ -416,14 +552,16 @@ function App() {
     if (searchPeriod === "30d") return resolveFlowRange("month");
     if (searchPeriod === "90d") return { start: addDays(startOfDay(new Date()), -89), end: startOfDay(new Date()) };
     if (searchPeriod === "custom") {
-      const start = fromDateInput(searchStartDate) || fullRange.start;
-      const end = fromDateInput(searchEndDate) || fullRange.end;
+      const start = fromDateInput(searchStartDate);
+      const end = fromDateInput(searchEndDate);
+      if (!start || !end) return null;
       return start <= end ? { start, end } : { start: end, end: start };
     }
     return fullRange;
   }, [searchPeriod, searchStartDate, searchEndDate, fullRange]);
 
   const searchResults = useMemo(() => {
+    if (!searchRange) return [];
     const base = buildOccurrences(searchWallet.entries, searchRange);
     const q = searchText.trim().toLowerCase();
     if (!q) return [];
@@ -486,11 +624,23 @@ function App() {
     return { ...item, category: getCategory(item.categoryId), label: getLabel(item.labelId) };
   }
 
+  function maybeShiftLedgerPage(bucket) {
+    const visibleCount = visibleCountForMode(ledgerMode);
+    const currentStart = ledgerPageByMode[ledgerMode] ?? Math.max(0, buckets.length - visibleCount);
+    const idx = buckets.findIndex((entry) => entry.key === bucket.key);
+    if (idx < 0) return;
+    if (idx === currentStart && idx > 0) {
+      setLedgerPageByMode((prev) => ({ ...prev, [ledgerMode]: Math.max(0, currentStart - 1) }));
+    } else if (idx === currentStart + visibleCount - 1 && idx < buckets.length - 1) {
+      setLedgerPageByMode((prev) => ({ ...prev, [ledgerMode]: Math.min(buckets.length - visibleCount, currentStart + 1) }));
+    }
+  }
+
   function handleLedgerBucketSelect(bucket) {
     setLedgerSelectedByMode((prev) => ({ ...prev, [ledgerMode]: bucket.key }));
     setStatsSelectedByMode((prev) => ({ ...prev, [ledgerMode]: bucket.key }));
     setLedgerSelection(null);
-    setLedgerPageByMode((prev) => ({ ...prev, [ledgerMode]: prev[ledgerMode] ?? Math.max(0, buckets.length - visibleCountForMode(ledgerMode)) }));
+    maybeShiftLedgerPage(bucket);
   }
 
   function handleLedgerBarSelect(bucket, metric) {
@@ -498,6 +648,7 @@ function App() {
     setStatsSelectedByMode((prev) => ({ ...prev, [ledgerMode]: bucket.key }));
     const amount = metric === "income" ? bucket.income : -Math.abs(bucket.expense);
     setLedgerSelection({ chartMode: "flow", mode: ledgerMode, key: bucket.key, label: bucket.label, metric, amount });
+    maybeShiftLedgerPage(bucket);
   }
 
   function handleLedgerPointSelect(point) {
@@ -509,16 +660,18 @@ function App() {
   function renderLedgerList() {
     if (selectedBucket) {
       return (
-        <EntryList
+        <PaginatedEntryList
           items={selectedBucket.items.map(resolveEntryData)}
           onEdit={(item) => openEditEntry(item)}
+          resetKey={`${ledgerMode}:${selectedBucket.key}`}
         />
       );
     }
     return (
-      <EntryList
+      <PaginatedEntryList
         items={allOccurrences.map(resolveEntryData)}
         onEdit={(item) => openEditEntry(item)}
+        resetKey="all"
       />
     );
   }
@@ -547,88 +700,102 @@ function App() {
 
     return (
       <Stack gap="md">
-        <SimpleGrid cols={{ base: 1, sm: 2 }}>
+        <SimpleGrid cols={2}>
           <Card withBorder radius="sm" shadow="sm">
-            <Text fw={700} size="sm" c="dimmed">총 남은 현금</Text>
-            <Title order={2}>{formatMoney(totalBalance)}</Title>
+            <Text fw={700} size="xs" c="dimmed" ta="center">{t("card.total")}</Text>
+            <Text fw={700} size="lg" lh={1.2} ta="center">{formatMoney(statsTotalBalance)}</Text>
+            <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
           </Card>
           <Card withBorder radius="sm" shadow="sm">
-            <Text fw={700} size="sm" c="dimmed">기간내 총 현금 흐름</Text>
-            <Title order={2}>{formatMoney(statsFlow)}</Title>
+            <Text fw={700} size="xs" c="dimmed" ta="center">{ledgerPeriodLabel}</Text>
+            <Text fw={700} size="lg" lh={1.2} ta="center">{formatMoney(statsFlow)}</Text>
+            <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
           </Card>
         </SimpleGrid>
 
         <Card withBorder radius="sm" shadow="sm">
-          <Group justify="space-between" wrap="nowrap" mb="sm">
-            <Group gap="xs" wrap="nowrap">
-              <ActionIcon variant="default" onClick={() => setStatsPageByMode((prev) => ({ ...prev, [ledgerMode]: Math.max(0, statsPageStart - statsVisibleCount) }))} disabled={statsPageStart <= 0}>
-                <IconArrowLeft size={16} />
-              </ActionIcon>
-              <ScrollArea type="never" className="max-w-full">
-                <Group gap="xs" wrap="nowrap">
-                  {statsPage.map((bucket) => (
-                    <Button
-                      key={bucket.key}
-                      size="xs"
-                      variant={bucket.key === statsBucket?.key ? "filled" : "light"}
-                      onClick={() => {
-                        setStatsSelectedByMode((prev) => ({ ...prev, [ledgerMode]: bucket.key }));
-                        setLedgerSelectedByMode((prev) => ({ ...prev, [ledgerMode]: bucket.key }));
-                        setStatsLabelFilterId(null);
-                      }}
-                    >
-                      {bucket.label}
-                    </Button>
-                  ))}
-                </Group>
-              </ScrollArea>
-              <ActionIcon variant="default" onClick={() => setStatsPageByMode((prev) => ({ ...prev, [ledgerMode]: Math.min(Math.max(0, buckets.length - statsVisibleCount), statsPageStart + statsVisibleCount) }))} disabled={statsPageStart + statsVisibleCount >= buckets.length}>
-                <IconArrowRight size={16} />
-              </ActionIcon>
-            </Group>
-            <Text size="sm" c="dimmed">{statsBucket ? `선택 구간: ${statsBucket.label}` : "선택 가능한 기간이 없습니다."}</Text>
-          </Group>
+          <BucketScroller
+            buckets={buckets}
+            selectedKey={statsBucket?.key || null}
+            onSelect={(bucketKey) => {
+              setStatsSelectedByMode((prev) => ({ ...prev, [ledgerMode]: bucketKey }));
+              setLedgerSelectedByMode((prev) => ({ ...prev, [ledgerMode]: bucketKey }));
+              setStatsLabelFilterId(null);
+            }}
+            statsBucketLabel={statsBucket?.label}
+            active={activeTab === "stats"}
+          />
 
           <Divider my="sm" />
-          <Title order={4} mb="xs">Labels</Title>
+          <Title order={4} mb="xs">{t("settings.labels")}</Title>
           <Table striped highlightOnHover verticalSpacing="xs" className="text-center">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th className="text-center">레이블</Table.Th>
-                <Table.Th className="text-center">수입</Table.Th>
-                <Table.Th className="text-center">지출</Table.Th>
+                <Table.Th className="text-center">{t("stats.column.label")}</Table.Th>
+                <Table.Th className="text-center">{t("stats.column.income")}</Table.Th>
+                <Table.Th className="text-center">{t("stats.column.expense")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {[...labelMap.values()].sort((a, b) => (a.label.name > b.label.name ? 1 : -1)).map(({ label, income, expense }) => (
-                <Table.Tr key={label.id}>
-                  <Table.Td className="text-center">{label.name}</Table.Td>
-                  <Table.Td className="text-center">
-                    <Button size="xs" variant={statsLabelFilterId === label.id && statsCategoryType === "income" ? "filled" : "subtle"} onClick={() => { setStatsLabelFilterId(label.id); setStatsCategoryType("income"); }}>
-                      {formatMoney(income)}
-                    </Button>
-                  </Table.Td>
-                  <Table.Td className="text-center">
-                    <Button size="xs" variant={statsLabelFilterId === label.id && statsCategoryType === "expense" ? "filled" : "subtle"} color="red" onClick={() => { setStatsLabelFilterId(label.id); setStatsCategoryType("expense"); }}>
-                      {formatMoney(expense)}
-                    </Button>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
+              {[...labelMap.values()].sort((a, b) => (a.label.name > b.label.name ? 1 : -1)).map(({ label, income, expense }) => {
+                const incomeActive = statsLabelFilterId === label.id && statsCategoryType === "income";
+                const expenseActive = statsLabelFilterId === label.id && statsCategoryType === "expense";
+                return (
+                  <Table.Tr key={label.id}>
+                    <Table.Td className="text-center">{label.name}</Table.Td>
+                    <Table.Td className="text-center">
+                      <Button
+                        size="xs"
+                        variant="transparent"
+                        color="dark"
+                        styles={{ label: { fontWeight: incomeActive ? 700 : 400, textDecoration: incomeActive ? "underline" : "none" } }}
+                        onClick={() => { setStatsLabelFilterId(label.id); setStatsCategoryType("income"); }}
+                      >
+                        {formatMoney(income)}
+                      </Button>
+                    </Table.Td>
+                    <Table.Td className="text-center">
+                      <Button
+                        size="xs"
+                        variant="transparent"
+                        color="dark"
+                        styles={{ label: { fontWeight: expenseActive ? 700 : 400, textDecoration: expenseActive ? "underline" : "none" } }}
+                        onClick={() => { setStatsLabelFilterId(label.id); setStatsCategoryType("expense"); }}
+                      >
+                        {formatMoney(expense)}
+                      </Button>
+                    </Table.Td>
+                  </Table.Tr>
+                );
+              })}
             </Table.Tbody>
           </Table>
 
           <Divider my="sm" />
           <Group justify="space-between" className="mb-2">
-            <Title order={4}>Categories</Title>
+            <Title order={4}>{t("settings.categories")}</Title>
             <Group gap="xs">
-              <Text size="sm" c="dimmed">필터: {statsLabelFilterId ? getLabel(statsLabelFilterId)?.name : "없음"}</Text>
-              <Button size="xs" variant="default" onClick={() => setStatsLabelFilterId(null)}>All</Button>
+              <Text size="sm" c="dimmed">{t("stats.filter", { value: statsLabelFilterId ? getLabel(statsLabelFilterId)?.name : t("stats.filterNone") })}</Text>
+              <Button size="xs" variant="default" onClick={() => setStatsLabelFilterId(null)}>{t("stats.all")}</Button>
             </Group>
           </Group>
-          <Group justify="center" className="mb-3">
-            <Button variant={statsCategoryType === "income" ? "filled" : "light"} onClick={() => setStatsCategoryType("income")}>총 수입</Button>
-            <Button variant={statsCategoryType === "expense" ? "filled" : "light"} color="red" onClick={() => setStatsCategoryType("expense")}>총 지출</Button>
+          <Group grow gap="xs" className="mb-3">
+            <Button
+              size="lg"
+              variant={statsCategoryType === "income" ? "filled" : "light"}
+              color={statsCategoryType === "income" ? "dark" : "gray"}
+              onClick={() => setStatsCategoryType("income")}
+            >
+              {t("stats.totalIncome")}
+            </Button>
+            <Button
+              size="lg"
+              variant={statsCategoryType === "expense" ? "filled" : "light"}
+              color={statsCategoryType === "expense" ? "dark" : "gray"}
+              onClick={() => setStatsCategoryType("expense")}
+            >
+              {t("stats.totalExpense")}
+            </Button>
           </Group>
           <Center>
             <PieChart items={typedItems} type={statsCategoryType} />
@@ -637,9 +804,9 @@ function App() {
           <Table striped highlightOnHover verticalSpacing="xs" className="text-center">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th className="text-center">카테고리</Table.Th>
-                <Table.Th className="text-center">건수</Table.Th>
-                <Table.Th className="text-center">총 금액</Table.Th>
+                <Table.Th className="text-center">{t("stats.column.category")}</Table.Th>
+                <Table.Th className="text-center">{t("stats.column.count")}</Table.Th>
+                <Table.Th className="text-center">{t("stats.column.amount")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -669,52 +836,93 @@ function App() {
   }
 
   function renderSearchPage() {
+    const items = searchResults.map((item) => ({ ...item, ...resolveEntryData(item) }));
+    const resetKey = `${searchWalletId}|${searchPeriod}|${searchStartDate}|${searchEndDate}|${searchText}`;
     return (
-      <Card withBorder radius="sm" shadow="sm">
-        <Title order={3} mb="md">검색</Title>
-        <Stack gap="sm">
-          <TextInput value={searchText} onChange={(e) => setSearchText(e.currentTarget.value)} placeholder="카테고리, 레이블, 노트" leftSection={<IconSearch size={16} />} />
-          <SimpleGrid cols={{ base: 1, sm: 2 }}>
-            <Select
-              label="지갑"
-              data={state.wallets.map((wallet) => ({ value: wallet.id, label: wallet.name }))}
-              value={searchWalletId}
-              onChange={(value) => setSearchWalletId(value || state.wallets[0]?.id || "")}
+      <Stack gap="sm">
+        <div className="sticky top-0 z-20 -mx-4 border-b border-line bg-white/95 px-4 py-3 backdrop-blur">
+          <Stack gap="sm">
+            <TextInput
+              value={searchText}
+              onChange={(e) => { setSearchText(e.currentTarget.value); setSearchActive(true); }}
+              placeholder={t("search.placeholder")}
+              leftSection={<IconSearch size={16} />}
             />
-            <Select
-              label="기간별 조회"
-              data={[
-                { value: "all", label: "전체" },
-                { value: "7d", label: "최근 7일" },
-                { value: "30d", label: "최근 30일" },
-                { value: "90d", label: "최근 90일" },
-                { value: "custom", label: "직접 설정" },
-              ]}
-              value={searchPeriod}
-              onChange={(value) => setSearchPeriod(value || "all")}
-            />
-          </SimpleGrid>
-          {searchPeriod === "custom" && (
-            <SimpleGrid cols={{ base: 1, sm: 2 }}>
-              <TextInput label="시작일" type="date" value={searchStartDate} onChange={(e) => setSearchStartDate(e.currentTarget.value)} />
-              <TextInput label="종료일" type="date" value={searchEndDate} onChange={(e) => setSearchEndDate(e.currentTarget.value)} />
+            <SimpleGrid cols={2}>
+              <Select
+                label={t("search.wallet")}
+                data={state.wallets.map((wallet) => ({ value: wallet.id, label: wallet.name }))}
+                value={searchWalletId}
+                onChange={(value) => { setSearchWalletId(value || state.wallets[0]?.id || ""); setSearchActive(true); }}
+              />
+              <Select
+                label={t("search.period")}
+                data={[
+                  { value: "all", label: t("search.all") },
+                  { value: "7d", label: t("search.recent7") },
+                  { value: "30d", label: t("search.recent30") },
+                  { value: "90d", label: t("search.recent90") },
+                  { value: "custom", label: t("search.custom") },
+                ]}
+                value={searchPeriod}
+                onChange={(value) => { setSearchPeriod(value || "all"); setSearchActive(true); }}
+              />
             </SimpleGrid>
-          )}
-          <Divider />
-          <EntryList items={searchResults.map((item) => ({ ...item, ...resolveEntryData(item) }))} onEdit={(item) => openEditEntry(item)} />
-        </Stack>
-      </Card>
+            {searchPeriod === "custom" && (
+              <SimpleGrid cols={2}>
+                <TextInput label={t("search.startDate")} type="date" value={searchStartDate} onChange={(e) => { setSearchStartDate(e.currentTarget.value); setSearchActive(true); }} />
+                <TextInput label={t("search.endDate")} type="date" value={searchEndDate} onChange={(e) => { setSearchEndDate(e.currentTarget.value); setSearchActive(true); }} />
+              </SimpleGrid>
+            )}
+          </Stack>
+        </div>
+        {searchActive ? (
+          <PaginatedEntryList items={items} onEdit={(item) => openEditEntry(item)} resetKey={resetKey} />
+        ) : null}
+      </Stack>
     );
   }
 
-  const pendingScheduledForSettings = useMemo(
-    () => buildPendingScheduledOccurrences(currentWallet, fullRange),
-    [currentWallet, fullRange]
-  );
+  const walletTotals = useMemo(() => {
+    const categoryById = new Map(state.categories.map((category) => [category.id, category]));
+    const map = new Map();
+    for (const wallet of state.wallets) {
+      const range = resolveFullRange(wallet.entries);
+      const occurrences = buildOccurrences(wallet.entries, range);
+      const total = occurrences.reduce((sum, item) => {
+        const category = categoryById.get(item.categoryId);
+        const amount = Math.abs(item.amount || 0);
+        return sum + (category?.type === "income" ? amount : -amount);
+      }, 0);
+      map.set(wallet.id, total);
+    }
+    return map;
+  }, [state.wallets, state.categories]);
+
+  const scheduledEntriesForSettings = useMemo(() => {
+    const today = startOfDay(new Date());
+    const horizon = addDays(today, 365 * 5);
+    return currentWallet.entries
+      .filter((entry) => entry.repeat && entry.repeat !== "none")
+      .map((entry) => {
+        const next = nextOccurrenceOnOrAfter(entry, today, horizon);
+        return { ...entry, nextDate: next ? toDateInput(next) : null };
+      })
+      .sort((a, b) => {
+        if (a.nextDate && b.nextDate) return a.nextDate < b.nextDate ? -1 : 1;
+        if (a.nextDate) return -1;
+        if (b.nextDate) return 1;
+        return a.date < b.date ? -1 : 1;
+      });
+  }, [currentWallet]);
 
   function selectWallet(walletId) {
     persistState((prev) => ({ ...prev, selectedWalletId: walletId }));
     setSearchWalletId(walletId);
+  }
+
+  function setLanguage(language) {
+    persistState((prev) => ({ ...prev, language: language === "en" ? "en" : "ko" }));
   }
 
   function addWallet() {
@@ -928,9 +1136,9 @@ function App() {
             <Select
               className="w-40"
               data={[
-                { value: "week", label: "By weeks" },
-                { value: "month", label: "By months" },
-                { value: "year", label: "By years" },
+                { value: "week", label: t("mode.week") },
+                { value: "month", label: t("mode.month") },
+                { value: "year", label: t("mode.year") },
               ]}
               value={ledgerMode}
               onChange={(value) => setLedgerMode(value || "month")}
@@ -940,37 +1148,55 @@ function App() {
       )}
 
       <main className="mx-auto max-w-7xl px-4 py-4">
-        <Tabs value={activeTab} onChange={setActiveTab}>
+        <Tabs
+          value={activeTab}
+          onChange={(value) => {
+            setActiveTab(value);
+            if (value !== "stats") setStatsLabelFilterId(null);
+            if (value !== "search") setSearchActive(false);
+            if (value === "ledger") {
+              const visibleCount = visibleCountForMode(ledgerMode);
+              const selectedKey = ledgerSelectedByMode[ledgerMode];
+              const idx = buckets.findIndex((bucket) => bucket.key === selectedKey);
+              if (idx >= 0) {
+                const target = Math.max(0, Math.min(buckets.length - visibleCount, idx - 1));
+                setLedgerPageByMode((prev) => ({ ...prev, [ledgerMode]: target }));
+              }
+            }
+          }}
+        >
           <Tabs.Panel value="ledger" pt="md">
             <Stack gap="md">
-              <SimpleGrid cols={{ base: 1, sm: 2 }}>
+              <SimpleGrid cols={2}>
                 <Card
                   withBorder
                   radius="sm"
                   shadow={ledgerChartMode === "balance" ? "md" : "sm"}
-                  className={`cursor-pointer transition ${ledgerChartMode === "balance" ? "ring-2 ring-balance" : "hover:shadow-md"}`}
+                  className={`cursor-pointer transition ${ledgerChartMode === "balance" ? "ring-2 ring-slate-700" : "hover:shadow-md"}`}
                   role="button"
                   tabIndex={0}
                   aria-pressed={ledgerChartMode === "balance"}
                   onClick={() => setLedgerChartMode("balance")}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLedgerChartMode("balance"); } }}
                 >
-                  <Text fw={700} size="sm" c="dimmed">총 남은 현금</Text>
-                  <Title order={2}>{formatMoney(totalBalance)}</Title>
+                  <Text fw={700} size="xs" c="dimmed" ta="center">{t("card.total")}</Text>
+                  <Text fw={700} size="lg" lh={1.2} ta="center">{formatMoney(totalBalance)}</Text>
+                  <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
                 </Card>
                 <Card
                   withBorder
                   radius="sm"
                   shadow={ledgerChartMode === "flow" ? "md" : "sm"}
-                  className={`cursor-pointer transition ${ledgerChartMode === "flow" ? "ring-2 ring-expense" : "hover:shadow-md"}`}
+                  className={`cursor-pointer transition ${ledgerChartMode === "flow" ? "ring-2 ring-slate-700" : "hover:shadow-md"}`}
                   role="button"
                   tabIndex={0}
                   aria-pressed={ledgerChartMode === "flow"}
                   onClick={() => setLedgerChartMode("flow")}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLedgerChartMode("flow"); } }}
                 >
-                  <Text fw={700} size="sm" c="dimmed">기간내 총 현금 흐름</Text>
-                  <Title order={2}>{formatMoney(periodFlow)}</Title>
+                  <Text fw={700} size="xs" c="dimmed" ta="center">{ledgerPeriodLabel}</Text>
+                  <Text fw={700} size="lg" lh={1.2} ta="center">{formatMoney(periodFlow)}</Text>
+                  <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
                 </Card>
               </SimpleGrid>
 
@@ -979,16 +1205,25 @@ function App() {
                   <Group gap="md">
                     {ledgerChartMode === "flow" ? (
                       <>
-                        <Text size="sm">수입</Text>
-                        <Text size="sm">지출</Text>
+                        <Group gap={6} wrap="nowrap">
+                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#1565c0" }} />
+                          <Text size="sm">{t("chart.income")}</Text>
+                        </Group>
+                        <Group gap={6} wrap="nowrap">
+                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#c62828" }} />
+                          <Text size="sm">{t("chart.expense")}</Text>
+                        </Group>
                       </>
                     ) : (
-                      <Text size="sm">현금 흐름</Text>
+                      <Group gap={6} wrap="nowrap">
+                        <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#2e7d32" }} />
+                        <Text size="sm">{t("chart.cashFlow")}</Text>
+                      </Group>
                     )}
                   </Group>
                 </Group>
                 <Group justify="space-between" align="center" className="min-h-5">
-                  <Text size="sm" c="dimmed">{ledgerPage.length ? `${ledgerPage[0].label} ~ ${ledgerPage[ledgerPage.length - 1].label}` : "데이터 없음"}</Text>
+                  <Text size="sm" c="dimmed">{ledgerPage.length ? `${ledgerPage[0].label} ~ ${ledgerPage[ledgerPage.length - 1].label}` : t("chart.empty")}</Text>
                   <Text size="sm" c="dimmed">{ledgerValueText}</Text>
                 </Group>
                 <LedgerChart
@@ -1002,18 +1237,28 @@ function App() {
                 />
               </Card>
 
-              <Card withBorder radius="sm" shadow="sm">
-                <Group justify="space-between" mb="sm">
-                  <Title order={4}>일별 거래 목록</Title>
-                  <Text size="sm" c="dimmed">
-                    {pendingScheduled.length ? `예정된 반복 거래 ${pendingScheduled.length}개` : ""}
-                  </Text>
-                </Group>
-                <Divider mb="sm" />
-                {pendingScheduled.length > 0 && (
-                  <Paper withBorder radius="sm" p="sm" className="mb-3 bg-slate-50">
-                    <Text fw={700} size="sm" mb="xs">예정된 반복 거래</Text>
-                    <Stack gap="xs">
+              {pendingScheduled.length > 0 && (
+                <Paper
+                  withBorder
+                  radius="sm"
+                  p="sm"
+                  className="bg-slate-50 cursor-pointer"
+                  onClick={() => setPendingExpanded((value) => !value)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setPendingExpanded((value) => !value);
+                    }
+                  }}
+                >
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text fw={700} size="sm">{t("ledger.pending", { count: pendingScheduled.length })}</Text>
+                    {pendingExpanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+                  </Group>
+                  {pendingExpanded && (
+                    <Stack gap="xs" mt="sm" onClick={(event) => event.stopPropagation()}>
                       {pendingScheduled.map((item) => {
                         const resolved = resolveEntryData(item);
                         return (
@@ -1029,8 +1274,11 @@ function App() {
                         );
                       })}
                     </Stack>
-                  </Paper>
-                )}
+                  )}
+                </Paper>
+              )}
+
+              <Card withBorder radius="sm" shadow="sm">
                 {renderLedgerList()}
               </Card>
             </Stack>
@@ -1047,7 +1295,10 @@ function App() {
           <Tabs.Panel value="settings" pt="md">
             <Settings
               state={state}
-              pendingScheduled={pendingScheduledForSettings}
+              scheduledEntries={scheduledEntriesForSettings}
+              walletTotals={walletTotals}
+              language={state.language || "ko"}
+              onLanguageChange={setLanguage}
               onSelectWallet={selectWallet}
               onAddWallet={addWallet}
               onRenameWallet={renameWallet}
@@ -1069,9 +1320,9 @@ function App() {
           >
             <div className="mx-auto max-w-7xl px-4">
               <Tabs.List grow>
-                {TAB_ITEMS.map((tab) => (
-                  <Tabs.Tab key={tab.value} value={tab.value}>
-                    {tab.label}
+                {TAB_KEYS.map((key) => (
+                  <Tabs.Tab key={key} value={key}>
+                    {t(`tab.${key}`)}
                   </Tabs.Tab>
                 ))}
               </Tabs.List>
@@ -1087,13 +1338,13 @@ function App() {
           color="indigo"
           className="fixed bottom-20 right-4 z-30 shadow-soft"
           onClick={openNewEntry}
-          aria-label="거래 추가"
+          aria-label={t("ledger.fab.add")}
         >
           <IconPlus size={24} />
         </ActionIcon>
       )}
 
-      <Modal opened={entryModalOpen} onClose={() => setEntryModalOpen(false)} title={editingEntry ? "거래 수정" : "거래 추가"} centered size="lg">
+      <Modal opened={entryModalOpen} onClose={() => setEntryModalOpen(false)} title={editingEntry ? t("entry.edit") : t("entry.add")} centered size="lg">
         <EntryEditor
           categories={state.categories}
           labels={state.labels}
@@ -1112,7 +1363,7 @@ function App() {
         onClose={() => setStatsCategoryModalId(null)}
         title={(() => {
           const cat = statsCategoryModalId ? getCategory(statsCategoryModalId) : null;
-          if (!cat) return "카테고리";
+          if (!cat) return t("stats.column.category");
           return (
             <Group gap="xs">
               <span style={{ color: cat.color }} className="inline-flex items-center">
@@ -1140,7 +1391,7 @@ function App() {
           return (
             <Stack gap="sm">
               <Group justify="space-between">
-                <Text size="sm" c="dimmed">총 {items.length}건</Text>
+                <Text size="sm" c="dimmed">{t("stats.summary.count", { count: items.length })}</Text>
                 <Text fw={700}>{formatMoney(total)}</Text>
               </Group>
               <Divider />
@@ -1160,6 +1411,7 @@ function App() {
 }
 
 function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }) {
+  const t = useT();
   const [date, setDate] = useState(entry?.date || toDateInput(startOfDay(new Date())));
   const [amount, setAmount] = useState(entry?.amount || 0);
   const [categoryId, setCategoryId] = useState(entry?.categoryId || categories[0]?.id || "");
@@ -1175,24 +1427,24 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
   return (
     <Stack>
       <SimpleGrid cols={2}>
-        <TextInput label="날짜" type="date" value={date} onChange={(e) => setDate(e.currentTarget.value)} />
-        <NumberInput label="금액" value={amount} onChange={(value) => setAmount(Number(value || 0))} min={0} />
+        <TextInput label={t("entry.field.date")} type="date" value={date} onChange={(e) => setDate(e.currentTarget.value)} />
+        <NumberInput label={t("entry.field.amount")} value={amount} onChange={(value) => setAmount(Number(value || 0))} min={0} />
       </SimpleGrid>
-      <Select label="카테고리" data={categories.map((category) => ({ value: category.id, label: category.name }))} value={categoryId} onChange={(value) => setCategoryId(value || "")} />
-      <Select label="레이블" data={labels.map((label) => ({ value: label.id, label: label.name }))} value={labelId} onChange={(value) => setLabelId(value || "")} />
-      <Textarea label="노트" value={note} onChange={(e) => setNote(e.currentTarget.value)} minRows={3} />
-      <Select label="반복" data={REPEAT_OPTIONS.map((item) => ({ value: item.value, label: item.label }))} value={repeat} onChange={(value) => setRepeat(value || "none")} />
-      {repeat !== "none" && <TextInput label="반복 종료일" type="date" value={repeatEndDate} onChange={(e) => setRepeatEndDate(e.currentTarget.value)} placeholder="비우면 무기한 반복" />}
+      <Select label={t("entry.field.category")} data={categories.map((category) => ({ value: category.id, label: category.name }))} value={categoryId} onChange={(value) => setCategoryId(value || "")} />
+      <Select label={t("entry.field.label")} data={labels.map((label) => ({ value: label.id, label: label.name }))} value={labelId} onChange={(value) => setLabelId(value || "")} />
+      <Textarea label={t("entry.field.note")} value={note} onChange={(e) => setNote(e.currentTarget.value)} minRows={3} />
+      <Select label={t("entry.field.repeat")} data={REPEAT_OPTIONS_DATA.map((item) => ({ value: item.value, label: t(`repeat.${item.value}`) }))} value={repeat} onChange={(value) => setRepeat(value || "none")} />
+      {repeat !== "none" && <TextInput label={t("entry.field.repeatEnd")} type="date" value={repeatEndDate} onChange={(e) => setRepeatEndDate(e.currentTarget.value)} placeholder={t("entry.field.repeatEnd.placeholder")} />}
       <Group justify="space-between" pt="sm">
         <Group>
-          {onDelete && <Button color="red" variant="light" leftSection={<IconTrash size={16} />} onClick={onDelete}>삭제</Button>}
+          {onDelete && <Button color="red" variant="light" leftSection={<IconTrash size={16} />} onClick={onDelete}>{t("entry.action.delete")}</Button>}
         </Group>
         <Group>
           <Button
             leftSection={<IconCheck size={16} />}
             onClick={() => onSubmit({ date, amount: Number(amount), categoryId, labelId, note, repeat, repeatEndDate: repeat === "none" ? "" : repeatEndDate })}
           >
-            저장
+            {t("entry.action.save")}
           </Button>
         </Group>
       </Group>
@@ -1200,15 +1452,14 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
   );
 }
 
-const REPEAT_OPTIONS = [
-  { value: "none", label: "반복 없음" },
-  { value: "daily", label: "매일" },
-  { value: "every_other_day", label: "격일" },
-  { value: "weekday", label: "평일" },
-  { value: "weekend", label: "주말" },
-  { value: "biweekly", label: "격주" },
-  { value: "fourweekly", label: "4주" },
-  { value: "monthly", label: "한달" },
-];
+function AppRoot() {
+  const [state, setState] = useState(() => loadState());
+  const lang = state.language || DEFAULT_LANGUAGE;
+  return (
+    <I18nProvider lang={lang}>
+      <App state={state} setState={setState} />
+    </I18nProvider>
+  );
+}
 
-export default App;
+export default AppRoot;

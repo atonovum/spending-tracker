@@ -12,6 +12,13 @@
 }
 
 @layer components {
+  .bucket-scroller {
+    scrollbar-width: none;
+  }
+  .bucket-scroller::-webkit-scrollbar {
+    display: none;
+  }
+
   .bottom-nav-tabs [role="tablist"] {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));

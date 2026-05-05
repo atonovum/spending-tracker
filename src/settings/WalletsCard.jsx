@@ -25,8 +25,10 @@ import {
   IconUpload,
 } from "@tabler/icons-react";
 import { MAX_WALLETS } from "../lib/finance.js";
+import { useI18n } from "../lib/i18n.jsx";
 
-function WalletRow({ wallet, isSelected, onSelect, onEdit, onExport }) {
+function WalletRow({ wallet, isSelected, total, onSelect, onEdit, onExport }) {
+  const { t, formatMoney } = useI18n();
   return (
     <Paper withBorder p="sm" radius="sm">
       <Group justify="space-between" wrap="nowrap" gap="sm">
@@ -35,18 +37,27 @@ function WalletRow({ wallet, isSelected, onSelect, onEdit, onExport }) {
             variant={isSelected ? "filled" : "subtle"}
             color={isSelected ? "yellow" : "gray"}
             onClick={onSelect}
-            aria-label={isSelected ? "현재 선택된 지갑" : "이 지갑 선택"}
+            aria-label={isSelected ? t("settings.wallets.selectedAria") : t("settings.wallets.selectAria")}
           >
             {isSelected ? <IconStarFilled size={16} /> : <IconStar size={16} />}
           </ActionIcon>
-          <Text fw={600} className="truncate">{wallet.name}</Text>
-          <Badge variant="light">{wallet.entries.length}</Badge>
+          <div className="min-w-0">
+            <Group gap="xs" wrap="nowrap">
+              <Text fw={600} className="truncate">{wallet.name}</Text>
+              <Badge variant="light">{wallet.entries.length}</Badge>
+            </Group>
+            {typeof total === "number" ? (
+              <Text size="xs" c={total > 0 ? "blue" : total < 0 ? "red" : "dimmed"}>
+                {t("settings.wallets.totalPrefix", { amount: formatMoney(total) })}
+              </Text>
+            ) : null}
+          </div>
         </Group>
         <Group gap={4} wrap="nowrap">
-          <ActionIcon variant="subtle" onClick={onEdit} aria-label="수정">
+          <ActionIcon variant="subtle" onClick={onEdit} aria-label={t("settings.wallets.editAria")}>
             <IconPencil size={16} />
           </ActionIcon>
-          <ActionIcon variant="subtle" onClick={onExport} aria-label="내보내기">
+          <ActionIcon variant="subtle" onClick={onExport} aria-label={t("settings.wallets.exportAria")}>
             <IconDownload size={16} />
           </ActionIcon>
         </Group>
@@ -56,6 +67,7 @@ function WalletRow({ wallet, isSelected, onSelect, onEdit, onExport }) {
 }
 
 function WalletEditModal({ opened, wallet, isOnly, onClose, onRename, onDelete }) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState(wallet?.name || "");
 
   function handleSave() {
@@ -70,20 +82,20 @@ function WalletEditModal({ opened, wallet, isOnly, onClose, onRename, onDelete }
     <Modal
       opened={opened}
       onClose={onClose}
-      title="지갑 수정"
+      title={t("settings.wallets.editTitle")}
       centered
       size="md"
       onTransitionEnd={() => setDraft(wallet.name)}
     >
       <Stack gap="sm">
         <TextInput
-          label="이름"
+          label={t("settings.wallets.nameLabel")}
           value={draft}
           onChange={(event) => setDraft(event.currentTarget.value)}
           autoFocus
         />
         <Text size="xs" c="dimmed">
-          거래 {wallet.entries.length}건이 이 지갑에 포함되어 있습니다.
+          {t("settings.wallets.containsEntries", { count: wallet.entries.length })}
         </Text>
         <Group justify="space-between" pt="sm">
           <Button
@@ -92,12 +104,12 @@ function WalletEditModal({ opened, wallet, isOnly, onClose, onRename, onDelete }
             leftSection={<IconTrash size={16} />}
             onClick={onDelete}
             disabled={isOnly}
-            title={isOnly ? "최소 1개의 지갑은 남겨두어야 합니다." : ""}
+            title={isOnly ? t("settings.wallets.minimum") : ""}
           >
-            지갑 삭제
+            {t("settings.wallets.deleteAction")}
           </Button>
           <Button leftSection={<IconCheck size={16} />} onClick={handleSave} disabled={!draft.trim()}>
-            저장
+            {t("entry.action.save")}
           </Button>
         </Group>
       </Stack>
@@ -106,13 +118,21 @@ function WalletEditModal({ opened, wallet, isOnly, onClose, onRename, onDelete }
 }
 
 function ImportModal({ opened, onClose, parsed, fileName, wallets, onConfirm, error }) {
+  const { t } = useI18n();
   const [target, setTarget] = useState("__new__");
   const incoming = parsed?.wallet || (Array.isArray(parsed?.wallets) ? parsed.wallets[0] : null);
   const incomingCount = Array.isArray(incoming?.entries) ? incoming.entries.length : 0;
   const canCreateNew = wallets.length < MAX_WALLETS;
   const data = [
-    { value: "__new__", label: canCreateNew ? "새 지갑으로 가져오기" : "새 지갑 (한도 초과)", disabled: !canCreateNew },
-    ...wallets.map((wallet) => ({ value: wallet.id, label: `${wallet.name} (${wallet.entries.length}건에 추가)` })),
+    {
+      value: "__new__",
+      label: canCreateNew ? t("settings.wallets.importNew") : t("settings.wallets.importNewLimit"),
+      disabled: !canCreateNew,
+    },
+    ...wallets.map((wallet) => ({
+      value: wallet.id,
+      label: t("settings.wallets.importExisting", { name: wallet.name, count: wallet.entries.length }),
+    })),
   ];
 
   function handleConfirm() {
@@ -120,23 +140,28 @@ function ImportModal({ opened, onClose, parsed, fileName, wallets, onConfirm, er
   }
 
   return (
-    <Modal opened={opened} onClose={onClose} title="지갑 가져오기" centered size="md">
+    <Modal opened={opened} onClose={onClose} title={t("settings.wallets.importTitle")} centered size="md">
       <Stack gap="sm">
         {error ? (
           <Text size="sm" c="red">{error}</Text>
         ) : (
           <>
-            <Text size="sm" c="dimmed">파일: {fileName}</Text>
-            <Text size="sm">{incoming?.name || "(이름 없음)"} · 거래 {incomingCount}건</Text>
+            <Text size="sm" c="dimmed">{t("settings.wallets.importFile", { name: fileName })}</Text>
+            <Text size="sm">
+              {t("settings.wallets.importInfo", {
+                name: incoming?.name || t("settings.wallets.importNoName"),
+                count: incomingCount,
+              })}
+            </Text>
             <Select
-              label="가져올 위치"
+              label={t("settings.wallets.importTarget")}
               data={data}
               value={target}
               onChange={(value) => setTarget(value || "__new__")}
               allowDeselect={false}
             />
             <Text size="xs" c="dimmed">
-              기존 지갑을 선택하면 거래가 해당 지갑에 합쳐집니다. 새 지갑으로 가져오려면 첫 옵션을 선택하세요.
+              {t("settings.wallets.importHelp")}
             </Text>
           </>
         )}
@@ -146,7 +171,7 @@ function ImportModal({ opened, onClose, parsed, fileName, wallets, onConfirm, er
             onClick={handleConfirm}
             disabled={!incoming || (target === "__new__" && !canCreateNew)}
           >
-            가져오기
+            {t("settings.wallets.importBtn")}
           </Button>
         </Group>
       </Stack>
@@ -156,6 +181,7 @@ function ImportModal({ opened, onClose, parsed, fileName, wallets, onConfirm, er
 
 export function WalletsCard({
   state,
+  walletTotals,
   onSelectWallet,
   onAddWallet,
   onRenameWallet,
@@ -164,6 +190,7 @@ export function WalletsCard({
   onImportWallet,
   onConfirm,
 }) {
+  const { t } = useI18n();
   const importResetRef = useRef(null);
   const [editModal, setEditModal] = useState({ open: false, wallet: null });
   const [importModal, setImportModal] = useState({ open: false, parsed: null, fileName: "", error: "" });
@@ -177,7 +204,7 @@ export function WalletsCard({
       const parsed = JSON.parse(text);
       setImportModal({ open: true, parsed, fileName: file.name, error: "" });
     } catch {
-      setImportModal({ open: true, parsed: null, fileName: file.name, error: "지갑 파일을 읽지 못했습니다. JSON 형식을 확인해주세요." });
+      setImportModal({ open: true, parsed: null, fileName: file.name, error: t("settings.wallets.importError") });
     } finally {
       importResetRef.current?.();
     }
@@ -191,17 +218,17 @@ export function WalletsCard({
   function requestDelete(wallet) {
     if (state.wallets.length <= 1) {
       onConfirm({
-        title: "지갑 삭제 불가",
-        message: "최소 1개의 지갑은 남겨두어야 합니다.",
-        confirmLabel: "확인",
+        title: t("settings.wallets.deleteCannot"),
+        message: t("settings.wallets.minimum"),
+        confirmLabel: t("settings.confirm.confirm"),
         confirmColor: "blue",
         action: null,
       });
       return;
     }
     onConfirm({
-      title: "지갑 삭제",
-      message: `"${wallet.name}" 지갑과 ${wallet.entries.length}건의 거래가 모두 삭제됩니다. 계속하시겠습니까?`,
+      title: t("settings.wallets.deleteTitle"),
+      message: t("settings.wallets.deleteConfirm", { name: wallet.name, count: wallet.entries.length }),
       action: () => {
         onDeleteWallet(wallet.id);
         setEditModal({ open: false, wallet: null });
@@ -214,21 +241,21 @@ export function WalletsCard({
       <Card withBorder radius="sm" shadow="sm">
         <Group justify="space-between" mb="sm" wrap="nowrap">
           <div>
-            <Title order={4}>Wallets</Title>
+            <Title order={4}>{t("settings.wallets")}</Title>
             <Text size="xs" c="dimmed">
-              최대 {MAX_WALLETS}개까지 추가할 수 있습니다. ({state.wallets.length}/{MAX_WALLETS})
+              {t("settings.wallets.limit", { max: MAX_WALLETS, current: state.wallets.length })}
             </Text>
           </div>
           <Group gap="xs" wrap="nowrap">
             <FileButton onChange={handleImportFile} accept="application/json" resetRef={importResetRef}>
               {(props) => (
                 <Button {...props} size="xs" variant="default" leftSection={<IconUpload size={14} />}>
-                  가져오기
+                  {t("settings.wallets.import")}
                 </Button>
               )}
             </FileButton>
             <Button size="xs" leftSection={<IconPlus size={14} />} onClick={onAddWallet} disabled={!canAddWallet}>
-              지갑 추가
+              {t("settings.wallets.add")}
             </Button>
           </Group>
         </Group>
@@ -238,6 +265,7 @@ export function WalletsCard({
               key={wallet.id}
               wallet={wallet}
               isSelected={wallet.id === state.selectedWalletId}
+              total={walletTotals?.get(wallet.id)}
               onSelect={() => onSelectWallet(wallet.id)}
               onEdit={() => setEditModal({ open: true, wallet })}
               onExport={() => onExportWallet(wallet.id)}

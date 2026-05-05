@@ -4,13 +4,17 @@ import { WalletsCard } from "./WalletsCard.jsx";
 import { CategoriesCard } from "./CategoriesCard.jsx";
 import { LabelsCard } from "./LabelsCard.jsx";
 import { ScheduledCard } from "./ScheduledCard.jsx";
+import { PreferencesCard } from "./PreferencesCard.jsx";
 import { ConfirmModal } from "./shared.jsx";
 
 const EMPTY_CONFIRM = { open: false, title: "", message: "", action: null, confirmLabel: "삭제", confirmColor: "red" };
 
 function Settings({
   state,
-  pendingScheduled,
+  scheduledEntries,
+  walletTotals,
+  language,
+  onLanguageChange,
   onSelectWallet,
   onAddWallet,
   onRenameWallet,
@@ -52,8 +56,10 @@ function Settings({
 
   return (
     <Stack gap="md">
+      <PreferencesCard language={language} onLanguageChange={onLanguageChange} />
       <WalletsCard
         state={state}
+        walletTotals={walletTotals}
         onSelectWallet={onSelectWallet}
         onAddWallet={onAddWallet}
         onRenameWallet={onRenameWallet}
@@ -79,7 +85,7 @@ function Settings({
       />
 
       <ScheduledCard
-        pendingScheduled={pendingScheduled}
+        scheduledEntries={scheduledEntries}
         getCategory={getCategory}
         getLabel={getLabel}
         onEditEntry={onEditEntry}
