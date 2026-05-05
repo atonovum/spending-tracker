@@ -211,7 +211,8 @@ function CategoriesManager({
 
   const checkedSet = checked[tab];
   const checkedCategories = grouped[tab].filter((category) => checkedSet.has(category.id));
-  const mergeCandidates = grouped[tab].filter((category) => !checkedSet.has(category.id));
+  const mergeCandidates = grouped[tab];
+  const canMerge = checkedCategories.length >= 1 && grouped[tab].length >= 2;
 
   function toggleChecked(id, value) {
     setChecked((prev) => {
@@ -252,12 +253,14 @@ function CategoriesManager({
   }
 
   function startMerge() {
-    if (checkedCategories.length < 1 || mergeCandidates.length === 0) return;
+    if (!canMerge) return;
     setMergeModal({ open: true });
   }
 
   function confirmMerge(targetId) {
-    const sourceIds = checkedCategories.map((category) => category.id);
+    const sourceIds = checkedCategories
+      .map((category) => category.id)
+      .filter((id) => id !== targetId);
     if (!sourceIds.length || !targetId) return;
     onConfirm({
       title: t("settings.categories.mergeTitle"),
@@ -327,9 +330,6 @@ function CategoriesManager({
             <Group justify="space-between">
               <Text size="xs" c="dimmed">
                 {t("settings.categories.selected", { count: checkedCategories.length })}
-                {checkedCategories.length > 0 && mergeCandidates.length === 0
-                  ? ` · ${t("settings.categories.noMergeTarget")}`
-                  : ""}
               </Text>
               <Group gap="xs">
                 <Button
@@ -338,7 +338,7 @@ function CategoriesManager({
                   color="indigo"
                   leftSection={<IconArrowsJoin size={14} />}
                   onClick={startMerge}
-                  disabled={checkedCategories.length < 1 || mergeCandidates.length === 0}
+                  disabled={!canMerge}
                 >
                   {t("settings.categories.merge")}
                 </Button>

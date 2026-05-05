@@ -56,7 +56,6 @@ function Settings({
 
   return (
     <Stack gap="md">
-      <PreferencesCard language={language} onLanguageChange={onLanguageChange} />
       <WalletsCard
         state={state}
         walletTotals={walletTotals}
@@ -90,6 +89,8 @@ function Settings({
         getLabel={getLabel}
         onEditEntry={onEditEntry}
       />
+
+      <PreferencesCard language={language} onLanguageChange={onLanguageChange} />
 
       <ConfirmModal
         opened={confirm.open}

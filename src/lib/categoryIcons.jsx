@@ -1,12 +1,16 @@
 import {
   IconBook,
   IconBolt,
+  IconBrush,
   IconBus,
+  IconCar,
   IconCash,
   IconGift,
   IconHome,
+  IconMovie,
   IconPigMoney,
   IconPlane,
+  IconRepeat,
   IconShoppingCart,
   IconSparkles,
   IconStethoscope,
@@ -28,6 +32,10 @@ export const CATEGORY_ICON_KEYS = [
   "gift",
   "savings",
   "study",
+  "car",
+  "entertainment",
+  "subscription",
+  "hobby",
 ];
 
 export const CATEGORY_ICON_LABELS = {
@@ -44,6 +52,10 @@ export const CATEGORY_ICON_LABELS = {
   gift: "선물",
   savings: "저축",
   study: "교육",
+  car: "자동차",
+  entertainment: "오락",
+  subscription: "구독",
+  hobby: "취미",
 };
 
 const CATEGORY_ICON_COMPONENTS = {
@@ -60,6 +72,10 @@ const CATEGORY_ICON_COMPONENTS = {
   gift: IconGift,
   savings: IconPigMoney,
   study: IconBook,
+  car: IconCar,
+  entertainment: IconMovie,
+  subscription: IconRepeat,
+  hobby: IconBrush,
 };
 
 export function getCategoryIconComponent(key) {

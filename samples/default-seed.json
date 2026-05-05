@@ -1,0 +1,36 @@
+{
+  "wallets": [
+    {
+      "id": "wallet_default",
+      "name": "My Wallet",
+      "entries": []
+    }
+  ],
+  "selectedWalletId": "wallet_default",
+  "categories": [
+    { "id": "salary",        "name": "Salary",        "type": "income",  "color": "#1565c0", "icon": "salary" },
+    { "id": "incentive",     "name": "Incentive",     "type": "income",  "color": "#43a047", "icon": "gift" },
+    { "id": "income_other",  "name": "Other",         "type": "income",  "color": "#0288d1", "icon": "wallet" },
+    { "id": "food_drink",    "name": "Food & Drink",  "type": "expense", "color": "#c62828", "icon": "food" },
+    { "id": "groceries",     "name": "Groceries",     "type": "expense", "color": "#ef6c00", "icon": "cart" },
+    { "id": "shopping",      "name": "Shopping",      "type": "expense", "color": "#6a1b9a", "icon": "cart" },
+    { "id": "transport",     "name": "Transport",     "type": "expense", "color": "#0277bd", "icon": "bus" },
+    { "id": "rent",          "name": "Rent",          "type": "expense", "color": "#37474f", "icon": "house" },
+    { "id": "utility",       "name": "Utility Bills", "type": "expense", "color": "#00897b", "icon": "utility" },
+    { "id": "entertainment", "name": "Entertainment", "type": "expense", "color": "#d81b60", "icon": "entertainment" },
+    { "id": "travel",        "name": "Travel",        "type": "expense", "color": "#1976d2", "icon": "travel" },
+    { "id": "healthcare",    "name": "Healthcare",    "type": "expense", "color": "#2e7d32", "icon": "hospital" },
+    { "id": "education",     "name": "Education",     "type": "expense", "color": "#5d4037", "icon": "study" },
+    { "id": "subscription",  "name": "Subscription",  "type": "expense", "color": "#7e57c2", "icon": "subscription" },
+    { "id": "car",           "name": "Car",           "type": "expense", "color": "#455a64", "icon": "car" },
+    { "id": "hobby",         "name": "Hobby",         "type": "expense", "color": "#ff7043", "icon": "hobby" },
+    { "id": "beauty",        "name": "Beauty",        "type": "expense", "color": "#ec407a", "icon": "spark" },
+    { "id": "expense_other", "name": "Other",         "type": "expense", "color": "#78909c", "icon": "spark" }
+  ],
+  "labels": [
+    { "id": "fixed",    "name": "Fixed" },
+    { "id": "variable", "name": "Variable" },
+    { "id": "events",   "name": "Events" },
+    { "id": "lieu",     "name": "Payment in lieu of" }
+  ]
+}

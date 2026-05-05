@@ -1,25 +1,20 @@
-import sampleOffice from "../../samples/3y-salaryman-wallet.json";
+import sample2y from "../../samples/2y-sample-wallet.json";
+import sample3y from "../../samples/3y-sample-wallet.json";
+import sample5y from "../../samples/5y-sample-wallet.json";
+import defaultSeed from "../../samples/default-seed.json";
 import { ACTIVE_STORAGE_KEY, STORAGE_KEYS, safeJsonParse, uid } from "./finance.js";
 
 const INCLUDE_SAMPLE = import.meta.env.VITE_INCLUDE_SAMPLE === "true";
 
-const EMPTY_SEED = {
-  wallets: [{ name: "내 지갑", entries: [] }],
-  categories: [
-    { name: "식비", type: "expense", color: "#c62828", icon: "food" },
-    { name: "교통", type: "expense", color: "#ef6c00", icon: "bus" },
-    { name: "쇼핑", type: "expense", color: "#6a1b9a", icon: "cart" },
-    { name: "주거", type: "expense", color: "#37474f", icon: "house" },
-    { name: "공과금", type: "expense", color: "#00897b", icon: "utility" },
-    { name: "급여", type: "income", color: "#1565c0", icon: "salary" },
-  ],
-  labels: [
-    { name: "고정", color: "#0f766e" },
-    { name: "변동", color: "#9333ea" },
-  ],
+const SAMPLE_SEED = {
+  wallets: [sample2y, sample3y, sample5y],
+  selectedWalletId: sample3y.id,
+  categories: defaultSeed.categories,
+  labels: defaultSeed.labels,
+  language: defaultSeed.language || "ko",
 };
 
-const DEFAULT_SEED = INCLUDE_SAMPLE ? sampleOffice : EMPTY_SEED;
+const DEFAULT_SEED = INCLUDE_SAMPLE ? SAMPLE_SEED : defaultSeed;
 
 function inferCategoryIcon(category) {
   const id = (category.id || "").toLowerCase();
@@ -52,7 +47,6 @@ function normalizeLabel(label, index) {
   return {
     id: label.id || uid(),
     name: label.name || `레이블 ${index + 1}`,
-    color: label.color || "#64748b",
   };
 }
 
@@ -66,7 +60,11 @@ function normalizeWallet(wallet, categories, labels) {
           date: entry.date || new Date().toISOString().slice(0, 10),
           amount: Number(entry.amount || 0),
           categoryId: entry.categoryId || categories[0]?.id || "",
-          labelId: entry.labelId || labels[0]?.id || "",
+          labelIds: Array.isArray(entry.labelIds)
+            ? entry.labelIds.filter(Boolean)
+            : entry.labelId
+              ? [entry.labelId]
+              : [],
           note: entry.note || "",
           repeat: entry.repeat || "none",
           repeatEndDate: entry.repeatEndDate || "",

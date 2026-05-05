@@ -21,6 +21,7 @@ import {
   TextInput,
   Textarea,
   Title,
+  UnstyledButton,
 } from "@mantine/core";
 import {
   IconArrowLeft,
@@ -28,6 +29,7 @@ import {
   IconCheck,
   IconChevronDown,
   IconChevronUp,
+  IconClock,
   IconPlus,
   IconPencil,
   IconSearch,
@@ -96,16 +98,17 @@ function donutSlicePath(cx, cy, r, startAngle, endAngle) {
 function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSelectBar, selection }) {
   const t = useT();
   const width = 640;
-  const height = 240;
+  const height = 210;
   const padX = 42;
-  const padY = 18;
-  const labelArea = mode === "year" ? 24 : 34;
-  const baseY = height - padY - labelArea;
-  const graphH = baseY - padY;
+  const padTop = 14;
+  const padBottom = 4;
+  const labelArea = mode === "year" ? 22 : 32;
+  const baseY = height - padBottom - labelArea;
+  const graphH = baseY - padTop;
   const graphW = width - padX * 2;
 
   if (!page.length) {
-    return <Center h={220} c="dimmed">{t("chart.empty")}</Center>;
+    return <Center h={190} c="dimmed">{t("chart.empty")}</Center>;
   }
 
   if (chartMode === "balance") {
@@ -125,7 +128,7 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
     });
 
     return (
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-[240px] select-none">
+      <svg viewBox={`0 0 ${width} ${height}`} className="block w-full select-none" style={{ height: "auto", maxHeight: 260 }}>
         {[minTick, (minTick + maxTick) / 2, maxTick].map((tick) => {
           const ratio = (tick - minTick) / tickRange;
           const y = baseY - ratio * graphH;
@@ -186,7 +189,7 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
   const barW = Math.max(7, slotW * 0.34);
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-[240px] select-none">
+    <svg viewBox={`0 0 ${width} ${height}`} className="block w-full select-none" style={{ height: "auto", maxHeight: 260 }}>
       {[0, midTick, maxTick].map((tick) => {
         const ratio = tick / maxTick;
         const y = baseY - ratio * graphH;
@@ -211,7 +214,7 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
           <g key={bucket.key}>
             <rect
               x={slotX + 1}
-              y={padY}
+              y={padTop}
               width={slotW - 2}
               height={graphH}
               fill={selectedKey === bucket.key ? "rgba(21,101,192,0.08)" : "transparent"}
@@ -345,7 +348,7 @@ function EntryList({ items, onEdit }) {
           <Stack gap="xs">
             {rows.map((item) => {
               const category = item.category;
-              const label = item.label;
+              const itemLabels = item.labels || [];
               return (
                 <Paper key={item.id + item.occurrenceDate} withBorder radius="sm" p="sm" className="cursor-pointer" onClick={() => onEdit(item)}>
                   <div className="grid grid-cols-[auto,auto,1fr,auto] items-center gap-3">
@@ -359,13 +362,24 @@ function EntryList({ items, onEdit }) {
                     </span>
                     <div className="min-w-0 text-left">
                       <div className="truncate font-medium text-slate-900">
-                        {category.name} <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">{label.name}</span>
+                        {category.name}
+                        {itemLabels.map((lbl) => (
+                          <span
+                            key={lbl.id}
+                            className="ml-1 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                          >
+                            {lbl.name}
+                          </span>
+                        ))}
                       </div>
                       {item.note ? <div className="text-xs text-slate-500">{item.note}</div> : null}
                     </div>
                     <div className="text-right">
-                      <div className={item.amount >= 0 ? "text-income font-semibold" : "text-expense font-semibold"}>
-                        {formatMoney(item.amount)}
+                      <div
+                        className="font-semibold"
+                        style={{ color: category.type === "income" ? "#1565c0" : "#c62828" }}
+                      >
+                        {formatMoney(signedAmount(item))}
                       </div>
                     </div>
                   </div>
@@ -531,15 +545,16 @@ function App({ state, setState }) {
 
   const selectedLedgerPageStart = ledgerPageByMode[ledgerMode] ?? Math.max(0, buckets.length - visibleCountForMode(ledgerMode));
   const ledgerPage = buckets.slice(selectedLedgerPageStart, selectedLedgerPageStart + visibleCountForMode(ledgerMode));
-  const ledgerValueText = ledgerSelection && ledgerSelection.mode === ledgerMode
-    ? `${ledgerSelection.label} · ${
-        ledgerSelection.metric === "income"
-          ? t("chart.income")
-          : ledgerSelection.metric === "expense"
-            ? t("chart.expense")
-            : t("chart.cashFlow")
-      }: ${formatMoney(ledgerSelection.amount)}`
-    : "";
+  const ledgerValueText = ledgerSelection
+    && ledgerSelection.mode === ledgerMode
+    && ledgerSelection.chartMode === "flow"
+    && ledgerChartMode === "flow"
+      ? `${ledgerSelection.label} · ${
+          ledgerSelection.metric === "income"
+            ? t("chart.income")
+            : t("chart.expense")
+        }: ${formatMoney(ledgerSelection.amount)}`
+      : "";
 
   const pendingScheduled = useMemo(() => buildPendingScheduledOccurrences(currentWallet, selectedBucket ? { start: selectedBucket.start, end: selectedBucket.end } : resolveFlowRange(ledgerMode)), [currentWallet, selectedBucket, ledgerMode]);
 
@@ -570,8 +585,9 @@ function App({ state, setState }) {
     const labelNameById = new Map(state.labels.map((l) => [l.id, (l.name || "").toLowerCase()]));
     return base.filter((item) => {
       const category = categoryNameById.get(item.categoryId) || "";
-      const label = labelNameById.get(item.labelId) || "";
-      return category.includes(q) || label.includes(q) || (item.note || "").toLowerCase().includes(q);
+      const ids = Array.isArray(item.labelIds) ? item.labelIds : item.labelId ? [item.labelId] : [];
+      const labelText = ids.map((id) => labelNameById.get(id) || "").join(" ");
+      return category.includes(q) || labelText.includes(q) || (item.note || "").toLowerCase().includes(q);
     });
   }, [searchWallet, searchRange, searchText, state.categories, state.labels]);
 
@@ -622,7 +638,12 @@ function App({ state, setState }) {
   }
 
   function resolveEntryData(item) {
-    return { ...item, category: getCategory(item.categoryId), label: getLabel(item.labelId) };
+    const labelIds = Array.isArray(item.labelIds) ? item.labelIds : item.labelId ? [item.labelId] : [];
+    return {
+      ...item,
+      category: getCategory(item.categoryId),
+      labels: labelIds.map((id) => getLabel(id)).filter(Boolean),
+    };
   }
 
   function maybeShiftLedgerPage(bucket) {
@@ -681,12 +702,13 @@ function App({ state, setState }) {
     const resolvedStatsItems = statsItems.map(resolveEntryData);
     const labelMap = new Map();
     for (const item of resolvedStatsItems) {
-      const label = item.label;
       const signed = signedAmount(item);
-      const cur = labelMap.get(label.id) || { label, income: 0, expense: 0 };
-      if (signed >= 0) cur.income += signed;
-      else cur.expense += Math.abs(signed);
-      labelMap.set(label.id, cur);
+      for (const label of item.labels || []) {
+        const cur = labelMap.get(label.id) || { label, income: 0, expense: 0 };
+        if (signed >= 0) cur.income += signed;
+        else cur.expense += Math.abs(signed);
+        labelMap.set(label.id, cur);
+      }
     }
     const categoryMap = new Map();
     for (const item of resolvedStatsItems.filter((entry) => entry.category.type === statsCategoryType)) {
@@ -696,7 +718,9 @@ function App({ state, setState }) {
       cur.amount += Math.abs(signedAmount(item));
       categoryMap.set(category.id, cur);
     }
-    const filteredByLabel = statsLabelFilterId ? resolvedStatsItems.filter((item) => item.labelId === statsLabelFilterId) : resolvedStatsItems;
+    const filteredByLabel = statsLabelFilterId
+      ? resolvedStatsItems.filter((item) => (item.labels || []).some((label) => label.id === statsLabelFilterId))
+      : resolvedStatsItems;
     const typedItems = filteredByLabel.filter((item) => item.category.type === statsCategoryType);
 
     return (
@@ -1005,7 +1029,11 @@ function App({ state, setState }) {
         date: entry.date || new Date().toISOString().slice(0, 10),
         amount: Number(entry.amount || 0),
         categoryId: entry.categoryId || prev.categories[0]?.id || "",
-        labelId: entry.labelId || prev.labels[0]?.id || "",
+        labelIds: Array.isArray(entry.labelIds)
+          ? entry.labelIds.filter(Boolean)
+          : entry.labelId
+            ? [entry.labelId]
+            : [],
         note: entry.note || "",
         repeat: entry.repeat || "none",
         repeatEndDate: entry.repeatEndDate || "",
@@ -1113,7 +1141,14 @@ function App({ state, setState }) {
       labels: prev.labels.filter((label) => label.id !== labelId),
       wallets: prev.wallets.map((wallet) => ({
         ...wallet,
-        entries: wallet.entries.filter((entry) => entry.labelId !== labelId),
+        entries: wallet.entries.map((entry) => {
+          const ids = Array.isArray(entry.labelIds)
+            ? entry.labelIds
+            : entry.labelId
+              ? [entry.labelId]
+              : [];
+          return { ...entry, labelIds: ids.filter((id) => id !== labelId) };
+        }),
       })),
     }));
   }
@@ -1238,46 +1273,110 @@ function App({ state, setState }) {
                 />
               </Card>
 
-              {pendingScheduled.length > 0 && (
-                <Paper
-                  withBorder
-                  radius="sm"
-                  p="sm"
-                  className="bg-slate-50 cursor-pointer"
-                  onClick={() => setPendingExpanded((value) => !value)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      setPendingExpanded((value) => !value);
-                    }
-                  }}
-                >
-                  <Group justify="space-between" wrap="nowrap">
-                    <Text fw={700} size="sm">{t("ledger.pending", { count: pendingScheduled.length })}</Text>
-                    {pendingExpanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
-                  </Group>
-                  {pendingExpanded && (
-                    <Stack gap="xs" mt="sm" onClick={(event) => event.stopPropagation()}>
-                      {pendingScheduled.map((item) => {
-                        const resolved = resolveEntryData(item);
-                        return (
-                          <Paper key={item.id + item.occurrenceDate} withBorder radius="sm" p="sm" className="bg-white">
-                            <Group justify="space-between">
-                              <div>
-                                <Text fw={600}>{item.occurrenceDate}</Text>
-                                <Text size="sm" c="dimmed">{resolved.category.name} / {resolved.label.name}</Text>
-                              </div>
-                              <Text fw={700}>{formatMoney(item.amount)}</Text>
-                            </Group>
-                          </Paper>
-                        );
-                      })}
-                    </Stack>
-                  )}
-                </Paper>
-              )}
+              {pendingScheduled.length > 0 && (() => {
+                const resolvedPending = pendingScheduled.map(resolveEntryData);
+                const pendingTotal = resolvedPending.reduce((sum, item) => sum + signedAmount(item), 0);
+                const pendingGroups = (() => {
+                  const map = new Map();
+                  for (const item of resolvedPending) {
+                    const key = item.occurrenceDate;
+                    if (!map.has(key)) map.set(key, []);
+                    map.get(key).push(item);
+                  }
+                  return [...map.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
+                })();
+                return (
+                  <Paper
+                    withBorder
+                    radius="sm"
+                    p="sm"
+                    className="bg-slate-50 cursor-pointer"
+                    onClick={() => setPendingExpanded((value) => !value)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setPendingExpanded((value) => !value);
+                      }
+                    }}
+                  >
+                    <Group justify="space-between" wrap="nowrap">
+                      <Group gap={6} wrap="nowrap">
+                        <IconClock size={16} className="text-slate-500" />
+                        <Text fw={700} size="sm">{t("ledger.pending", { count: pendingScheduled.length })}</Text>
+                      </Group>
+                      <Group gap="xs" wrap="nowrap">
+                        <Text size="sm" c="dimmed">{formatMoney(pendingTotal)}</Text>
+                        {pendingExpanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+                      </Group>
+                    </Group>
+                    {pendingExpanded && (
+                      <Stack gap="sm" mt="sm" onClick={(event) => event.stopPropagation()}>
+                        {pendingGroups.map(([date, items]) => {
+                          const dailyTotal = items.reduce((sum, item) => sum + signedAmount(item), 0);
+                          return (
+                            <Box key={date}>
+                              <Group justify="space-between" mb={6} wrap="nowrap">
+                                <Text fw={700} size="sm" className="text-slate-500">{date}</Text>
+                                <Text fw={700} size="sm" className="text-slate-500">{formatMoney(dailyTotal)}</Text>
+                              </Group>
+                              <Stack gap="xs">
+                                {items.map((item) => {
+                                  const category = item.category;
+                                  const itemLabels = item.labels || [];
+                                  return (
+                                    <Paper
+                                      key={item.id + item.occurrenceDate}
+                                      withBorder
+                                      radius="sm"
+                                      p="sm"
+                                      style={{ opacity: 0.78, backgroundColor: "#f1f5f9" }}
+                                    >
+                                      <div className="grid grid-cols-[auto,auto,1fr,auto] items-center gap-3">
+                                        <span className="h-10 w-1.5 rounded-full" style={{ background: category.color }} />
+                                        <span
+                                          aria-hidden="true"
+                                          className="grid h-9 w-9 place-items-center rounded-full"
+                                          style={{ background: `${category.color}1a`, color: category.color }}
+                                        >
+                                          <CategoryIcon category={category} size={18} />
+                                        </span>
+                                        <div className="min-w-0 text-left">
+                                          <div className="truncate font-medium text-slate-700">
+                                            {category.name}
+                                            {itemLabels.map((lbl) => (
+                                              <span
+                                                key={lbl.id}
+                                                className="ml-1 inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-600"
+                                              >
+                                                {lbl.name}
+                                              </span>
+                                            ))}
+                                          </div>
+                                          {item.note ? <div className="text-xs text-slate-500">{item.note}</div> : null}
+                                        </div>
+                                        <div className="text-right">
+                                          <div
+                                            className="font-semibold"
+                                            style={{ color: category.type === "income" ? "#1565c0" : "#c62828" }}
+                                          >
+                                            {formatMoney(signedAmount(item))}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </Paper>
+                                  );
+                                })}
+                              </Stack>
+                            </Box>
+                          );
+                        })}
+                      </Stack>
+                    )}
+                  </Paper>
+                );
+              })()}
 
               <Card withBorder radius="sm" shadow="sm">
                 {renderLedgerList()}
@@ -1413,10 +1512,23 @@ function App({ state, setState }) {
 
 function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }) {
   const t = useT();
+  const initialCategory = categories.find((c) => c.id === entry?.categoryId);
+  const initialLabelIds = Array.isArray(entry?.labelIds)
+    ? entry.labelIds.filter(Boolean)
+    : entry?.labelId
+      ? [entry.labelId]
+      : [];
+
   const [date, setDate] = useState(entry?.date || toDateInput(startOfDay(new Date())));
   const [amount, setAmount] = useState(entry?.amount || 0);
-  const [categoryId, setCategoryId] = useState(entry?.categoryId || categories[0]?.id || "");
-  const [labelId, setLabelId] = useState(entry?.labelId || labels[0]?.id || "");
+  const [categoryType, setCategoryType] = useState(initialCategory?.type || "expense");
+  const [categoryId, setCategoryId] = useState(
+    entry?.categoryId
+      || categories.find((c) => c.type === "expense")?.id
+      || categories[0]?.id
+      || ""
+  );
+  const [labelIds, setLabelIds] = useState(initialLabelIds);
   const [note, setNote] = useState(entry?.note || "");
   const [repeat, setRepeat] = useState(entry?.repeat || "none");
   const [repeatEndDate, setRepeatEndDate] = useState(entry?.repeatEndDate || "");
@@ -1425,14 +1537,106 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
     if (repeat === "none") setRepeatEndDate("");
   }, [repeat]);
 
+  const categoriesOfType = useMemo(
+    () => [...categories].filter((c) => c.type === categoryType).sort((a, b) => a.name.localeCompare(b.name)),
+    [categories, categoryType]
+  );
+
+  function handleTypeChange(nextType) {
+    setCategoryType(nextType);
+    const current = categories.find((c) => c.id === categoryId);
+    if (!current || current.type !== nextType) {
+      const fallback = categories.find((c) => c.type === nextType);
+      if (fallback) setCategoryId(fallback.id);
+    }
+  }
+
+  function toggleLabel(id) {
+    setLabelIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
   return (
     <Stack>
       <SimpleGrid cols={2}>
         <TextInput label={t("entry.field.date")} type="date" value={date} onChange={(e) => setDate(e.currentTarget.value)} />
         <NumberInput label={t("entry.field.amount")} value={amount} onChange={(value) => setAmount(Number(value || 0))} min={0} />
       </SimpleGrid>
-      <Select label={t("entry.field.category")} data={categories.map((category) => ({ value: category.id, label: category.name }))} value={categoryId} onChange={(value) => setCategoryId(value || "")} />
-      <Select label={t("entry.field.label")} data={labels.map((label) => ({ value: label.id, label: label.name }))} value={labelId} onChange={(value) => setLabelId(value || "")} />
+
+      <Stack gap={6}>
+        <Text size="sm" fw={500}>{t("entry.field.category")}</Text>
+        <Paper withBorder radius="sm" p="xs">
+          <Tabs value={categoryType} onChange={(value) => handleTypeChange(value || "expense")}>
+            <Tabs.List grow>
+              <Tabs.Tab value="expense">{t("type.expense")}</Tabs.Tab>
+              <Tabs.Tab value="income">{t("type.income")}</Tabs.Tab>
+            </Tabs.List>
+          </Tabs>
+          <ScrollArea h={170} mt="xs">
+            <SimpleGrid cols={2} spacing={8} p={6}>
+              {categoriesOfType.map((category) => {
+                const active = category.id === categoryId;
+                return (
+                  <UnstyledButton
+                    key={category.id}
+                    onClick={() => setCategoryId(category.id)}
+                    style={{
+                      padding: "8px 10px",
+                      borderRadius: 6,
+                      background: active ? `${category.color}1a` : "transparent",
+                      boxShadow: active ? `inset 0 0 0 1px ${category.color}` : "none",
+                    }}
+                  >
+                    <Group gap={8} wrap="nowrap">
+                      <span style={{ color: category.color }} className="inline-flex items-center">
+                        <CategoryIcon category={category} size={16} />
+                      </span>
+                      <Text
+                        size="sm"
+                        className="truncate"
+                        style={{ color: active ? category.color : undefined, fontWeight: active ? 600 : 400 }}
+                      >
+                        {category.name}
+                      </Text>
+                    </Group>
+                  </UnstyledButton>
+                );
+              })}
+            </SimpleGrid>
+          </ScrollArea>
+        </Paper>
+      </Stack>
+
+      <Stack gap={6}>
+        <Text size="sm" fw={500}>{t("entry.field.label")}</Text>
+        {labels.length === 0 ? (
+          <Text size="xs" c="dimmed">{t("settings.labels.empty")}</Text>
+        ) : (
+          <Group gap={6} wrap="wrap">
+            {labels.map((label) => {
+              const active = labelIds.includes(label.id);
+              return (
+                <UnstyledButton
+                  key={label.id}
+                  onClick={() => toggleLabel(label.id)}
+                  style={{
+                    padding: "4px 12px",
+                    borderRadius: 999,
+                    border: "1px solid #cbd5e1",
+                    background: active ? "#334155" : "#ffffff",
+                    color: active ? "#ffffff" : "#334155",
+                    fontSize: 12,
+                    fontWeight: active ? 600 : 400,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {label.name}
+                </UnstyledButton>
+              );
+            })}
+          </Group>
+        )}
+      </Stack>
+
       <Textarea label={t("entry.field.note")} value={note} onChange={(e) => setNote(e.currentTarget.value)} minRows={3} />
       <Select label={t("entry.field.repeat")} data={REPEAT_OPTIONS_DATA.map((item) => ({ value: item.value, label: t(`repeat.${item.value}`) }))} value={repeat} onChange={(value) => setRepeat(value || "none")} />
       {repeat !== "none" && <TextInput label={t("entry.field.repeatEnd")} type="date" value={repeatEndDate} onChange={(e) => setRepeatEndDate(e.currentTarget.value)} placeholder={t("entry.field.repeatEnd.placeholder")} />}
@@ -1443,7 +1647,7 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
         <Group>
           <Button
             leftSection={<IconCheck size={16} />}
-            onClick={() => onSubmit({ date, amount: Number(amount), categoryId, labelId, note, repeat, repeatEndDate: repeat === "none" ? "" : repeatEndDate })}
+            onClick={() => onSubmit({ date, amount: Number(amount), categoryId, labelIds, note, repeat, repeatEndDate: repeat === "none" ? "" : repeatEndDate })}
           >
             {t("entry.action.save")}
           </Button>
