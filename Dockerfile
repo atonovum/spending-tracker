@@ -5,6 +5,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+ENV VITE_INCLUDE_SAMPLE=true
 RUN npm run build
 
 

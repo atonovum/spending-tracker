@@ -1,6 +1,26 @@
 import sampleOffice from "../../samples/3y-salaryman-wallet.json";
 import { ACTIVE_STORAGE_KEY, STORAGE_KEYS, safeJsonParse, uid } from "./finance.js";
 
+const INCLUDE_SAMPLE = import.meta.env.VITE_INCLUDE_SAMPLE === "true";
+
+const EMPTY_SEED = {
+  wallets: [{ name: "내 지갑", entries: [] }],
+  categories: [
+    { name: "식비", type: "expense", color: "#c62828", icon: "food" },
+    { name: "교통", type: "expense", color: "#ef6c00", icon: "bus" },
+    { name: "쇼핑", type: "expense", color: "#6a1b9a", icon: "cart" },
+    { name: "주거", type: "expense", color: "#37474f", icon: "house" },
+    { name: "공과금", type: "expense", color: "#00897b", icon: "utility" },
+    { name: "급여", type: "income", color: "#1565c0", icon: "salary" },
+  ],
+  labels: [
+    { name: "고정", color: "#0f766e" },
+    { name: "변동", color: "#9333ea" },
+  ],
+};
+
+const DEFAULT_SEED = INCLUDE_SAMPLE ? sampleOffice : EMPTY_SEED;
+
 function inferCategoryIcon(category) {
   const id = (category.id || "").toLowerCase();
   const name = category.name || "";
@@ -60,19 +80,23 @@ export function normalizeState(parsed) {
     ? parsed
     : parsed?.wallet
       ? { wallets: [parsed.wallet], categories: parsed.categories || [], labels: parsed.labels || [], selectedWalletId: parsed.wallet.id }
-      : sampleOffice;
+      : DEFAULT_SEED;
 
-  const categories = (Array.isArray(seed.categories) && seed.categories.length ? seed.categories : sampleOffice.categories || []).map(normalizeCategory);
-  const labels = (Array.isArray(seed.labels) && seed.labels.length ? seed.labels : sampleOffice.labels || []).map(normalizeLabel);
+  const fallbackCategories = DEFAULT_SEED.categories || [];
+  const fallbackLabels = DEFAULT_SEED.labels || [];
+  const fallbackWallet = DEFAULT_SEED.wallets?.[0] || DEFAULT_SEED.wallet;
+
+  const categories = (Array.isArray(seed.categories) && seed.categories.length ? seed.categories : fallbackCategories).map(normalizeCategory);
+  const labels = (Array.isArray(seed.labels) && seed.labels.length ? seed.labels : fallbackLabels).map(normalizeLabel);
   const wallets = (Array.isArray(seed.wallets) ? seed.wallets : []).map((wallet) => normalizeWallet(wallet, categories, labels));
 
-  if (!wallets.length) {
-    wallets.push(normalizeWallet(sampleOffice.wallet, categories, labels));
+  if (!wallets.length && fallbackWallet) {
+    wallets.push(normalizeWallet(fallbackWallet, categories, labels));
   }
 
   return {
     version: 3,
-    selectedWalletId: seed.selectedWalletId || wallets[0].id,
+    selectedWalletId: seed.selectedWalletId || wallets[0]?.id || "",
     language: seed.language === "en" ? "en" : "ko",
     wallets,
     categories,
@@ -87,7 +111,7 @@ export function loadState() {
     const parsed = safeJsonParse(raw);
     if (parsed) return normalizeState(parsed);
   }
-  return normalizeState(sampleOffice);
+  return normalizeState(DEFAULT_SEED);
 }
 
 export function saveState(state) {
