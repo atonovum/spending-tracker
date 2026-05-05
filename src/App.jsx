@@ -35,7 +35,7 @@ import {
   IconTrash,
   IconWallet,
 } from "@tabler/icons-react";
-import { loadState, saveState } from "./lib/storage.js";
+import { loadState, normalizeState, saveState } from "./lib/storage.js";
 import {
   addDays,
   buildOccurrences,
@@ -59,6 +59,7 @@ import {
 } from "./lib/finance.js";
 import { CategoryIcon, getCategoryIconComponent } from "./lib/categoryIcons.jsx";
 import { I18nProvider, useI18n, useT, DEFAULT_LANGUAGE } from "./lib/i18n.jsx";
+import { fetchRemoteState, pushRemoteState } from "./lib/cloudSync.js";
 import Settings from "./settings/Settings.jsx";
 
 const TAB_KEYS = ["ledger", "stats", "search", "settings"];
@@ -1455,6 +1456,31 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
 function AppRoot() {
   const [state, setState] = useState(() => loadState());
   const lang = state.language || DEFAULT_LANGUAGE;
+  const skipNextPush = useRef(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchRemoteState().then((remote) => {
+      if (cancelled || !remote) return;
+      skipNextPush.current = true;
+      setState(normalizeState(remote));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (skipNextPush.current) {
+      skipNextPush.current = false;
+      return;
+    }
+    const handle = setTimeout(() => {
+      pushRemoteState(state);
+    }, 1500);
+    return () => clearTimeout(handle);
+  }, [state]);
+
   return (
     <I18nProvider lang={lang}>
       <App state={state} setState={setState} />
