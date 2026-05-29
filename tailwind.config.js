@@ -4,16 +4,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: "#101418",
-        paper: "#f8fafc",
-        line: "#e2e8f0",
-        muted: "#64748b",
-        income: "#1565c0",
-        expense: "#c62828",
-        balance: "#2e7d32",
+        ink: "#1F2024",
+        paper: "#FFFBF5",
+        line: "#F0EDE7",
+        muted: "#8A8F9A",
+        income: "#5BB97A",
+        expense: "#F08A8A",
+        balance: "#5C8DEF",
+        accent: "#FFB454",
       },
       boxShadow: {
-        soft: "0 10px 30px rgba(15, 23, 42, 0.08)",
+        soft: "0 8px 24px rgba(31, 32, 36, 0.06)",
+      },
+      borderRadius: {
+        card: "20px",
+        chip: "999px",
       },
     },
   },

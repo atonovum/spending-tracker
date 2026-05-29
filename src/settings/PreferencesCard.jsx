@@ -4,7 +4,7 @@ import { LANGUAGES, useT } from "../lib/i18n.jsx";
 export function PreferencesCard({ language, onLanguageChange }) {
   const t = useT();
   return (
-    <Card withBorder radius="sm" shadow="sm">
+    <Card withBorder radius="card" shadow="soft">
       <Stack gap="xs">
         <Title order={4}>{t("settings.preferences")}</Title>
         <Group justify="space-between" wrap="nowrap" align="center">

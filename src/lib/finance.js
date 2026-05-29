@@ -50,6 +50,12 @@ export function formatMoney(value) {
   return `${sign}${abs.toLocaleString("ko-KR")}원`;
 }
 
+export function normalizeLabelIds(entry) {
+  if (!entry) return [];
+  if (Array.isArray(entry.labelIds)) return entry.labelIds.filter(Boolean);
+  return entry.labelId ? [entry.labelId] : [];
+}
+
 export function formatShortDate(date) {
   return `${date.getMonth() + 1}/${date.getDate()}`;
 }

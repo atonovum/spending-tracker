@@ -13,6 +13,7 @@ import {
 import { useMediaQuery } from "@mantine/hooks";
 import { IconChevronRight } from "@tabler/icons-react";
 import { CategoryIcon } from "../lib/categoryIcons.jsx";
+import { normalizeLabelIds } from "../lib/finance.js";
 import { useI18n } from "../lib/i18n.jsx";
 
 function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEditEntry }) {
@@ -35,14 +36,17 @@ function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEdi
           <Stack gap="xs" pr={4}>
             {entries.map((entry) => {
               const category = getCategory(entry.categoryId);
-              const label = getLabel(entry.labelId);
+              const entryLabels = normalizeLabelIds(entry).map((id) => getLabel(id)).filter(Boolean);
               return (
                 <Paper
                   key={entry.id}
                   withBorder
                   p="sm"
-                  radius="sm"
-                  className="cursor-pointer hover:bg-slate-50"
+                  radius="card"
+                  className="cursor-pointer"
+                  style={{ transition: 'background 150ms ease' }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(138, 143, 154, 0.04)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   onClick={() => onEditEntry(entry)}
                 >
                   <Group justify="space-between" wrap="nowrap" align="flex-start">
@@ -50,8 +54,8 @@ function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEdi
                       {category ? (
                         <span
                           aria-hidden="true"
-                          className="grid h-9 w-9 place-items-center rounded-full"
-                          style={{ background: `${category.color}1a`, color: category.color }}
+                          className="grid h-9 w-9 place-items-center rounded-xl"
+                          style={{ background: `${category.color}14`, color: category.color }}
                         >
                           <CategoryIcon category={category} size={18} />
                         </span>
@@ -59,8 +63,10 @@ function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEdi
                       <div className="min-w-0">
                         <Group gap="xs">
                           <Text fw={600} className="truncate">{category?.name || t("settings.scheduled.noCategory")}</Text>
-                          {label ? <Badge variant="light" size="xs" color="gray">{label.name}</Badge> : null}
-                          <Badge variant="filled" size="xs" color="indigo">{t(`repeat.${entry.repeat}`)}</Badge>
+                          {entryLabels.map((lbl) => (
+                            <Badge key={lbl.id} variant="light" size="xs" color="gray">{lbl.name}</Badge>
+                          ))}
+                          <Badge variant="filled" size="xs" style={{ backgroundColor: '#FFB454', color: '#FFFFFF' }}>{t(`repeat.${entry.repeat}`)}</Badge>
                         </Group>
                         <Text size="xs" c="dimmed">
                           {t("settings.scheduled.start", { date: entry.date })}
@@ -74,7 +80,7 @@ function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEdi
                         ) : null}
                       </div>
                     </Group>
-                    <Text fw={700} c={category?.type === "income" ? "blue" : "red"}>
+                    <Text fw={700} style={{ color: category?.type === "income" ? "#5BB97A" : "#F08A8A" }}>
                       {formatMoney(category?.type === "income" ? entry.amount : -Math.abs(entry.amount))}
                     </Text>
                   </Group>
@@ -94,7 +100,7 @@ export function ScheduledCard({ scheduledEntries, getCategory, getLabel, onEditE
 
   return (
     <>
-      <Card withBorder radius="sm" shadow="sm" className="cursor-pointer" onClick={() => setOpen(true)}>
+      <Card withBorder radius="card" shadow="soft" className="cursor-pointer" onClick={() => setOpen(true)}>
         <Group justify="space-between" wrap="nowrap">
           <Title order={4}>{t("settings.scheduled")}</Title>
           <Group gap="xs">

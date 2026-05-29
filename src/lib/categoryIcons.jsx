@@ -38,26 +38,6 @@ export const CATEGORY_ICON_KEYS = [
   "hobby",
 ];
 
-export const CATEGORY_ICON_LABELS = {
-  spark: "기본",
-  house: "주거",
-  food: "식비",
-  cart: "쇼핑",
-  bus: "교통",
-  hospital: "의료",
-  utility: "공과금",
-  travel: "여행",
-  wallet: "지갑",
-  salary: "급여",
-  gift: "선물",
-  savings: "저축",
-  study: "교육",
-  car: "자동차",
-  entertainment: "오락",
-  subscription: "구독",
-  hobby: "취미",
-};
-
 const CATEGORY_ICON_COMPONENTS = {
   spark: IconSparkles,
   house: IconHome,
