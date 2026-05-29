@@ -51,7 +51,7 @@ function LabelEditModal({ opened, initial, onClose, onSubmit }) {
 function LabelRow({ label, stat, onEdit, onDelete }) {
   const t = useT();
   return (
-    <Paper withBorder p="sm" radius="sm">
+    <Paper withBorder p="sm" radius="card">
       <Group justify="space-between" wrap="nowrap" gap="sm">
         <div className="min-w-0 flex-1">
           <Text fw={600} className="truncate">{label.name}</Text>
@@ -172,7 +172,7 @@ export function LabelsCard({ state, onSaveLabel, onDeleteLabel, onConfirm }) {
 
   return (
     <>
-      <Card withBorder radius="sm" shadow="sm" className="cursor-pointer" onClick={() => setOpen(true)}>
+      <Card withBorder radius="card" shadow="soft" className="cursor-pointer" onClick={() => setOpen(true)}>
         <Group justify="space-between" wrap="nowrap">
           <Title order={4}>{t("settings.labels")}</Title>
           <Group gap="xs">

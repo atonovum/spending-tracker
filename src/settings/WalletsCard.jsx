@@ -30,7 +30,7 @@ import { useI18n } from "../lib/i18n.jsx";
 function WalletRow({ wallet, isSelected, total, onSelect, onEdit, onExport }) {
   const { t, formatMoney } = useI18n();
   return (
-    <Paper withBorder p="sm" radius="sm">
+    <Paper withBorder p="sm" radius="card">
       <Group justify="space-between" wrap="nowrap" gap="sm">
         <Group gap="xs" wrap="nowrap" className="min-w-0 flex-1">
           <ActionIcon
@@ -238,7 +238,7 @@ export function WalletsCard({
 
   return (
     <>
-      <Card withBorder radius="sm" shadow="sm">
+      <Card withBorder radius="card" shadow="soft">
         <Group justify="space-between" mb="sm" wrap="nowrap">
           <div>
             <Title order={4}>{t("settings.wallets")}</Title>

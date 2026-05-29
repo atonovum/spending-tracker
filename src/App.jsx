@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActionIcon,
-  Badge,
   Box,
   Button,
   Card,
@@ -31,9 +30,7 @@ import {
   IconChevronUp,
   IconClock,
   IconPlus,
-  IconPencil,
   IconSearch,
-  IconSettings,
   IconTrash,
   IconWallet,
 } from "@tabler/icons-react";
@@ -46,9 +43,9 @@ import {
   formatShortDate,
   fromDateInput,
   groupOccurrences,
-  inRangeOccurrences,
   MAX_WALLETS,
   nextOccurrenceOnOrAfter,
+  normalizeLabelIds,
   REPEAT_OPTIONS as REPEAT_OPTIONS_DATA,
   resolveFlowRange,
   resolveFullRange,
@@ -82,10 +79,6 @@ function visibleCountForMode(mode) {
   return 4;
 }
 
-function bucketLabelRange(bucket) {
-  return `${bucket.label}`;
-}
-
 function donutSlicePath(cx, cy, r, startAngle, endAngle) {
   const x1 = cx + r * Math.cos(startAngle);
   const y1 = cy + r * Math.sin(startAngle);
@@ -95,7 +88,7 @@ function donutSlicePath(cx, cy, r, startAngle, endAngle) {
   return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
 }
 
-function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSelectBar, selection }) {
+function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSelectBar }) {
   const t = useT();
   const width = 640;
   const height = 210;
@@ -134,8 +127,8 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
           const y = baseY - ratio * graphH;
           return (
             <g key={tick}>
-              <line x1={padX} x2={width - padX} y1={y} y2={y} stroke="#e2e8f0" strokeWidth="1" />
-              <text x="8" y={y + 4} className="fill-slate-500 text-[12px]">
+              <line x1={padX} x2={width - padX} y1={y} y2={y} stroke="#F0EDE7" strokeWidth="1" />
+              <text x="8" y={y + 4} className="fill-muted text-[12px]">
                 {formatAxisTick(tick)}
               </text>
             </g>
@@ -145,7 +138,7 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
           <polyline
             points={points.map((p) => `${p.x},${p.y}`).join(" ")}
             fill="none"
-            stroke="#2e7d32"
+            stroke="#5C8DEF"
             strokeWidth="2.5"
           />
         )}
@@ -155,26 +148,26 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
               cx={point.x}
               cy={point.y}
               r={selectedKey === point.key ? 7 : 4}
-              fill={selectedKey === point.key ? "#e53935" : "#fff"}
-              stroke="#2e7d32"
+              fill={selectedKey === point.key ? "#F08A8A" : "#fff"}
+              stroke="#5C8DEF"
               strokeWidth="2"
               onClick={() => onSelectBucket(point)}
               style={{ cursor: "pointer" }}
             />
             {mode === "week" ? (
-              <text x={point.x} y={height - 16} textAnchor="middle" className="fill-slate-600 text-[10px]">
+              <text x={point.x} y={height - 16} textAnchor="middle" className="fill-muted text-[10px]">
                 <tspan x={point.x} dy="0">{formatShortDate(point.start)}</tspan>
                 <tspan x={point.x} dy="12">{formatShortDate(point.end)}</tspan>
               </text>
             ) : (
-              <text x={point.x} y={height - 10} textAnchor="middle" className="fill-slate-600 text-[11px]">
+              <text x={point.x} y={height - 10} textAnchor="middle" className="fill-muted text-[11px]">
                 {point.label}
               </text>
             )}
           </g>
         ))}
         {mode !== "week" && points.map((point) => (
-          <text key={`${point.key}-label`} x={point.x} y={height - 22} textAnchor="middle" className="fill-slate-500 text-[10px]">
+          <text key={`${point.key}-label`} x={point.x} y={height - 22} textAnchor="middle" className="fill-muted text-[10px]">
             {mode === "year" ? point.label : ""}
           </text>
         ))}
@@ -226,7 +219,7 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
               y={baseY - incH}
               width={barW}
               height={Math.max(incH, 4)}
-              fill="#1565c0"
+              fill="#5BB97A"
               opacity={dimmed ? 0.35 : 1}
               onClick={() => onSelectBar(bucket, "income")}
               style={{ cursor: "pointer" }}
@@ -236,12 +229,12 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
               y={baseY - expH}
               width={barW}
               height={Math.max(expH, 4)}
-              fill="#c62828"
+              fill="#F08A8A"
               opacity={dimmed ? 0.35 : 1}
               onClick={() => onSelectBar(bucket, "expense")}
               style={{ cursor: "pointer" }}
             />
-            <text x={centerX} y={height - 10} textAnchor="middle" className="fill-slate-600 text-[11px]">
+            <text x={centerX} y={height - 10} textAnchor="middle" className="fill-muted text-[11px]">
               {bucket.label}
             </text>
           </g>
@@ -342,42 +335,43 @@ function EntryList({ items, onEdit }) {
         return (
         <Box key={date}>
           <Group justify="space-between" mb={6} wrap="nowrap">
-            <Text fw={700} size="sm" className="text-slate-700">{date}</Text>
-            <Text fw={700} size="sm" className="text-slate-700">{formatMoney(dailyTotal)}</Text>
+            <Text fw={700} size="sm" className="text-ink">{date}</Text>
+            <Text fw={700} size="sm" className="text-ink">{formatMoney(dailyTotal)}</Text>
           </Group>
           <Stack gap="xs">
             {rows.map((item) => {
               const category = item.category;
               const itemLabels = item.labels || [];
               return (
-                <Paper key={item.id + item.occurrenceDate} withBorder radius="sm" p="sm" className="cursor-pointer" onClick={() => onEdit(item)}>
+                <Paper key={item.id + item.occurrenceDate} withBorder radius="card" p="sm" className="cursor-pointer" onClick={() => onEdit(item)}>
                   <div className="grid grid-cols-[auto,auto,1fr,auto] items-center gap-3">
-                    <span className="h-10 w-1.5 rounded-full" style={{ background: category.color }} />
+                    <span className="h-10 w-1.5 rounded-chip" style={{ background: category.color }} />
                     <span
                       aria-hidden="true"
-                      className="grid h-9 w-9 place-items-center rounded-full"
-                      style={{ background: `${category.color}1a`, color: category.color }}
+                      className="grid h-9 w-9 place-items-center rounded-xl"
+                      style={{ background: `${category.color}14`, color: category.color }}
                     >
                       <CategoryIcon category={category} size={18} />
                     </span>
                     <div className="min-w-0 text-left">
-                      <div className="truncate font-medium text-slate-900">
+                      <div className="truncate font-medium text-ink">
                         {category.name}
                         {itemLabels.map((lbl) => (
                           <span
                             key={lbl.id}
-                            className="ml-1 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                            className="ml-1 inline-flex items-center rounded-chip px-2 py-0.5 text-xs"
+                            style={{ background: 'rgba(138, 143, 154, 0.08)', color: '#8A8F9A' }}
                           >
                             {lbl.name}
                           </span>
                         ))}
                       </div>
-                      {item.note ? <div className="text-xs text-slate-500">{item.note}</div> : null}
+                      {item.note ? <div className="text-xs text-muted">{item.note}</div> : null}
                     </div>
                     <div className="text-right">
                       <div
                         className="font-semibold"
-                        style={{ color: category.type === "income" ? "#1565c0" : "#c62828" }}
+                        style={{ color: category.type === "income" ? "#5BB97A" : "#F08A8A" }}
                       >
                         {formatMoney(signedAmount(item))}
                       </div>
@@ -513,7 +507,10 @@ function App({ state, setState }) {
   const [pendingExpanded, setPendingExpanded] = useState(false);
 
   useEffect(() => {
-    saveState(state);
+    const result = saveState(state);
+    if (!result.ok) {
+      console.warn('Failed to save state to localStorage:', result.error);
+    }
   }, [state]);
 
   const currentWallet = useMemo(
@@ -585,8 +582,7 @@ function App({ state, setState }) {
     const labelNameById = new Map(state.labels.map((l) => [l.id, (l.name || "").toLowerCase()]));
     return base.filter((item) => {
       const category = categoryNameById.get(item.categoryId) || "";
-      const ids = Array.isArray(item.labelIds) ? item.labelIds : item.labelId ? [item.labelId] : [];
-      const labelText = ids.map((id) => labelNameById.get(id) || "").join(" ");
+      const labelText = normalizeLabelIds(item).map((id) => labelNameById.get(id) || "").join(" ");
       return category.includes(q) || labelText.includes(q) || (item.note || "").toLowerCase().includes(q);
     });
   }, [searchWallet, searchRange, searchText, state.categories, state.labels]);
@@ -594,7 +590,10 @@ function App({ state, setState }) {
   function persistState(next) {
     setState((prev) => {
       const value = typeof next === "function" ? next(prev) : next;
-      saveState(value);
+      const result = saveState(value);
+      if (!result.ok) {
+        console.warn('Failed to save state to localStorage:', result.error);
+      }
       return value;
     });
   }
@@ -627,7 +626,7 @@ function App({ state, setState }) {
         if (wallet.id !== state.selectedWalletId) return wallet;
         const entries = editingEntry
           ? wallet.entries.map((entry) => (entry.id === editingEntry.id ? { ...editingEntry, ...payload } : entry))
-          : [{ id: crypto.randomUUID().replace(/-/g, "").slice(0, 16), ...payload }, ...wallet.entries];
+          : [{ id: uid(), ...payload }, ...wallet.entries];
         return { ...wallet, entries };
       })
     );
@@ -638,11 +637,10 @@ function App({ state, setState }) {
   }
 
   function resolveEntryData(item) {
-    const labelIds = Array.isArray(item.labelIds) ? item.labelIds : item.labelId ? [item.labelId] : [];
     return {
       ...item,
       category: getCategory(item.categoryId),
-      labels: labelIds.map((id) => getLabel(id)).filter(Boolean),
+      labels: normalizeLabelIds(item).map((id) => getLabel(id)).filter(Boolean),
     };
   }
 
@@ -726,19 +724,19 @@ function App({ state, setState }) {
     return (
       <Stack gap="md">
         <SimpleGrid cols={2}>
-          <Card withBorder radius="sm" shadow="sm">
+          <Card withBorder radius="card" shadow="soft">
             <Text fw={700} size="xs" c="dimmed" ta="center">{t("card.total")}</Text>
             <Text fw={700} size="lg" lh={1.2} ta="center">{formatMoney(statsTotalBalance)}</Text>
             <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
           </Card>
-          <Card withBorder radius="sm" shadow="sm">
+          <Card withBorder radius="card" shadow="soft">
             <Text fw={700} size="xs" c="dimmed" ta="center">{ledgerPeriodLabel}</Text>
             <Text fw={700} size="lg" lh={1.2} ta="center">{formatMoney(statsFlow)}</Text>
             <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
           </Card>
         </SimpleGrid>
 
-        <Card withBorder radius="sm" shadow="sm">
+        <Card withBorder radius="card" shadow="soft">
           <BucketScroller
             buckets={buckets}
             selectedKey={statsBucket?.key || null}
@@ -1029,11 +1027,7 @@ function App({ state, setState }) {
         date: entry.date || new Date().toISOString().slice(0, 10),
         amount: Number(entry.amount || 0),
         categoryId: entry.categoryId || prev.categories[0]?.id || "",
-        labelIds: Array.isArray(entry.labelIds)
-          ? entry.labelIds.filter(Boolean)
-          : entry.labelId
-            ? [entry.labelId]
-            : [],
+        labelIds: normalizeLabelIds(entry),
         note: entry.note || "",
         repeat: entry.repeat || "none",
         repeatEndDate: entry.repeatEndDate || "",
@@ -1141,14 +1135,10 @@ function App({ state, setState }) {
       labels: prev.labels.filter((label) => label.id !== labelId),
       wallets: prev.wallets.map((wallet) => ({
         ...wallet,
-        entries: wallet.entries.map((entry) => {
-          const ids = Array.isArray(entry.labelIds)
-            ? entry.labelIds
-            : entry.labelId
-              ? [entry.labelId]
-              : [];
-          return { ...entry, labelIds: ids.filter((id) => id !== labelId) };
-        }),
+        entries: wallet.entries.map((entry) => ({
+          ...entry,
+          labelIds: normalizeLabelIds(entry).filter((id) => id !== labelId),
+        })),
       })),
     }));
   }
@@ -1206,9 +1196,9 @@ function App({ state, setState }) {
               <SimpleGrid cols={2}>
                 <Card
                   withBorder
-                  radius="sm"
-                  shadow={ledgerChartMode === "balance" ? "md" : "sm"}
-                  className={`cursor-pointer transition ${ledgerChartMode === "balance" ? "ring-2 ring-slate-700" : "hover:shadow-md"}`}
+                  radius="card"
+                  shadow="soft"
+                  className={`cursor-pointer transition ${ledgerChartMode === "balance" ? "ring-2 ring-accent" : "hover:shadow-md"}`}
                   role="button"
                   tabIndex={0}
                   aria-pressed={ledgerChartMode === "balance"}
@@ -1221,9 +1211,9 @@ function App({ state, setState }) {
                 </Card>
                 <Card
                   withBorder
-                  radius="sm"
-                  shadow={ledgerChartMode === "flow" ? "md" : "sm"}
-                  className={`cursor-pointer transition ${ledgerChartMode === "flow" ? "ring-2 ring-slate-700" : "hover:shadow-md"}`}
+                  radius="card"
+                  shadow="soft"
+                  className={`cursor-pointer transition ${ledgerChartMode === "flow" ? "ring-2 ring-accent" : "hover:shadow-md"}`}
                   role="button"
                   tabIndex={0}
                   aria-pressed={ledgerChartMode === "flow"}
@@ -1236,23 +1226,23 @@ function App({ state, setState }) {
                 </Card>
               </SimpleGrid>
 
-              <Card withBorder radius="sm" shadow="sm" className="overflow-hidden">
+              <Card withBorder radius="card" shadow="soft" className="overflow-hidden">
                 <Group justify="space-between" align="flex-start" mb="xs">
                   <Group gap="md">
                     {ledgerChartMode === "flow" ? (
                       <>
                         <Group gap={6} wrap="nowrap">
-                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#1565c0" }} />
+                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#5BB97A" }} />
                           <Text size="sm">{t("chart.income")}</Text>
                         </Group>
                         <Group gap={6} wrap="nowrap">
-                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#c62828" }} />
+                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#F08A8A" }} />
                           <Text size="sm">{t("chart.expense")}</Text>
                         </Group>
                       </>
                     ) : (
                       <Group gap={6} wrap="nowrap">
-                        <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#2e7d32" }} />
+                        <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#5C8DEF" }} />
                         <Text size="sm">{t("chart.cashFlow")}</Text>
                       </Group>
                     )}
@@ -1267,7 +1257,6 @@ function App({ state, setState }) {
                   chartMode={ledgerChartMode}
                   page={ledgerPage}
                   selectedKey={selectedBucket?.key || null}
-                  selection={ledgerSelection}
                   onSelectBucket={handleLedgerBucketSelect}
                   onSelectBar={handleLedgerBarSelect}
                 />
@@ -1288,9 +1277,10 @@ function App({ state, setState }) {
                 return (
                   <Paper
                     withBorder
-                    radius="sm"
+                    radius="card"
                     p="sm"
-                    className="bg-slate-50 cursor-pointer"
+                    className="cursor-pointer"
+                    style={{ backgroundColor: 'rgba(138, 143, 154, 0.04)' }}
                     onClick={() => setPendingExpanded((value) => !value)}
                     role="button"
                     tabIndex={0}
@@ -1303,7 +1293,7 @@ function App({ state, setState }) {
                   >
                     <Group justify="space-between" wrap="nowrap">
                       <Group gap={6} wrap="nowrap">
-                        <IconClock size={16} className="text-slate-500" />
+                        <IconClock size={16} className="text-muted" />
                         <Text fw={700} size="sm">{t("ledger.pending", { count: pendingScheduled.length })}</Text>
                       </Group>
                       <Group gap="xs" wrap="nowrap">
@@ -1318,8 +1308,8 @@ function App({ state, setState }) {
                           return (
                             <Box key={date}>
                               <Group justify="space-between" mb={6} wrap="nowrap">
-                                <Text fw={700} size="sm" className="text-slate-500">{date}</Text>
-                                <Text fw={700} size="sm" className="text-slate-500">{formatMoney(dailyTotal)}</Text>
+                                <Text fw={700} size="sm" className="text-muted">{date}</Text>
+                                <Text fw={700} size="sm" className="text-muted">{formatMoney(dailyTotal)}</Text>
                               </Group>
                               <Stack gap="xs">
                                 {items.map((item) => {
@@ -1329,37 +1319,38 @@ function App({ state, setState }) {
                                     <Paper
                                       key={item.id + item.occurrenceDate}
                                       withBorder
-                                      radius="sm"
+                                      radius="card"
                                       p="sm"
-                                      style={{ opacity: 0.78, backgroundColor: "#f1f5f9" }}
+                                      style={{ opacity: 0.78, backgroundColor: 'rgba(138, 143, 154, 0.02)' }}
                                     >
                                       <div className="grid grid-cols-[auto,auto,1fr,auto] items-center gap-3">
-                                        <span className="h-10 w-1.5 rounded-full" style={{ background: category.color }} />
+                                        <span className="h-10 w-1.5 rounded-chip" style={{ background: category.color }} />
                                         <span
                                           aria-hidden="true"
-                                          className="grid h-9 w-9 place-items-center rounded-full"
-                                          style={{ background: `${category.color}1a`, color: category.color }}
+                                          className="grid h-9 w-9 place-items-center rounded-xl"
+                                          style={{ background: `${category.color}14`, color: category.color }}
                                         >
                                           <CategoryIcon category={category} size={18} />
                                         </span>
                                         <div className="min-w-0 text-left">
-                                          <div className="truncate font-medium text-slate-700">
+                                          <div className="truncate font-medium text-ink">
                                             {category.name}
                                             {itemLabels.map((lbl) => (
                                               <span
                                                 key={lbl.id}
-                                                className="ml-1 inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-600"
+                                                className="ml-1 inline-flex items-center rounded-chip px-2 py-0.5 text-xs"
+                                                style={{ background: 'rgba(138, 143, 154, 0.12)', color: '#8A8F9A' }}
                                               >
                                                 {lbl.name}
                                               </span>
                                             ))}
                                           </div>
-                                          {item.note ? <div className="text-xs text-slate-500">{item.note}</div> : null}
+                                          {item.note ? <div className="text-xs text-muted">{item.note}</div> : null}
                                         </div>
                                         <div className="text-right">
                                           <div
                                             className="font-semibold"
-                                            style={{ color: category.type === "income" ? "#1565c0" : "#c62828" }}
+                                            style={{ color: category.type === "income" ? "#5BB97A" : "#F08A8A" }}
                                           >
                                             {formatMoney(signedAmount(item))}
                                           </div>
@@ -1378,7 +1369,7 @@ function App({ state, setState }) {
                 );
               })()}
 
-              <Card withBorder radius="sm" shadow="sm">
+              <Card withBorder radius="card" shadow="soft">
                 {renderLedgerList()}
               </Card>
             </Stack>
@@ -1435,7 +1426,7 @@ function App({ state, setState }) {
         <ActionIcon
           size="xl"
           radius="xl"
-          color="indigo"
+          style={{ backgroundColor: '#FFB454', color: '#FFFFFF' }}
           className="fixed bottom-20 right-4 z-30 shadow-soft"
           onClick={openNewEntry}
           aria-label={t("ledger.fab.add")}
@@ -1513,11 +1504,7 @@ function App({ state, setState }) {
 function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }) {
   const t = useT();
   const initialCategory = categories.find((c) => c.id === entry?.categoryId);
-  const initialLabelIds = Array.isArray(entry?.labelIds)
-    ? entry.labelIds.filter(Boolean)
-    : entry?.labelId
-      ? [entry.labelId]
-      : [];
+  const initialLabelIds = normalizeLabelIds(entry);
 
   const [date, setDate] = useState(entry?.date || toDateInput(startOfDay(new Date())));
   const [amount, setAmount] = useState(entry?.amount || 0);
@@ -1574,7 +1561,7 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
 
       <Stack gap={6}>
         <Text size="sm" fw={500}>{t("entry.field.category")}</Text>
-        <Paper withBorder radius="sm" p="xs">
+        <Paper withBorder radius="card" p="xs">
           <Tabs value={categoryType} onChange={(value) => handleTypeChange(value || "expense")}>
             <Tabs.List grow>
               <Tabs.Tab value="expense">{t("type.expense")}</Tabs.Tab>
@@ -1591,8 +1578,8 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
                     onClick={() => setCategoryId(category.id)}
                     style={{
                       padding: "8px 10px",
-                      borderRadius: 6,
-                      background: active ? `${category.color}1a` : "transparent",
+                      borderRadius: 12,
+                      background: active ? `${category.color}14` : "transparent",
                       boxShadow: active ? `inset 0 0 0 1px ${category.color}` : "none",
                     }}
                   >
@@ -1631,9 +1618,9 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
                   style={{
                     padding: "4px 12px",
                     borderRadius: 999,
-                    border: "1px solid #cbd5e1",
-                    background: active ? "#334155" : "#ffffff",
-                    color: active ? "#ffffff" : "#334155",
+                    border: `1px solid ${active ? '#FFB454' : '#F0EDE7'}`,
+                    background: active ? "#FFB454" : "#ffffff",
+                    color: active ? "#ffffff" : "#1F2024",
                     fontSize: 12,
                     fontWeight: active ? 600 : 400,
                     whiteSpace: "nowrap",

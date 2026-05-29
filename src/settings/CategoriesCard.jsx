@@ -34,8 +34,8 @@ import { useT } from "../lib/i18n.jsx";
 import { buildCategoryStats, usageText } from "./shared.jsx";
 
 const DEFAULT_CATEGORY_COLORS = {
-  expense: "#c62828",
-  income: "#1565c0",
+  expense: "#F08A8A",
+  income: "#5BB97A",
 };
 
 function IconOption({ option }) {
@@ -77,7 +77,7 @@ function InlineCategoryForm({ initial, defaultType, onCancel, onSubmit }) {
   const iconOptions = CATEGORY_ICON_KEYS.map((key) => ({ value: key, label: t(`iconKey.${key}`) }));
 
   return (
-    <Paper withBorder radius="sm" p="sm" className="bg-slate-50">
+    <Paper withBorder radius="card" p="sm" className="bg-slate-50">
       <Stack gap="xs">
         <Text size="sm" fw={700}>{isEdit ? t("settings.categories.editTitle") : t("settings.categories.newTitle")}</Text>
         <TextInput label={t("settings.categories.field.name")} value={name} onChange={(event) => setName(event.currentTarget.value)} required size="sm" />
@@ -97,7 +97,7 @@ function InlineCategoryForm({ initial, defaultType, onCancel, onSubmit }) {
           value={color}
           onChange={setColor}
           format="hex"
-          swatches={["#1565c0", "#2e7d32", "#c62828", "#ef6c00", "#6a1b9a", "#4a148c", "#37474f", "#00897b", "#5d4037"]}
+          swatches={["#5BB97A", "#F08A8A", "#FFB454", "#5C8DEF", "#ef6c00", "#6a1b9a", "#4a148c", "#00897b", "#5d4037"]}
           size="sm"
         />
         <Group justify="flex-end" gap="xs">
@@ -152,7 +152,7 @@ function MergeModal({ opened, sources, candidates, onClose, onConfirm }) {
 function CategoryRow({ category, stat, checked, onToggle, onEdit, onDelete }) {
   const t = useT();
   return (
-    <Paper withBorder p="sm" radius="sm">
+    <Paper withBorder p="sm" radius="card">
       <Group justify="space-between" wrap="nowrap" gap="sm">
         <Group gap="sm" wrap="nowrap" className="min-w-0 flex-1">
           <Checkbox
@@ -373,7 +373,7 @@ export function CategoriesCard({ state, onSaveCategory, onDeleteCategory, onMerg
 
   return (
     <>
-      <Card withBorder radius="sm" shadow="sm" className="cursor-pointer" onClick={() => setOpen(true)}>
+      <Card withBorder radius="card" shadow="soft" className="cursor-pointer" onClick={() => setOpen(true)}>
         <Group justify="space-between" wrap="nowrap">
           <Title order={4}>{t("settings.categories")}</Title>
           <Group gap="xs">
