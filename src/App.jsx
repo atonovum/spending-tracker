@@ -56,7 +56,7 @@ import {
   toDateInput,
   uid,
 } from "./lib/finance.js";
-import { aggregateCategoryByBucket, aggregateCategoryByLabel } from "./lib/categoryStats.js";
+import { aggregateCategoryBySubBucket, aggregateCategoryByLabel } from "./lib/categoryStats.js";
 import { CategoryIcon, getCategoryIconComponent } from "./lib/categoryIcons.jsx";
 import { I18nProvider, useI18n, useT, DEFAULT_LANGUAGE } from "./lib/i18n.jsx";
 import { fetchRemoteState, pushRemoteState } from "./lib/cloudSync.js";
@@ -246,9 +246,12 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
   );
 }
 
-function CategoryStatsChart({ buckets, categoryId, color }) {
+function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categoryId, color }) {
   const t = useT();
-  const series = useMemo(() => aggregateCategoryByBucket(buckets, categoryId), [buckets, categoryId]);
+  const series = useMemo(
+    () => aggregateCategoryBySubBucket(items, ledgerMode, periodStart, periodEnd, categoryId),
+    [items, ledgerMode, periodStart, periodEnd, categoryId],
+  );
   const width = 640;
   const height = 180;
   const padX = 36;
@@ -305,9 +308,9 @@ function CategoryStatsChart({ buckets, categoryId, color }) {
   );
 }
 
-function CategoryLabelTotals({ buckets, categoryId, getLabel }) {
+function CategoryLabelTotals({ items, categoryId, getLabel }) {
   const { t, formatMoney } = useI18n();
-  const rows = useMemo(() => aggregateCategoryByLabel(buckets, categoryId), [buckets, categoryId]);
+  const rows = useMemo(() => aggregateCategoryByLabel(items, categoryId), [items, categoryId]);
   if (!rows.length) return null;
   return (
     <Table withTableBorder={false} withColumnBorders={false} verticalSpacing={4}>
@@ -1569,10 +1572,17 @@ function App({ state, setState }) {
           const cat = getCategory(statsCategoryModalId);
           return (
             <Stack gap="sm">
-              <Text size="xs" fw={700} c="dimmed" tt="uppercase">{t("stats.byPeriod", { mode: t(`modeLabel.${ledgerMode}`) })}</Text>
-              <CategoryStatsChart buckets={buckets} categoryId={statsCategoryModalId} color={cat?.color || "#5C8DEF"} />
+              <Text size="xs" fw={700} c="dimmed" tt="uppercase">{t(`stats.subBucket.${ledgerMode}`)}</Text>
+              <CategoryStatsChart
+                items={statsBucket.items}
+                ledgerMode={ledgerMode}
+                periodStart={statsBucket.start}
+                periodEnd={statsBucket.end}
+                categoryId={statsCategoryModalId}
+                color={cat?.color || "#5C8DEF"}
+              />
               <Text size="xs" fw={700} c="dimmed" tt="uppercase" mt="xs">{t("stats.labelTotals")}</Text>
-              <CategoryLabelTotals buckets={buckets} categoryId={statsCategoryModalId} getLabel={getLabel} />
+              <CategoryLabelTotals items={statsBucket.items} categoryId={statsCategoryModalId} getLabel={getLabel} />
               <Divider />
               <Group justify="space-between">
                 <Text size="sm" c="dimmed">{t("stats.summary.count", { count: items.length })}</Text>
