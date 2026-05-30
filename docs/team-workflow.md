@@ -156,11 +156,20 @@ main 보호 규칙에 의존한다.
   권한**을 가져야 한다.
 - 사용자 핸들만 쓸 경우 해당 사용자가 collaborator로 등록되어 있어야 한다.
 
-### 3.3 배포 분리
+### 3.3 배포 — Cloudflare Workers Builds
 
-- `ci.yml` — `pull_request` 이벤트에서 실행. test + coverage 코멘트.
-- `deploy.yml` — `push: branches: [main]` 으로만 트리거. wrangler deploy 실행.
-- **PR 단계에서는 절대로 deploy 잡이 돌지 않는다** — 시크릿 노출 방지 + 비용.
+- 배포는 **GitHub Actions가 아니라 Cloudflare Workers Builds**가 담당한다.
+  레포에 남아 있는 `cloudflare/workers-autoconfig` 브랜치는
+  `cloudflare-workers-and-pages[bot]`이 Workers Builds 연동을 부트스트랩할 때
+  만든 마커이다.
+- 동작: `main` 푸시(머지) → Cloudflare가 감지 → `npm ci` + `npm run build` +
+  `wrangler deploy` 를 Cloudflare 인프라에서 실행. PR / fork 푸시에는 트리거되지 않는다.
+- GitHub Actions 측 `deploy.yml` 은 **존재하지 않는다** — 중복 배포 / 시크릿 누출 방지.
+- 따라서 `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` GitHub repo secret 도 **필요 없다**.
+- Workers Builds 설정 확인: Cloudflare 대시보드 → Workers & Pages →
+  `spending-tracker` → Settings → Builds. 연결된 브랜치가 `main`이 맞는지 확인.
+- 만약 향후 Workers Builds를 끄고 GitHub Actions로 옮긴다면, 그때 `deploy.yml` +
+  위 두 시크릿을 추가하고 본 문서를 재갱신한다.
 
 ---
 

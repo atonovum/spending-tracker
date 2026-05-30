@@ -16,11 +16,11 @@
 - **스택**: React 18 + Vite 6 (FE) / Cloudflare Workers + KV (BE)
 - **이슈 트래커**: Multica (마스터) ↔ GitHub Issues (1:1 미러)
 - **기본 브랜치**: `main` (보호 브랜치)
-- **CI**: GitHub Actions
-  - `.github/workflows/ci.yml` — PR 검증 + 커버리지 코멘트
-  - `.github/workflows/deploy.yml` — main 푸시 시 Cloudflare 배포
+- **CI**: GitHub Actions — `.github/workflows/ci.yml` (PR 검증 + 커버리지 코멘트)
+- **배포**: **Cloudflare Workers Builds** (Cloudflare가 호스팅하는 CI/CD).
+  `main` 푸시를 Cloudflare가 직접 감지해 빌드 + 배포한다. GitHub Actions에서는 배포하지 않는다.
 - **테스트 프레임워크**: vitest 4.1 + @vitest/coverage-v8
-- **배포 타깃**: Cloudflare Workers (`wrangler deploy`)
+- **배포 타깃**: Cloudflare Workers (`STATE_KV` 바인딩 포함)
 
 > 모든 작업은 **Multica 이슈에서 시작**해 **GitHub PR 로 끝난다**. 이슈 없이 PR 을 열지 않는다.
 
@@ -146,17 +146,21 @@ feat/#42 ──► PR open ──► CI green + review ──► squash merge �
 - 머지 시점에 연결된 GitHub 이슈가 자동 close 되어야 한다 (`Closes #N`).
 - 머지 직후 머지 SHA 를 Multica 이슈에 코멘트로 게시한 뒤 `multica issue status <id> done`.
 
-### 배포 (`main` → Cloudflare)
+### 배포 (`main` → Cloudflare Workers Builds)
 
-- 배포는 **오직 `main` 브랜치에 push (머지) 된 경우에만** 실행된다.
-- `.github/workflows/deploy.yml` 이 다음을 수행:
+- 배포는 **Cloudflare Workers Builds**가 담당한다 — Cloudflare 대시보드에서 본
+  레포가 Workers Build에 연결되어 있다 (`cloudflare/workers-autoconfig` 브랜치가
+  `cloudflare-workers-and-pages[bot]`이 부트스트랩한 흔적).
+- `main` 에 푸시(머지)되면 Cloudflare가 직접 감지하여:
   1. `npm ci`
   2. `npm run build` (vite build)
-  3. `cloudflare/wrangler-action@v3` 로 `wrangler deploy` 실행 — `STATE_KV` 바인딩 포함
-- PR 브랜치 및 fork 에서는 배포가 트리거되지 않는다.
-- 필요 시크릿 (Repo Settings → Secrets and variables → Actions):
-  - `CLOUDFLARE_API_TOKEN` — Workers Scripts:Edit + Account Settings:Read 권한
-  - `CLOUDFLARE_ACCOUNT_ID`
+  3. `wrangler deploy` — `STATE_KV` 바인딩 포함
+- PR 브랜치 / fork 에서는 배포 트리거되지 않는다.
+- GitHub Actions 측에는 별도 `deploy.yml` 이 **없다** — Workers Builds가 인증·배포를
+  모두 자체 처리하므로 `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` 시크릿도
+  필요 없다.
+- 배포 상태 확인: Cloudflare 대시보드 → Workers & Pages → `spending-tracker` →
+  Deployments 탭.
 
 ### 롤백
 
@@ -238,8 +242,8 @@ gh pr create --title "revert: <reason>" --body "Reverts #<pr-number>"
 - `CLAUDE.md` — Multica 에이전트 런타임 가이드
 - `wrangler.jsonc` — Cloudflare Workers 설정
 - 워크플로우 파일
-  - `.github/workflows/ci.yml`
-  - `.github/workflows/deploy.yml`
+  - `.github/workflows/ci.yml` — PR 시 vitest + 커버리지 코멘트
+  - (배포는 GitHub Actions가 아니라 Cloudflare Workers Builds 가 처리)
 
 ---
 
