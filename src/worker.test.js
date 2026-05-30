@@ -88,7 +88,10 @@ describe("Worker /api/state contract tests", () => {
       expect(response.headers.get("cache-control")).toBe("no-store");
 
       const retrieved = JSON.parse(await response.text());
-      expect(retrieved).toEqual(testData);
+      // Object payloads get a server-side updatedAt stamp (Tier 2, EUN-4).
+      // Original fields must round-trip; updatedAt is added.
+      expect(retrieved).toMatchObject(testData);
+      expect(typeof retrieved.updatedAt).toBe("number");
     });
 
     it("returns 500 when KV get fails", async () => {
@@ -220,7 +223,9 @@ describe("Worker /api/state contract tests", () => {
       });
       const getResponse = await worker.fetch(getRequest, env);
       const retrieved = await getResponse.json();
-      expect(retrieved).toEqual(complexData);
+      // Tier 2 (EUN-4): object payloads get a server-side updatedAt stamp.
+      expect(retrieved).toMatchObject(complexData);
+      expect(typeof retrieved.updatedAt).toBe("number");
     });
 
     it("rejects body > 1 MiB with 413", async () => {
@@ -409,6 +414,170 @@ describe("Worker /api/state contract tests", () => {
 
       const body = await response.json();
       expect(body).toEqual({ error: "asset fetch failed" });
+    });
+  });
+
+  describe("Optimistic concurrency (Tier 2, EUN-4)", () => {
+    it("GET returns ETag header reflecting state.updatedAt", async () => {
+      await worker.fetch(
+        new Request("http://localhost/api/state", {
+          method: "PUT",
+          body: JSON.stringify({ foo: 1, updatedAt: 1717000000000 }),
+        }),
+        env,
+      );
+
+      const response = await worker.fetch(
+        new Request("http://localhost/api/state", { method: "GET" }),
+        env,
+      );
+
+      expect(response.headers.get("etag")).toBe("1717000000000");
+    });
+
+    it("GET omits ETag when stored state has no updatedAt (e.g. legacy / array / primitive)", async () => {
+      await worker.fetch(
+        new Request("http://localhost/api/state", {
+          method: "PUT",
+          body: JSON.stringify([1, 2, 3]),
+        }),
+        env,
+      );
+
+      const response = await worker.fetch(
+        new Request("http://localhost/api/state", { method: "GET" }),
+        env,
+      );
+
+      expect(response.headers.get("etag")).toBeNull();
+    });
+
+    it("PUT without updatedAt on object payload stamps server-side updatedAt and exposes it via ETag", async () => {
+      const response = await worker.fetch(
+        new Request("http://localhost/api/state", {
+          method: "PUT",
+          body: JSON.stringify({ foo: "bar" }),
+        }),
+        env,
+      );
+
+      expect(response.status).toBe(200);
+      const etag = response.headers.get("etag");
+      expect(etag).not.toBeNull();
+      expect(Number(etag)).toBeGreaterThan(0);
+
+      const stored = await env.STATE_KV.get("state");
+      expect(JSON.parse(stored).updatedAt).toBe(Number(etag));
+    });
+
+    it("PUT with matching If-Match succeeds", async () => {
+      await worker.fetch(
+        new Request("http://localhost/api/state", {
+          method: "PUT",
+          body: JSON.stringify({ foo: 1, updatedAt: 100 }),
+        }),
+        env,
+      );
+
+      const response = await worker.fetch(
+        new Request("http://localhost/api/state", {
+          method: "PUT",
+          headers: { "if-match": "100" },
+          body: JSON.stringify({ foo: 2, updatedAt: 200 }),
+        }),
+        env,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("etag")).toBe("200");
+
+      const stored = await env.STATE_KV.get("state");
+      expect(JSON.parse(stored)).toEqual({ foo: 2, updatedAt: 200 });
+    });
+
+    it("PUT with mismatched If-Match returns 409 with current revision", async () => {
+      await worker.fetch(
+        new Request("http://localhost/api/state", {
+          method: "PUT",
+          body: JSON.stringify({ foo: 1, updatedAt: 100 }),
+        }),
+        env,
+      );
+
+      const response = await worker.fetch(
+        new Request("http://localhost/api/state", {
+          method: "PUT",
+          headers: { "if-match": "99" },
+          body: JSON.stringify({ foo: 2, updatedAt: 200 }),
+        }),
+        env,
+      );
+
+      expect(response.status).toBe(409);
+      const body = await response.json();
+      expect(body).toEqual({ error: "version_mismatch", current: 100 });
+
+      const stored = await env.STATE_KV.get("state");
+      expect(JSON.parse(stored).foo).toBe(1);
+    });
+
+    it("PUT with If-Match against empty KV returns 409 (current=null)", async () => {
+      const response = await worker.fetch(
+        new Request("http://localhost/api/state", {
+          method: "PUT",
+          headers: { "if-match": "100" },
+          body: JSON.stringify({ foo: 1, updatedAt: 200 }),
+        }),
+        env,
+      );
+
+      expect(response.status).toBe(409);
+      const body = await response.json();
+      expect(body).toEqual({ error: "version_mismatch", current: null });
+    });
+
+    it('PUT with If-Match "*" bypasses precondition and always succeeds', async () => {
+      await worker.fetch(
+        new Request("http://localhost/api/state", {
+          method: "PUT",
+          body: JSON.stringify({ foo: 1, updatedAt: 100 }),
+        }),
+        env,
+      );
+
+      const response = await worker.fetch(
+        new Request("http://localhost/api/state", {
+          method: "PUT",
+          headers: { "if-match": "*" },
+          body: JSON.stringify({ foo: 2, updatedAt: 200 }),
+        }),
+        env,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("etag")).toBe("200");
+    });
+
+    it("PUT without If-Match keeps legacy last-write-wins behavior", async () => {
+      await worker.fetch(
+        new Request("http://localhost/api/state", {
+          method: "PUT",
+          body: JSON.stringify({ foo: 1, updatedAt: 100 }),
+        }),
+        env,
+      );
+
+      const response = await worker.fetch(
+        new Request("http://localhost/api/state", {
+          method: "PUT",
+          body: JSON.stringify({ foo: 2, updatedAt: 50 }),
+        }),
+        env,
+      );
+
+      expect(response.status).toBe(200);
+      const stored = await env.STATE_KV.get("state");
+      expect(JSON.parse(stored).foo).toBe(2);
     });
   });
 
