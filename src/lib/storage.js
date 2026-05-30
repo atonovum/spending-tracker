@@ -2,7 +2,7 @@ import sample2y from "../../samples/2y-sample-wallet.json";
 import sample3y from "../../samples/3y-sample-wallet.json";
 import sample5y from "../../samples/5y-sample-wallet.json";
 import defaultSeed from "../../samples/default-seed.json";
-import { ACTIVE_STORAGE_KEY, STORAGE_KEYS, safeJsonParse, uid } from "./finance.js";
+import { ACTIVE_STORAGE_KEY, normalizeLabelIds, STORAGE_KEYS, safeJsonParse, uid } from "./finance.js";
 
 const INCLUDE_SAMPLE = import.meta.env.VITE_INCLUDE_SAMPLE === "true";
 
@@ -16,7 +16,7 @@ const SAMPLE_SEED = {
 
 const DEFAULT_SEED = INCLUDE_SAMPLE ? SAMPLE_SEED : defaultSeed;
 
-function inferCategoryIcon(category) {
+export function inferCategoryIcon(category) {
   const id = (category.id || "").toLowerCase();
   const name = category.name || "";
   if (/salary|wage|payroll/.test(id) || /급여|월급|봉급|연봉/.test(name)) return "salary";
@@ -33,7 +33,7 @@ function inferCategoryIcon(category) {
   return category.type === "income" ? "wallet" : "cart";
 }
 
-function normalizeCategory(category, index) {
+export function normalizeCategory(category, index) {
   return {
     id: category.id || uid(),
     name: category.name || `카테고리 ${index + 1}`,
@@ -43,14 +43,14 @@ function normalizeCategory(category, index) {
   };
 }
 
-function normalizeLabel(label, index) {
+export function normalizeLabel(label, index) {
   return {
     id: label.id || uid(),
     name: label.name || `레이블 ${index + 1}`,
   };
 }
 
-function normalizeWallet(wallet, categories, labels) {
+export function normalizeWallet(wallet, categories, labels) {
   return {
     id: wallet.id || uid(),
     name: wallet.name || "지갑",
@@ -60,11 +60,7 @@ function normalizeWallet(wallet, categories, labels) {
           date: entry.date || new Date().toISOString().slice(0, 10),
           amount: Number(entry.amount || 0),
           categoryId: entry.categoryId || categories[0]?.id || "",
-          labelIds: Array.isArray(entry.labelIds)
-            ? entry.labelIds.filter(Boolean)
-            : entry.labelId
-              ? [entry.labelId]
-              : [],
+          labelIds: normalizeLabelIds(entry),
           note: entry.note || "",
           repeat: entry.repeat || "none",
           repeatEndDate: entry.repeatEndDate || "",
@@ -114,5 +110,10 @@ export function loadState() {
 }
 
 export function saveState(state) {
-  localStorage.setItem(ACTIVE_STORAGE_KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(ACTIVE_STORAGE_KEY, JSON.stringify(state));
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err };
+  }
 }

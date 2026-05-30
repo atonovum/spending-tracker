@@ -388,7 +388,3 @@ export function useI18n() {
 export function useT() {
   return useContext(I18nContext).t;
 }
-
-export function useLang() {
-  return useContext(I18nContext).lang;
-}
