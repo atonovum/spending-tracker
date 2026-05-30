@@ -79,9 +79,24 @@ describe("aggregateCategoryBySubBucket", () => {
     ];
     const series = aggregateCategoryBySubBucket(items, "month", periodStart, periodEnd, "cat-1");
     expect(series).toHaveLength(10);
-    expect(series[0]).toEqual({ key: "2026-04-01_2026-04-03", label: "1~3", total: 120 });
-    expect(series[1]).toEqual({ key: "2026-04-04_2026-04-06", label: "4~6", total: 200 });
-    expect(series[9]).toEqual({ key: "2026-04-28_2026-04-30", label: "28~30", total: 30 });
+    expect(series[0]).toEqual({ key: "2026-04-01_2026-04-03", label: "1~3", total: 120, count: 2 });
+    expect(series[1]).toEqual({ key: "2026-04-04_2026-04-06", label: "4~6", total: 200, count: 1 });
+    expect(series[9]).toEqual({ key: "2026-04-28_2026-04-30", label: "28~30", total: 30, count: 1 });
+  });
+
+  it("returns count alongside total per sub-bucket", () => {
+    const items = [
+      makeItem({ occurrenceDate: "2026-04-04", amount: 100 }),
+      makeItem({ occurrenceDate: "2026-04-05", amount: 100 }),
+      makeItem({ occurrenceDate: "2026-04-06", amount: 100 }),
+      makeItem({ occurrenceDate: "2026-04-15", amount: 50 }),
+    ];
+    const series = aggregateCategoryBySubBucket(items, "month", periodStart, periodEnd, "cat-1");
+    expect(series[0].count).toBe(0);
+    expect(series[1].count).toBe(3);
+    expect(series[1].total).toBe(300);
+    expect(series[4].count).toBe(1);
+    expect(series[4].total).toBe(50);
   });
 
   it("buckets a year's items into 12 monthly bars (year mode)", () => {

@@ -248,10 +248,15 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
 
 function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categoryId, color }) {
   const t = useT();
+  const [activeIndex, setActiveIndex] = useState(null);
   const series = useMemo(
     () => aggregateCategoryBySubBucket(items, ledgerMode, periodStart, periodEnd, categoryId),
     [items, ledgerMode, periodStart, periodEnd, categoryId],
   );
+  useEffect(() => {
+    setActiveIndex(null);
+  }, [items, ledgerMode, periodStart, periodEnd, categoryId]);
+
   const width = 640;
   const height = 180;
   const padX = 36;
@@ -271,8 +276,22 @@ function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categor
   const slotW = graphW / Math.max(series.length, 1);
   const barW = Math.max(6, slotW * 0.5);
 
+  const active = activeIndex != null && series[activeIndex] ? series[activeIndex] : null;
+  const activeCenterX = active != null ? padX + activeIndex * slotW + slotW / 2 : 0;
+  const activeBarTop = active != null ? baseY - (active.total / maxTick) * graphH : 0;
+  const tipText = active ? t("stats.subBucket.count", { count: active.count }) : "";
+  const tipW = Math.max(44, tipText.length * 7 + 14);
+  const tipH = 18;
+  const tipY = Math.max(padTop + tipH, activeBarTop - 6);
+  const tipX = Math.max(padX, Math.min(width - padX - tipW, activeCenterX - tipW / 2));
+
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="block w-full select-none" style={{ height: "auto", maxHeight: 200 }}>
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className="block w-full select-none"
+      style={{ height: "auto", maxHeight: 200 }}
+      onClick={() => setActiveIndex(null)}
+    >
       {[0, midTick, maxTick].map((tick) => {
         const ratio = tick / maxTick;
         const y = baseY - ratio * graphH;
@@ -288,6 +307,7 @@ function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categor
         const centerX = slotX + slotW / 2;
         const barX = centerX - barW / 2;
         const h = (bucket.total / maxTick) * graphH;
+        const isActive = index === activeIndex;
         return (
           <g key={bucket.key || index}>
             <rect
@@ -296,7 +316,20 @@ function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categor
               width={barW}
               height={Math.max(h, 1)}
               fill={color}
+              opacity={activeIndex == null || isActive ? 1 : 0.5}
               rx={3}
+            />
+            <rect
+              x={slotX}
+              y={padTop}
+              width={slotW}
+              height={baseY - padTop}
+              fill="transparent"
+              style={{ cursor: "pointer" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveIndex((prev) => (prev === index ? null : index));
+              }}
             />
             <text x={centerX} y={height - 8} textAnchor="middle" className="fill-muted text-[11px]">
               {bucket.label}
@@ -304,6 +337,14 @@ function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categor
           </g>
         );
       })}
+      {active ? (
+        <g pointerEvents="none">
+          <rect x={tipX} y={tipY - tipH} width={tipW} height={tipH} rx={9} fill="#1F2937" opacity={0.92} />
+          <text x={tipX + tipW / 2} y={tipY - 5} textAnchor="middle" fill="#FFFFFF" className="text-[11px]">
+            {tipText}
+          </text>
+        </g>
+      ) : null}
     </svg>
   );
 }

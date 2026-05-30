@@ -70,13 +70,15 @@ export function buildSubBucketFrames(mode, periodStart, periodEnd) {
  * @param {Date} periodStart inclusive
  * @param {Date} periodEnd   inclusive
  * @param {string} categoryId
- * @returns {Array<{ key: string, label: string, total: number }>}
+ * @returns {Array<{ key: string, label: string, total: number, count: number }>}
+ *   `count` is the number of category items contributing to that sub-bucket.
  */
 export function aggregateCategoryBySubBucket(items, mode, periodStart, periodEnd, categoryId) {
   if (!Array.isArray(items)) return [];
   const frames = buildSubBucketFrames(mode, periodStart, periodEnd);
   if (!frames.length) return [];
   const totals = new Array(frames.length).fill(0);
+  const counts = new Array(frames.length).fill(0);
   for (const item of items) {
     if (item?.categoryId !== categoryId) continue;
     const date = fromDateInput(item.occurrenceDate);
@@ -84,8 +86,9 @@ export function aggregateCategoryBySubBucket(items, mode, periodStart, periodEnd
     const idx = frames.findIndex((f) => date >= f.start && date <= f.end);
     if (idx < 0) continue;
     totals[idx] += Math.abs(signedAmount(item));
+    counts[idx] += 1;
   }
-  return frames.map((f, i) => ({ key: f.key, label: f.label, total: totals[i] }));
+  return frames.map((f, i) => ({ key: f.key, label: f.label, total: totals[i], count: counts[i] }));
 }
 
 /**
