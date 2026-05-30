@@ -56,7 +56,7 @@ import {
   toDateInput,
   uid,
 } from "./lib/finance.js";
-import { aggregateCategoryByBucket, aggregateCategoryByLabel } from "./lib/categoryStats.js";
+import { aggregateCategoryBySubBucket, aggregateCategoryByLabel } from "./lib/categoryStats.js";
 import { CategoryIcon, getCategoryIconComponent } from "./lib/categoryIcons.jsx";
 import { I18nProvider, useI18n, useT, DEFAULT_LANGUAGE } from "./lib/i18n.jsx";
 import { fetchRemoteState, pushRemoteState } from "./lib/cloudSync.js";
@@ -246,9 +246,17 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
   );
 }
 
-function CategoryStatsChart({ buckets, categoryId, color }) {
+function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categoryId, color }) {
   const t = useT();
-  const series = useMemo(() => aggregateCategoryByBucket(buckets, categoryId), [buckets, categoryId]);
+  const [activeIndex, setActiveIndex] = useState(null);
+  const series = useMemo(
+    () => aggregateCategoryBySubBucket(items, ledgerMode, periodStart, periodEnd, categoryId),
+    [items, ledgerMode, periodStart, periodEnd, categoryId],
+  );
+  useEffect(() => {
+    setActiveIndex(null);
+  }, [items, ledgerMode, periodStart, periodEnd, categoryId]);
+
   const width = 640;
   const height = 180;
   const padX = 36;
@@ -268,8 +276,22 @@ function CategoryStatsChart({ buckets, categoryId, color }) {
   const slotW = graphW / Math.max(series.length, 1);
   const barW = Math.max(6, slotW * 0.5);
 
+  const active = activeIndex != null && series[activeIndex] ? series[activeIndex] : null;
+  const activeCenterX = active != null ? padX + activeIndex * slotW + slotW / 2 : 0;
+  const activeBarTop = active != null ? baseY - (active.total / maxTick) * graphH : 0;
+  const tipText = active ? t("stats.subBucket.count", { count: active.count }) : "";
+  const tipW = Math.max(44, tipText.length * 7 + 14);
+  const tipH = 18;
+  const tipY = Math.max(padTop + tipH, activeBarTop - 6);
+  const tipX = Math.max(padX, Math.min(width - padX - tipW, activeCenterX - tipW / 2));
+
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="block w-full select-none" style={{ height: "auto", maxHeight: 200 }}>
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className="block w-full select-none"
+      style={{ height: "auto", maxHeight: 200 }}
+      onClick={() => setActiveIndex(null)}
+    >
       {[0, midTick, maxTick].map((tick) => {
         const ratio = tick / maxTick;
         const y = baseY - ratio * graphH;
@@ -285,6 +307,7 @@ function CategoryStatsChart({ buckets, categoryId, color }) {
         const centerX = slotX + slotW / 2;
         const barX = centerX - barW / 2;
         const h = (bucket.total / maxTick) * graphH;
+        const isActive = index === activeIndex;
         return (
           <g key={bucket.key || index}>
             <rect
@@ -293,7 +316,20 @@ function CategoryStatsChart({ buckets, categoryId, color }) {
               width={barW}
               height={Math.max(h, 1)}
               fill={color}
+              opacity={activeIndex == null || isActive ? 1 : 0.5}
               rx={3}
+            />
+            <rect
+              x={slotX}
+              y={padTop}
+              width={slotW}
+              height={baseY - padTop}
+              fill="transparent"
+              style={{ cursor: "pointer" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveIndex((prev) => (prev === index ? null : index));
+              }}
             />
             <text x={centerX} y={height - 8} textAnchor="middle" className="fill-muted text-[11px]">
               {bucket.label}
@@ -301,13 +337,21 @@ function CategoryStatsChart({ buckets, categoryId, color }) {
           </g>
         );
       })}
+      {active ? (
+        <g pointerEvents="none">
+          <rect x={tipX} y={tipY - tipH} width={tipW} height={tipH} rx={9} fill="#1F2937" opacity={0.92} />
+          <text x={tipX + tipW / 2} y={tipY - 5} textAnchor="middle" fill="#FFFFFF" className="text-[11px]">
+            {tipText}
+          </text>
+        </g>
+      ) : null}
     </svg>
   );
 }
 
-function CategoryLabelTotals({ buckets, categoryId, getLabel }) {
+function CategoryLabelTotals({ items, categoryId, getLabel }) {
   const { t, formatMoney } = useI18n();
-  const rows = useMemo(() => aggregateCategoryByLabel(buckets, categoryId), [buckets, categoryId]);
+  const rows = useMemo(() => aggregateCategoryByLabel(items, categoryId), [items, categoryId]);
   if (!rows.length) return null;
   return (
     <Table withTableBorder={false} withColumnBorders={false} verticalSpacing={4}>
@@ -1569,10 +1613,17 @@ function App({ state, setState }) {
           const cat = getCategory(statsCategoryModalId);
           return (
             <Stack gap="sm">
-              <Text size="xs" fw={700} c="dimmed" tt="uppercase">{t("stats.byPeriod", { mode: t(`modeLabel.${ledgerMode}`) })}</Text>
-              <CategoryStatsChart buckets={buckets} categoryId={statsCategoryModalId} color={cat?.color || "#5C8DEF"} />
+              <Text size="xs" fw={700} c="dimmed" tt="uppercase">{t(`stats.subBucket.${ledgerMode}`)}</Text>
+              <CategoryStatsChart
+                items={statsBucket.items}
+                ledgerMode={ledgerMode}
+                periodStart={statsBucket.start}
+                periodEnd={statsBucket.end}
+                categoryId={statsCategoryModalId}
+                color={cat?.color || "#5C8DEF"}
+              />
               <Text size="xs" fw={700} c="dimmed" tt="uppercase" mt="xs">{t("stats.labelTotals")}</Text>
-              <CategoryLabelTotals buckets={buckets} categoryId={statsCategoryModalId} getLabel={getLabel} />
+              <CategoryLabelTotals items={statsBucket.items} categoryId={statsCategoryModalId} getLabel={getLabel} />
               <Divider />
               <Group justify="space-between">
                 <Text size="sm" c="dimmed">{t("stats.summary.count", { count: items.length })}</Text>
