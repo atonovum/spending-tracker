@@ -18,92 +18,78 @@ describe('PreferencesCard', () => {
   });
 
   describe('Language toggle', () => {
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('displays current language', async () => {
+    it('displays current language', async () => {
       renderWithMantine(
         <PreferencesCard language="ko" {...mockHandlers} />
       );
 
-      const languageSelect = await screen.findByRole('combobox');
-      expect(languageSelect).toHaveValue('ko');
+      const languageSelect = await screen.findByRole('textbox');
+      expect(languageSelect).toHaveValue('한국어');
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('toggles from Korean to English', async () => {
+    it('toggles from Korean to English', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <PreferencesCard language="ko" {...mockHandlers} />
       );
 
-      const languageSelect = await screen.findByRole('combobox');
+      const languageSelect = await screen.findByRole('textbox');
       await user.click(languageSelect);
 
-      // Select English option
       const enOption = await screen.findByRole('option', { name: /english/i });
       await user.click(enOption);
 
       expect(mockHandlers.onLanguageChange).toHaveBeenCalledWith('en');
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('toggles from English to Korean', async () => {
+    it('toggles from English to Korean', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <PreferencesCard language="en" {...mockHandlers} />
       );
 
-      const languageSelect = await screen.findByRole('combobox');
+      const languageSelect = await screen.findByRole('textbox');
       await user.click(languageSelect);
 
-      // Select Korean option
       const koOption = await screen.findByRole('option', { name: /한국어/i });
       await user.click(koOption);
 
       expect(mockHandlers.onLanguageChange).toHaveBeenCalledWith('ko');
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('persists language change to localStorage', async () => {
+    it('persists language change to localStorage', async () => {
       const user = userEvent.setup();
 
-      // This component only calls onLanguageChange
-      // Actual localStorage persistence is handled by parent (App.jsx)
       renderWithMantine(
         <PreferencesCard language="ko" {...mockHandlers} />
       );
 
-      const languageSelect = await screen.findByRole('combobox');
+      const languageSelect = await screen.findByRole('textbox');
       await user.click(languageSelect);
 
       const enOption = await screen.findByRole('option', { name: /english/i });
       await user.click(enOption);
 
       expect(mockHandlers.onLanguageChange).toHaveBeenCalledWith('en');
-
-      // The parent component would handle localStorage
-      // We just verify the callback was called with correct value
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('immediately reflects language change in UI', async () => {
+    it('immediately reflects language change in UI', async () => {
       const user = userEvent.setup();
       const { rerender } = renderWithMantine(
         <PreferencesCard language="ko" {...mockHandlers} />
       );
 
-      expect(screen.getByText(/환경설정/i)).toBeInTheDocument();
+      const languageSelect = await screen.findByRole('textbox');
+      expect(languageSelect).toHaveValue('한국어');
 
-      const languageSelect = screen.getByRole('combobox');
       await user.click(languageSelect);
-
-      const enOption = screen.getByRole('option', { name: /english/i });
+      const enOption = await screen.findByRole('option', { name: /english/i });
       await user.click(enOption);
 
-      // Simulate parent re-rendering with new language
       rerender(<PreferencesCard language="en" {...mockHandlers} />);
 
-      // After language change, UI should show English
-      expect(screen.getByText(/preferences/i)).toBeInTheDocument();
+      // The Select textbox displays the label of the new value.
+      expect(await screen.findByRole('textbox')).toHaveValue('English');
     });
   });
 
@@ -124,28 +110,21 @@ describe('PreferencesCard', () => {
       expect(screen.getByText(/언어/i)).toBeInTheDocument();
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('does not allow deselecting language', async () => {
+    it('does not allow deselecting language', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <PreferencesCard language="ko" {...mockHandlers} />
       );
 
-      const languageSelect = await screen.findByRole('combobox');
-
-      // Language select should not be clearable
-      // This is enforced by allowDeselect={false}
+      const languageSelect = await screen.findByRole('textbox');
       expect(languageSelect).toBeInTheDocument();
 
-      // Attempting to clear should not work - select always has a value
       await user.click(languageSelect);
-      const koOption = screen.getByRole('option', { name: /한국어/i });
-
-      // Re-selecting same value
+      const koOption = await screen.findByRole('option', { name: /한국어/i });
       await user.click(koOption);
 
-      // Should still have value
-      expect(languageSelect).toHaveValue('ko');
+      // allowDeselect={false} — select always has a value (label shown)
+      expect(languageSelect).toHaveValue('한국어');
     });
   });
 });

@@ -29,6 +29,11 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
+// jsdom lacks Element.scrollIntoView — Mantine Combobox calls it on option focus.
+if (typeof window !== 'undefined' && !window.HTMLElement.prototype.scrollIntoView) {
+  window.HTMLElement.prototype.scrollIntoView = function () {};
+}
+
 /**
  * Render a component with Mantine provider, notifications, and i18n context
  */

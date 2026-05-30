@@ -42,8 +42,7 @@ describe('WalletsCard', () => {
       expect(screen.getByText(/1.*5/i)).toBeInTheDocument();
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('displays all wallets with their totals', () => {
+    it('displays all wallets with their totals', () => {
       renderWithMantine(
         <WalletsCard
           state={mockState}
@@ -53,11 +52,11 @@ describe('WalletsCard', () => {
       );
 
       expect(screen.getByText('메인 지갑')).toBeInTheDocument();
-      expect(screen.getByText(/₩1,000/i)).toBeInTheDocument();
+      // ko locale formats 1000 as "총 1,000원".
+      expect(screen.getByText(/1,000원/)).toBeInTheDocument();
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('shows selected wallet with filled star icon', () => {
+    it('shows selected wallet with filled star icon', () => {
       renderWithMantine(
         <WalletsCard
           state={mockState}
@@ -67,7 +66,8 @@ describe('WalletsCard', () => {
       );
 
       const walletPaper = screen.getByText('메인 지갑').closest('[class*="Paper"]');
-      const starButton = within(walletPaper).getByLabelText(/선택됨/i);
+      // settings.wallets.selectedAria === "현재 선택된 지갑".
+      const starButton = within(walletPaper).getByLabelText(/현재 선택된/);
 
       expect(starButton).toBeInTheDocument();
     });
@@ -126,8 +126,7 @@ describe('WalletsCard', () => {
   });
 
   describe('Selecting wallet', () => {
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('calls onSelectWallet when star icon is clicked', async () => {
+    it('calls onSelectWallet when star icon is clicked', async () => {
       const user = userEvent.setup();
       const stateWithMultipleWallets = createMockState({
         wallets: [
@@ -145,9 +144,9 @@ describe('WalletsCard', () => {
         />
       );
 
-      // Click star on second wallet
+      // Click star on second wallet — selectAria === "이 지갑 선택".
       const savingsWalletPaper = screen.getByText('저축 지갑').closest('[class*="Paper"]');
-      const starButton = within(savingsWalletPaper).getByLabelText(/선택하기/i);
+      const starButton = within(savingsWalletPaper).getByLabelText('이 지갑 선택');
       await user.click(starButton);
 
       expect(mockHandlers.onSelectWallet).toHaveBeenCalledWith('wallet-2');
@@ -155,8 +154,7 @@ describe('WalletsCard', () => {
   });
 
   describe('Editing wallet', () => {
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('opens edit modal when edit button is clicked', async () => {
+    it('opens edit modal when edit button is clicked', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <WalletsCard
@@ -167,15 +165,14 @@ describe('WalletsCard', () => {
       );
 
       const walletPaper = screen.getByText('메인 지갑').closest('[class*="Paper"]');
-      const editButton = within(walletPaper).getByLabelText(/편집/i);
+      const editButton = within(walletPaper).getByLabelText('수정');
       await user.click(editButton);
 
       await waitForModal();
-      expect(screen.getByRole('dialog', { name: /지갑 편집/i })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: /지갑 수정/ })).toBeInTheDocument();
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('renames wallet when save is clicked', async () => {
+    it('renames wallet when save is clicked', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <WalletsCard
@@ -186,7 +183,7 @@ describe('WalletsCard', () => {
       );
 
       const walletPaper = screen.getByText('메인 지갑').closest('[class*="Paper"]');
-      const editButton = within(walletPaper).getByLabelText(/편집/i);
+      const editButton = within(walletPaper).getByLabelText('수정');
       await user.click(editButton);
 
       await waitForModal();
@@ -201,8 +198,7 @@ describe('WalletsCard', () => {
       expect(mockHandlers.onRenameWallet).toHaveBeenCalledWith('wallet-1', '주 지갑');
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('does not rename when name is unchanged', async () => {
+    it('does not rename when name is unchanged', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <WalletsCard
@@ -213,7 +209,7 @@ describe('WalletsCard', () => {
       );
 
       const walletPaper = screen.getByText('메인 지갑').closest('[class*="Paper"]');
-      const editButton = within(walletPaper).getByLabelText(/편집/i);
+      const editButton = within(walletPaper).getByLabelText('수정');
       await user.click(editButton);
 
       await waitForModal();
@@ -224,8 +220,7 @@ describe('WalletsCard', () => {
       expect(mockHandlers.onRenameWallet).not.toHaveBeenCalled();
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('disables save button when name is empty', async () => {
+    it('disables save button when name is empty', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <WalletsCard
@@ -236,7 +231,7 @@ describe('WalletsCard', () => {
       );
 
       const walletPaper = screen.getByText('메인 지갑').closest('[class*="Paper"]');
-      const editButton = within(walletPaper).getByLabelText(/편집/i);
+      const editButton = within(walletPaper).getByLabelText('수정');
       await user.click(editButton);
 
       await waitForModal();
@@ -250,8 +245,7 @@ describe('WalletsCard', () => {
   });
 
   describe('Deleting wallet', () => {
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('deletes wallet after confirmation', async () => {
+    it('deletes wallet after confirmation', async () => {
       const user = userEvent.setup();
       const stateWithMultipleWallets = createMockState({
         wallets: [
@@ -270,7 +264,7 @@ describe('WalletsCard', () => {
 
       // Open edit modal for second wallet
       const tempWalletPaper = screen.getByText('임시 지갑').closest('[class*="Paper"]');
-      const editButton = within(tempWalletPaper).getByLabelText(/편집/i);
+      const editButton = within(tempWalletPaper).getByLabelText('수정');
       await user.click(editButton);
 
       await waitForModal();
@@ -289,8 +283,7 @@ describe('WalletsCard', () => {
       expect(mockHandlers.onDeleteWallet).toHaveBeenCalledWith('wallet-2');
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('prevents deleting last wallet', async () => {
+    it('prevents deleting last wallet', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <WalletsCard
@@ -301,7 +294,7 @@ describe('WalletsCard', () => {
       );
 
       const walletPaper = screen.getByText('메인 지갑').closest('[class*="Paper"]');
-      const editButton = within(walletPaper).getByLabelText(/편집/i);
+      const editButton = within(walletPaper).getByLabelText('수정');
       await user.click(editButton);
 
       await waitForModal();
@@ -313,8 +306,7 @@ describe('WalletsCard', () => {
       expect(mockHandlers.onDeleteWallet).not.toHaveBeenCalled();
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('shows entry count in delete confirmation', async () => {
+    it('shows entry count in delete confirmation', async () => {
       const user = userEvent.setup();
       const stateWithMultipleWallets = createMockState({
         wallets: [
@@ -339,7 +331,7 @@ describe('WalletsCard', () => {
       );
 
       const tempWalletPaper = screen.getByText('임시 지갑').closest('[class*="Paper"]');
-      const editButton = within(tempWalletPaper).getByLabelText(/편집/i);
+      const editButton = within(tempWalletPaper).getByLabelText('수정');
       await user.click(editButton);
 
       await waitForModal();
@@ -406,8 +398,7 @@ describe('WalletsCard', () => {
       expect(screen.getByText(/가져온 지갑/i)).toBeInTheDocument();
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('imports as new wallet when "new wallet" is selected', async () => {
+    it('imports as new wallet when "new wallet" is selected', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <WalletsCard
@@ -427,10 +418,10 @@ describe('WalletsCard', () => {
       const fileInput = importButton.parentElement.querySelector('input[type="file"]');
       await user.upload(fileInput, file);
 
-      await waitForModal();
+      const dialog = await screen.findByRole('dialog', { name: /지갑 가져오기/ });
 
-      // Default selection should be "new wallet"
-      const confirmButton = screen.getByRole('button', { name: /가져오기/i });
+      // Default selection should be "new wallet" — confirm button is "가져오기" inside the dialog.
+      const confirmButton = within(dialog).getByRole('button', { name: '가져오기' });
       await user.click(confirmButton);
 
       expect(mockHandlers.onImportWallet).toHaveBeenCalledWith(
@@ -441,8 +432,7 @@ describe('WalletsCard', () => {
       );
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('imports into existing wallet when selected', async () => {
+    it('imports into existing wallet when selected', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <WalletsCard
@@ -462,18 +452,16 @@ describe('WalletsCard', () => {
       const fileInput = importButton.parentElement.querySelector('input[type="file"]');
       await user.upload(fileInput, file);
 
-      await waitForModal();
+      const dialog = await screen.findByRole('dialog', { name: /지갑 가져오기/ });
 
-      // Select existing wallet
-      const targetSelect = screen.getByRole('combobox');
+      // Select existing wallet — Mantine 7 renders Select input as role=textbox.
+      const targetSelect = within(dialog).getByRole('textbox');
       await user.click(targetSelect);
 
-      await waitFor(() => {
-        const existingOption = screen.getByText(/메인 지갑.*2/);
-        return user.click(existingOption);
-      });
+      const existingOption = await screen.findByRole('option', { name: /메인 지갑.*2/ });
+      await user.click(existingOption);
 
-      const confirmButton = screen.getAllByRole('button', { name: /가져오기/i }).pop();
+      const confirmButton = within(dialog).getByRole('button', { name: '가져오기' });
       await user.click(confirmButton);
 
       expect(mockHandlers.onImportWallet).toHaveBeenCalledWith(
@@ -482,8 +470,7 @@ describe('WalletsCard', () => {
       );
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('shows error when invalid JSON file is uploaded', async () => {
+    it('shows error when invalid JSON file is uploaded', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <WalletsCard
@@ -501,11 +488,11 @@ describe('WalletsCard', () => {
       await user.upload(fileInput, file);
 
       await waitForModal();
-      expect(screen.getByText(/오류/i)).toBeInTheDocument();
+      // importError === "지갑 파일을 읽지 못했습니다. JSON 형식을 확인해주세요."
+      expect(screen.getByText(/JSON 형식을 확인해주세요/)).toBeInTheDocument();
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('disables new wallet option when MAX_WALLETS reached', async () => {
+    it('disables new wallet option when MAX_WALLETS reached', async () => {
       const user = userEvent.setup();
       const stateWithMaxWallets = createMockState({
         wallets: Array.from({ length: 5 }, (_, i) => ({
@@ -533,10 +520,11 @@ describe('WalletsCard', () => {
       const fileInput = importButton.parentElement.querySelector('input[type="file"]');
       await user.upload(fileInput, file);
 
-      await waitForModal();
+      const dialog = await screen.findByRole('dialog', { name: /지갑 가져오기/ });
 
-      // "New wallet" option should mention limit
-      expect(screen.getByText(/limit reached/i)).toBeInTheDocument();
+      // Default selected option ("__new__") renders label "새 지갑 (한도 초과)" in the Select textbox.
+      const targetSelect = within(dialog).getByRole('textbox');
+      expect(targetSelect).toHaveValue('새 지갑 (한도 초과)');
     });
   });
 });
