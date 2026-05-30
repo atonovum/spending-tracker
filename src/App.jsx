@@ -496,7 +496,7 @@ function App({ state, setState }) {
   const [statsLabelFilterId, setStatsLabelFilterId] = useState(null);
   const [statsCategoryType, setStatsCategoryType] = useState("expense");
   const [searchWalletId, setSearchWalletId] = useState(state.selectedWalletId);
-  const [searchPeriod, setSearchPeriod] = useState("all");
+  const [searchPeriod, setSearchPeriod] = useState("90d");
   const [searchText, setSearchText] = useState("");
   const [searchStartDate, setSearchStartDate] = useState("");
   const [searchEndDate, setSearchEndDate] = useState("");
@@ -570,8 +570,9 @@ function App({ state, setState }) {
       if (!start || !end) return null;
       return start <= end ? { start, end } : { start: end, end: start };
     }
-    return fullRange;
-  }, [searchPeriod, searchStartDate, searchEndDate, fullRange]);
+    // Fallback for unknown values (defensive). Default option "90d" handled above.
+    return { start: addDays(startOfDay(new Date()), -89), end: startOfDay(new Date()) };
+  }, [searchPeriod, searchStartDate, searchEndDate]);
 
   const searchResults = useMemo(() => {
     if (!searchRange) return [];
@@ -881,14 +882,13 @@ function App({ state, setState }) {
               <Select
                 label={t("search.period")}
                 data={[
-                  { value: "all", label: t("search.all") },
                   { value: "7d", label: t("search.recent7") },
                   { value: "30d", label: t("search.recent30") },
                   { value: "90d", label: t("search.recent90") },
                   { value: "custom", label: t("search.custom") },
                 ]}
                 value={searchPeriod}
-                onChange={(value) => { setSearchPeriod(value || "all"); setSearchActive(true); }}
+                onChange={(value) => { setSearchPeriod(value || "90d"); setSearchActive(true); }}
               />
             </SimpleGrid>
             {searchPeriod === "custom" && (
