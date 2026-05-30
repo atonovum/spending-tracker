@@ -134,8 +134,7 @@ describe('ScheduledCard', () => {
       expect(mockHandlers.getLabel).toHaveBeenCalledWith('label-1');
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('displays repeat frequency badge', async () => {
+    it('displays repeat frequency badge', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <ScheduledCard
@@ -149,8 +148,8 @@ describe('ScheduledCard', () => {
 
       await waitForModal();
 
-      // Both entries are monthly
-      const monthlyBadges = screen.getAllByText(/매월/i);
+      // Both entries are monthly — repeat.monthly === "한달" in default ko locale.
+      const monthlyBadges = screen.getAllByText('한달');
       expect(monthlyBadges).toHaveLength(2);
     });
 
@@ -224,8 +223,7 @@ describe('ScheduledCard', () => {
       expect(screen.getByText('월급날 식사')).toBeInTheDocument();
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('displays amount with correct color for expense', async () => {
+    it('displays amount with correct color for expense', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <ScheduledCard
@@ -239,12 +237,12 @@ describe('ScheduledCard', () => {
 
       await waitForModal();
 
-      const expenseAmount = screen.getByText(/-₩3,000/i);
+      // ko locale formats as "-3,000원" with red (#F08A8A) for expense category.
+      const expenseAmount = screen.getByText('-3,000원');
       expect(expenseAmount).toHaveStyle({ color: '#F08A8A' });
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('displays amount with correct color for income', async () => {
+    it('displays amount with correct color for income', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <ScheduledCard
@@ -258,7 +256,7 @@ describe('ScheduledCard', () => {
 
       await waitForModal();
 
-      const incomeAmount = screen.getByText(/₩50,000/i);
+      const incomeAmount = screen.getByText('50,000원');
       expect(incomeAmount).toHaveStyle({ color: '#5BB97A' });
     });
   });

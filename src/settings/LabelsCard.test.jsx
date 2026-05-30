@@ -39,8 +39,7 @@ describe('LabelsCard', () => {
   });
 
   describe('Adding label', () => {
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('adds new label with name', async () => {
+    it('adds new label with name', async () => {
       const user = userEvent.setup();
       renderWithMantine(<LabelsCard state={mockState} {...mockHandlers} />);
 
@@ -49,7 +48,7 @@ describe('LabelsCard', () => {
       await waitForModal();
 
       // Type in the add input field
-      const addInput = screen.getByPlaceholderText(/레이블 이름/i);
+      const addInput = screen.getByPlaceholderText('이름');
       await user.type(addInput, '여행');
 
       // Click add button
@@ -59,8 +58,7 @@ describe('LabelsCard', () => {
       expect(mockHandlers.onSaveLabel).toHaveBeenCalledWith({ name: '여행' });
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('adds label with Enter key', async () => {
+    it('adds label with Enter key', async () => {
       const user = userEvent.setup();
       renderWithMantine(<LabelsCard state={mockState} {...mockHandlers} />);
 
@@ -68,14 +66,13 @@ describe('LabelsCard', () => {
       await user.click(card);
       await waitForModal();
 
-      const addInput = screen.getByPlaceholderText(/레이블 이름/i);
+      const addInput = screen.getByPlaceholderText('이름');
       await user.type(addInput, '쇼핑{Enter}');
 
       expect(mockHandlers.onSaveLabel).toHaveBeenCalledWith({ name: '쇼핑' });
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('clears input after adding label', async () => {
+    it('clears input after adding label', async () => {
       const user = userEvent.setup();
       renderWithMantine(<LabelsCard state={mockState} {...mockHandlers} />);
 
@@ -83,7 +80,7 @@ describe('LabelsCard', () => {
       await user.click(card);
       await waitForModal();
 
-      const addInput = screen.getByPlaceholderText(/레이블 이름/i);
+      const addInput = screen.getByPlaceholderText('이름');
       await user.type(addInput, '취미');
 
       const addButton = screen.getByRole('button', { name: /추가/i });
@@ -109,8 +106,7 @@ describe('LabelsCard', () => {
       expect(mockHandlers.onSaveLabel).not.toHaveBeenCalled();
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('trims whitespace from label name', async () => {
+    it('trims whitespace from label name', async () => {
       const user = userEvent.setup();
       renderWithMantine(<LabelsCard state={mockState} {...mockHandlers} />);
 
@@ -118,7 +114,7 @@ describe('LabelsCard', () => {
       await user.click(card);
       await waitForModal();
 
-      const addInput = screen.getByPlaceholderText(/레이블 이름/i);
+      const addInput = screen.getByPlaceholderText('이름');
       await user.type(addInput, '  운동  ');
 
       const addButton = screen.getByRole('button', { name: /추가/i });
@@ -162,8 +158,7 @@ describe('LabelsCard', () => {
       });
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('closes edit modal without saving on close', async () => {
+    it('closes edit modal without saving on close', async () => {
       const user = userEvent.setup();
       renderWithMantine(<LabelsCard state={mockState} {...mockHandlers} />);
 
@@ -177,10 +172,8 @@ describe('LabelsCard', () => {
 
       await waitForModal();
 
-      // Close modal (ESC or click overlay)
-      const editDialog = screen.getByRole('dialog', { name: /레이블 수정/i });
-      const closeButton = within(editDialog).getByLabelText(/닫기/i);
-      await user.click(closeButton);
+      // Close modal via ESC key (Mantine's close button label is locale-default).
+      await user.keyboard('{Escape}');
 
       await waitFor(() => {
         expect(screen.queryByRole('dialog', { name: /레이블 수정/i })).not.toBeInTheDocument();

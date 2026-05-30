@@ -25,8 +25,7 @@ describe('CategoriesCard', () => {
   });
 
   describe('Opening modal', () => {
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('opens categories modal when card is clicked', async () => {
+    it('opens categories modal when card is clicked', async () => {
       const user = userEvent.setup();
       renderWithMantine(<CategoriesCard state={mockState} {...mockHandlers} />);
 
@@ -35,43 +34,39 @@ describe('CategoriesCard', () => {
 
       await waitForModal();
       expect(screen.getByRole('dialog')).toBeInTheDocument();
-      expect(screen.getByText('지출 (2)', { selector: '[role="tab"]' })).toBeInTheDocument();
+      // Tab text "지출 (2)" may be split across spans — match by role + accessible name.
+      expect(screen.getByRole('tab', { name: /지출.*2/ })).toBeInTheDocument();
     });
   });
 
   describe('Adding category', () => {
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('adds new expense category with name, icon, and color', async () => {
+    it('adds new expense category with name, icon, and color', async () => {
       const user = userEvent.setup();
       renderWithMantine(<CategoriesCard state={mockState} {...mockHandlers} />);
 
-      // Open modal
       const card = screen.getByRole('heading', { name: /Categories/i }).closest('div[class*="Card"]');
       await user.click(card);
       await waitForModal();
 
-      // Click add button
       const addButton = screen.getByRole('button', { name: /추가/i });
       await user.click(addButton);
 
-      // Fill form
       const nameInput = screen.getByLabelText(/이름/i);
       await user.type(nameInput, '쇼핑');
 
-      // Select icon (using combobox)
-      const iconSelect = await screen.findByRole('combobox', { name: /아이콘/i });
+      // Mantine 7 searchable Select renders an input wired to a label "아이콘";
+      // find the label element first, then its associated input.
+      const iconLabel = await screen.findByText('아이콘');
+      const iconInputId = iconLabel.getAttribute('for');
+      const iconSelect = document.getElementById(iconInputId);
       await user.click(iconSelect);
-      await waitFor(() => {
-        const cartOption = screen.getByText('카트', { selector: '[role="option"] span' });
-        return user.click(cartOption);
-      });
+      const cartOption = await screen.findByRole('option', { name: /쇼핑/ });
+      await user.click(cartOption);
 
-      // Change color
       const colorInput = screen.getByLabelText(/색상/i);
       await user.clear(colorInput);
       await user.type(colorInput, '#FF5722');
 
-      // Save
       const saveButton = screen.getByRole('button', { name: /저장/i });
       await user.click(saveButton);
 
@@ -278,8 +273,7 @@ describe('CategoriesCard', () => {
   });
 
   describe('Merging categories', () => {
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('merges selected categories into target', async () => {
+    it('merges selected categories into target', async () => {
       const user = userEvent.setup();
       renderWithMantine(<CategoriesCard state={mockState} {...mockHandlers} />);
 
@@ -287,7 +281,6 @@ describe('CategoriesCard', () => {
       await user.click(card);
       await waitForModal();
 
-      // Select two categories via checkboxes
       const foodPaper = screen.getByText('식비').closest('[class*="Paper"]');
       const transportPaper = screen.getByText('교통').closest('[class*="Paper"]');
 
@@ -297,37 +290,29 @@ describe('CategoriesCard', () => {
       await user.click(foodCheckbox);
       await user.click(transportCheckbox);
 
-      // Click merge button
-      const mergeButton = screen.getByRole('button', { name: /병합/i });
-      await user.click(mergeButton);
+      // mergeBtn ("선택 병합") opens the merge modal.
+      const openMergeButton = screen.getByRole('button', { name: /선택 병합/ });
+      await user.click(openMergeButton);
 
-      await waitForModal();
+      // Merge modal appears with title "카테고리 병합".
+      const mergeDialog = await screen.findByRole('dialog', { name: /카테고리 병합/ });
 
-      // Merge modal should appear
-      expect(screen.getByText(/병합할 카테고리/i)).toBeInTheDocument();
-
-      // Select target
-      const targetSelect = await screen.findByRole('combobox');
+      // Select merge target (Mantine 7 Select → textbox).
+      const targetSelect = within(mergeDialog).getByRole('textbox');
       await user.click(targetSelect);
+      const foodOption = await screen.findByRole('option', { name: '식비' });
+      await user.click(foodOption);
 
-      await waitFor(() => {
-        const foodOption = screen.getAllByText('식비').find(el => el.closest('[role="option"]'));
-        return user.click(foodOption);
-      });
-
-      // Confirm merge
-      const confirmMergeButton = screen.getAllByRole('button', { name: /병합/i }).pop();
+      const confirmMergeButton = within(mergeDialog).getByRole('button', { name: '병합' });
       await user.click(confirmMergeButton);
 
-      // Should call onConfirm with action
       expect(mockHandlers.onConfirm).toHaveBeenCalledWith(
         expect.objectContaining({
           title: expect.stringMatching(/병합/i),
         })
       );
 
-      // After confirmation, onMerge should be called
-      // Source: transport (cat-expense-2), Target: food (cat-expense-1)
+      // Source: transport (cat-expense-2), Target: food (cat-expense-1).
       expect(mockHandlers.onMergeCategories).toHaveBeenCalledWith(['cat-expense-2'], 'cat-expense-1');
     });
 
@@ -343,37 +328,41 @@ describe('CategoriesCard', () => {
       expect(mergeButton).toBeDisabled();
     });
 
-    // TODO(#20): Mantine portal async — re-enable after migrating to findBy/within or upgrading Mantine.
-    it.skip('clears selection after successful merge', async () => {
+    it('clears selection after successful merge', async () => {
       const user = userEvent.setup();
-      renderWithMantine(<CategoriesCard state={mockState} {...mockHandlers} />);
+      // Need at least 2 categories so the source-vs-target filter leaves a non-empty source set.
+      const stateWithExtraCategory = createMockState({
+        categories: [
+          ...mockState.categories,
+          { id: 'cat-expense-3', name: '쇼핑', type: 'expense', color: '#888', icon: 'cart' },
+        ],
+      });
+      renderWithMantine(<CategoriesCard state={stateWithExtraCategory} {...mockHandlers} />);
 
       const card = screen.getByRole('heading', { name: /Categories/i }).closest('div[class*="Card"]');
       await user.click(card);
       await waitForModal();
 
-      // Select and merge
-      const foodPaper = screen.getByText('식비').closest('[class*="Paper"]');
-      const foodCheckbox = within(foodPaper).getByRole('checkbox');
-      await user.click(foodCheckbox);
+      const shoppingPaper = screen.getByText('쇼핑').closest('[class*="Paper"]');
+      const shoppingCheckbox = within(shoppingPaper).getByRole('checkbox');
+      await user.click(shoppingCheckbox);
 
-      const mergeButton = screen.getByRole('button', { name: /병합/i });
-      await user.click(mergeButton);
-      await waitForModal();
+      const openMergeButton = screen.getByRole('button', { name: /선택 병합/ });
+      await user.click(openMergeButton);
 
-      const targetSelect = await screen.findByRole('combobox');
+      const mergeDialog = await screen.findByRole('dialog', { name: /카테고리 병합/ });
+
+      const targetSelect = within(mergeDialog).getByRole('textbox');
       await user.click(targetSelect);
-      await waitFor(async () => {
-        const option = screen.getAllByText('식비').find(el => el.closest('[role="option"]'));
-        await user.click(option);
-      });
+      const foodOption = await screen.findByRole('option', { name: '식비' });
+      await user.click(foodOption);
 
-      const confirmMergeButton = screen.getAllByRole('button', { name: /병합/i }).pop();
+      const confirmMergeButton = within(mergeDialog).getByRole('button', { name: '병합' });
       await user.click(confirmMergeButton);
 
-      // After merge, checkbox should be unchecked
+      // After merge confirmation, the selection set is cleared.
       await waitFor(() => {
-        expect(foodCheckbox).not.toBeChecked();
+        expect(shoppingCheckbox).not.toBeChecked();
       });
     });
   });
