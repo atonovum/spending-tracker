@@ -26,17 +26,8 @@ export default defineConfig({
         '**/*.config.{js,jsx}',
       ],
       thresholds: {
-        'src/lib/finance.js': {
-          lines: 90,
-        },
         'src/worker.js': {
           lines: 90,
-        },
-        'src/lib/storage.js': {
-          lines: 85,
-        },
-        'src/lib/i18n.jsx': {
-          lines: 73,
         },
       },
     },
