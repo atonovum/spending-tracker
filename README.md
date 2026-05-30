@@ -104,9 +104,10 @@ Ledger·Stats 탭에는 공통 sticky 헤더 — 지갑 선택 + 기간(`week`/`
 - `groupOccurrences(occurrences, mode)` — 버킷 + 누적 잔액
 
 ### Cloud Sync (Cloudflare KV)
-- `AppRoot` 마운트 시 `fetchRemoteState()` 호출 → 원격이 있으면 정규화해서 state 교체
-- state 변경 시 1.5초 디바운스로 `pushRemoteState(state)` → Worker가 KV의 `state` 키로 JSON 통째 저장
-- 로컬과 원격이 모두 살아 있으며, **원격이 단일 진실 공급원이 아니라 보조 동기화** (브라우저 간 동기화·세션 복구용)
+- `AppRoot` 마운트 시 `fetchRemoteState()` 호출 → `{ state, updatedAt }` 반환. 로컬보다 원격이 더 새로우면 정규화해서 교체, 로컬이 더 새로우면 보존.
+- state 변경 시 1.5초 디바운스로 `pushRemoteState(state, { ifMatch })` → Worker가 `If-Match` 검증 후 KV의 `state` 키로 JSON 통째 저장.
+- 로컬과 원격이 모두 살아 있으며, **원격이 단일 진실 공급원이 아니라 보조 동기화** (브라우저 간 동기화·세션 복구용).
+- **다중 디바이스 동시 편집 (Tier 2, EUN-4)**: 마지막 쓰기가 최종이지만, 다른 기기에서 더 새 버전이 있으면 409 로 막힌 뒤 사용자에게 토스트로 알리고 원격을 다시 로드한다. 본 기기의 미반영 편집은 손실되지만 **silent 가 아니라 visible 손실**. Entry-level merge 는 본 앱 시나리오상 YAGNI.
 
 ### i18n
 - `src/lib/i18n.jsx` — `I18nProvider`, `useT`, `useI18n`, `formatMoney(value, lang)`

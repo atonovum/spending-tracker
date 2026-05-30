@@ -59,6 +59,7 @@ import {
 import { CategoryIcon, getCategoryIconComponent } from "./lib/categoryIcons.jsx";
 import { I18nProvider, useI18n, useT, DEFAULT_LANGUAGE } from "./lib/i18n.jsx";
 import { fetchRemoteState, pushRemoteState } from "./lib/cloudSync.js";
+import { notifications } from "@mantine/notifications";
 import Settings from "./settings/Settings.jsx";
 
 const TAB_KEYS = ["ledger", "stats", "search", "settings"];
@@ -1658,17 +1659,30 @@ function AppRoot() {
   const [state, setState] = useState(() => loadState());
   const lang = state.language || DEFAULT_LANGUAGE;
   const skipNextPush = useRef(true);
+  // Last server revision the client knows about. Used as `If-Match` on push.
+  // null = server has no state yet (no precondition required).
+  const remoteRevRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetchRemoteState().then((remote) => {
-      if (cancelled || !remote) return;
+    fetchRemoteState().then(({ state: remote, updatedAt }) => {
+      if (cancelled) return;
+      remoteRevRef.current = updatedAt;
+      if (!remote) return;
+      // Tier 2: if local is strictly newer than remote, keep local and push it.
+      // Otherwise, overwrite local with remote (last-write-wins read path).
+      const localUpdatedAt = typeof state.updatedAt === "number" ? state.updatedAt : 0;
+      const remoteUpdatedAt = typeof updatedAt === "number" ? updatedAt : 0;
+      if (localUpdatedAt > remoteUpdatedAt) {
+        return; // skipNextPush stays false → next push will write local up to KV
+      }
       skipNextPush.current = true;
       setState(normalizeState(remote));
     });
     return () => {
       cancelled = true;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -1676,11 +1690,37 @@ function AppRoot() {
       skipNextPush.current = false;
       return;
     }
-    const handle = setTimeout(() => {
-      pushRemoteState(state);
+    const handle = setTimeout(async () => {
+      const stamped = { ...state, updatedAt: Date.now() };
+      const result = await pushRemoteState(stamped, { ifMatch: remoteRevRef.current });
+      if (result.ok) {
+        remoteRevRef.current = result.newUpdatedAt ?? stamped.updatedAt;
+        return;
+      }
+      if (result.conflict) {
+        // Visible conflict: another device wrote a newer revision. Surface a
+        // toast (Tier 2 contract), then refetch and overwrite local. The local
+        // unpushed edit is lost, but it is a *visible* loss, not silent.
+        const refetched = await fetchRemoteState();
+        remoteRevRef.current = refetched.updatedAt;
+        if (refetched.state) {
+          skipNextPush.current = true;
+          setState(normalizeState(refetched.state));
+        }
+        if (typeof window !== "undefined") {
+          notifications.show({
+            color: "yellow",
+            title: lang === "en" ? "Updated on another device" : "다른 기기에서 갱신됨",
+            message:
+              lang === "en"
+                ? "Reloading the latest state."
+                : "최신 상태를 다시 불러왔습니다.",
+          });
+        }
+      }
     }, 1500);
     return () => clearTimeout(handle);
-  }, [state]);
+  }, [state, lang]);
 
   return (
     <I18nProvider lang={lang}>

@@ -99,6 +99,7 @@ export function normalizeState(parsed) {
     wallets,
     categories,
     labels,
+    updatedAt: typeof seed.updatedAt === "number" ? seed.updatedAt : 0,
   };
 }
 

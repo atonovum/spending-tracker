@@ -5,11 +5,26 @@ const JSON_HEADERS = {
 };
 const MAX_BODY_SIZE = 1024 * 1024; // 1 MiB - typical spending tracker state is < 100 KiB
 
-function jsonResponse(body, status = 200) {
+function jsonResponse(body, status = 200, extraHeaders) {
   return new Response(typeof body === "string" ? body : JSON.stringify(body), {
     status,
-    headers: JSON_HEADERS,
+    headers: { ...JSON_HEADERS, ...(extraHeaders || {}) },
   });
+}
+
+// Extract updatedAt (epoch ms) from a stored state JSON string.
+// Returns null when the stored value is null/non-object/missing updatedAt.
+function extractUpdatedAt(rawJson) {
+  if (!rawJson || rawJson === "null") return null;
+  try {
+    const parsed = JSON.parse(rawJson);
+    if (parsed && typeof parsed === "object" && typeof parsed.updatedAt === "number") {
+      return parsed.updatedAt;
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }
 
 async function handleStateApi(request, env) {
@@ -18,7 +33,9 @@ async function handleStateApi(request, env) {
       const value = await env.STATE_KV.get(KV_KEY);
       // TL decision: return "null" string + 200 for KV miss (option A).
       // Client already handles JSON.parse('null'). Single-user app, no need to change contract.
-      return jsonResponse(value || "null");
+      const updatedAt = extractUpdatedAt(value);
+      const extra = updatedAt !== null ? { ETag: String(updatedAt) } : undefined;
+      return jsonResponse(value || "null", 200, extra);
     } catch (error) {
       return jsonResponse({ error: "storage failure" }, 500);
     }
@@ -39,19 +56,53 @@ async function handleStateApi(request, env) {
 
     if (!body) return jsonResponse({ error: "missing body" }, 400);
 
+    let parsed;
     try {
-      JSON.parse(body);
+      parsed = JSON.parse(body);
     } catch {
       return jsonResponse({ error: "invalid json" }, 400);
     }
 
+    // 3. Optimistic concurrency: If-Match validation (EUN-16 Tier 2)
+    const ifMatchHeader = request.headers.get("if-match");
+    if (ifMatchHeader && ifMatchHeader !== "*") {
+      let current;
+      try {
+        current = await env.STATE_KV.get(KV_KEY);
+      } catch (error) {
+        return jsonResponse({ error: "storage failure" }, 500);
+      }
+      const currentUpdatedAt = extractUpdatedAt(current);
+      if (String(currentUpdatedAt) !== ifMatchHeader) {
+        return jsonResponse(
+          { error: "version_mismatch", current: currentUpdatedAt },
+          409,
+        );
+      }
+    }
+
+    // 4. Stamp updatedAt server-side if the payload is an object that lacks one.
+    //    Primitives / arrays pass through unchanged (still last-write-wins).
+    let bodyToStore = body;
+    let newUpdatedAt = null;
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      if (typeof parsed.updatedAt !== "number") {
+        const stamped = { ...parsed, updatedAt: Date.now() };
+        bodyToStore = JSON.stringify(stamped);
+        newUpdatedAt = stamped.updatedAt;
+      } else {
+        newUpdatedAt = parsed.updatedAt;
+      }
+    }
+
     try {
-      await env.STATE_KV.put(KV_KEY, body);
+      await env.STATE_KV.put(KV_KEY, bodyToStore);
     } catch (error) {
       return jsonResponse({ error: "storage failure" }, 500);
     }
 
-    return jsonResponse({ ok: true });
+    const extra = newUpdatedAt !== null ? { ETag: String(newUpdatedAt) } : undefined;
+    return jsonResponse({ ok: true }, 200, extra);
   }
   if (request.method === "DELETE") {
     try {
