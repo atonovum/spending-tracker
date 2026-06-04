@@ -635,6 +635,7 @@ function App({ state, setState }) {
   const [searchActive, setSearchActive] = useState(false);
   const [entryModalOpen, setEntryModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
+  const [deleteConfirmEntry, setDeleteConfirmEntry] = useState(null);
   const [statsCategoryModalId, setStatsCategoryModalId] = useState(null);
   const [pendingExpanded, setPendingExpanded] = useState(false);
 
@@ -767,6 +768,15 @@ function App({ state, setState }) {
 
   function deleteEntry(entryId) {
     updateWallets((wallets) => wallets.map((wallet) => (wallet.id === state.selectedWalletId ? { ...wallet, entries: wallet.entries.filter((entry) => entry.id !== entryId) } : wallet)));
+  }
+
+  function stopRepeat(entryId) {
+    const today = startOfDay(new Date());
+    const yesterday = toDateInput(addDays(today, -1));
+    const entry = currentWallet.entries.find((e) => e.id === entryId);
+    if (entry) {
+      upsertEntry({ ...entry, repeatEndDate: yesterday });
+    }
   }
 
   function resolveEntryData(item) {
@@ -1585,12 +1595,91 @@ function App({ state, setState }) {
           labels={state.labels}
           entry={editingEntry}
           onCancel={() => setEntryModalOpen(false)}
-          onDelete={editingEntry ? () => { deleteEntry(editingEntry.id); setEntryModalOpen(false); } : null}
+          onDelete={editingEntry ? () => {
+            if (editingEntry.repeat && editingEntry.repeat !== "none") {
+              setDeleteConfirmEntry(editingEntry);
+            } else {
+              deleteEntry(editingEntry.id);
+              setEntryModalOpen(false);
+            }
+          } : null}
           onSubmit={(payload) => {
             upsertEntry(payload);
             setEntryModalOpen(false);
           }}
         />
+      </Modal>
+
+      <Modal
+        opened={!!deleteConfirmEntry}
+        onClose={() => setDeleteConfirmEntry(null)}
+        title={t("entry.action.delete.scheduled.title")}
+        centered
+        size="md"
+      >
+        <Stack>
+          <Text size="sm">{t("entry.action.delete.scheduled.body")}</Text>
+
+          {(() => {
+            if (!deleteConfirmEntry) return null;
+            const startDate = fromDateInput(deleteConfirmEntry.date);
+            const today = startOfDay(new Date());
+            const hasPastOccurrences = startDate && startDate <= today;
+
+            return (
+              <Stack gap="sm" mt="md">
+                {hasPastOccurrences && (
+                  <Button
+                    variant="light"
+                    color="blue"
+                    fullWidth
+                    onClick={() => {
+                      stopRepeat(deleteConfirmEntry.id);
+                      setDeleteConfirmEntry(null);
+                      setEntryModalOpen(false);
+                    }}
+                  >
+                    <Stack gap={4} align="flex-start" style={{ width: '100%' }}>
+                      <Text size="sm" fw={600}>{t("entry.action.delete.scheduled.stopFuture")}</Text>
+                      <Text size="xs" c="dimmed">{t("entry.action.delete.scheduled.stopFutureDesc")}</Text>
+                    </Stack>
+                  </Button>
+                )}
+
+                {!hasPastOccurrences && (
+                  <Text size="xs" c="dimmed" ta="center">
+                    {t("entry.action.delete.scheduled.noFuture")}
+                  </Text>
+                )}
+
+                <Button
+                  variant="light"
+                  color="red"
+                  fullWidth
+                  onClick={() => {
+                    deleteEntry(deleteConfirmEntry.id);
+                    setDeleteConfirmEntry(null);
+                    setEntryModalOpen(false);
+                  }}
+                >
+                  <Stack gap={4} align="flex-start" style={{ width: '100%' }}>
+                    <Text size="sm" fw={600}>{t("entry.action.delete.scheduled.deleteAll")}</Text>
+                    <Text size="xs" c="dimmed">{t("entry.action.delete.scheduled.deleteAllDesc")}</Text>
+                  </Stack>
+                </Button>
+
+                <Button
+                  variant="subtle"
+                  color="gray"
+                  fullWidth
+                  onClick={() => setDeleteConfirmEntry(null)}
+                >
+                  {t("entry.action.delete.scheduled.cancel")}
+                </Button>
+              </Stack>
+            );
+          })()}
+        </Stack>
       </Modal>
 
       <Modal
