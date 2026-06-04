@@ -392,7 +392,7 @@ describe('WalletsCard', () => {
   });
 
   describe('Importing wallet', () => {
-    it('opens import modal when file is selected', async () => {
+    it('shows import menu with JSON and CSV options', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <WalletsCard
@@ -403,6 +403,27 @@ describe('WalletsCard', () => {
       );
 
       const importButton = screen.getByRole('button', { name: /가져오기/i });
+      await user.click(importButton);
+
+      // Menu items should appear (wait for portal rendering)
+      expect(await screen.findByRole('menuitem', { name: /JSON 파일에서 가져오기/i })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: /CSV 파일에서 가져오기/i })).toBeInTheDocument();
+    });
+
+    it('opens import modal when JSON file is selected', async () => {
+      const user = userEvent.setup();
+      renderWithMantine(
+        <WalletsCard
+          state={mockState}
+          walletTotals={mockWalletTotals}
+          {...mockHandlers}
+        />
+      );
+
+      const importButton = screen.getByRole('button', { name: /가져오기/i });
+      await user.click(importButton);
+
+      const jsonMenuItem = await screen.findByRole('menuitem', { name: /JSON 파일에서 가져오기/i });
 
       // Create a mock JSON file
       const fileContent = JSON.stringify({
@@ -414,9 +435,13 @@ describe('WalletsCard', () => {
       });
       const file = new File([fileContent], 'wallet.json', { type: 'application/json' });
 
-      // Find the hidden file input (inside FileButton)
-      const fileInput = importButton.parentElement.querySelector('input[type="file"]');
-      await user.upload(fileInput, file);
+      // Find the hidden JSON file input
+      const fileInputs = document.querySelectorAll('input[type="file"]');
+      const jsonInput = Array.from(fileInputs).find(input => input.accept === 'application/json');
+
+      // Clicking menu item triggers the input
+      await user.click(jsonMenuItem);
+      await user.upload(jsonInput, file);
 
       await waitForModal();
       expect(screen.getByRole('dialog', { name: /가져오기/i })).toBeInTheDocument();
@@ -434,14 +459,19 @@ describe('WalletsCard', () => {
       );
 
       const importButton = screen.getByRole('button', { name: /가져오기/i });
+      await user.click(importButton);
 
       const fileContent = JSON.stringify({
         wallet: { id: 'imported', name: '가져온 지갑', entries: [] },
       });
       const file = new File([fileContent], 'wallet.json', { type: 'application/json' });
 
-      const fileInput = importButton.parentElement.querySelector('input[type="file"]');
-      await user.upload(fileInput, file);
+      const jsonMenuItem = await screen.findByRole('menuitem', { name: /JSON 파일에서 가져오기/i });
+      const fileInputs = document.querySelectorAll('input[type="file"]');
+      const jsonInput = Array.from(fileInputs).find(input => input.accept === 'application/json');
+
+      await user.click(jsonMenuItem);
+      await user.upload(jsonInput, file);
 
       const dialog = await screen.findByRole('dialog', { name: /지갑 가져오기/ });
 
@@ -468,14 +498,19 @@ describe('WalletsCard', () => {
       );
 
       const importButton = screen.getByRole('button', { name: /가져오기/i });
+      await user.click(importButton);
 
       const fileContent = JSON.stringify({
         wallet: { id: 'imported', name: '가져온 지갑', entries: [{ id: 'e1', amount: 100 }] },
       });
       const file = new File([fileContent], 'wallet.json', { type: 'application/json' });
 
-      const fileInput = importButton.parentElement.querySelector('input[type="file"]');
-      await user.upload(fileInput, file);
+      const jsonMenuItem = await screen.findByRole('menuitem', { name: /JSON 파일에서 가져오기/i });
+      const fileInputs = document.querySelectorAll('input[type="file"]');
+      const jsonInput = Array.from(fileInputs).find(input => input.accept === 'application/json');
+
+      await user.click(jsonMenuItem);
+      await user.upload(jsonInput, file);
 
       const dialog = await screen.findByRole('dialog', { name: /지갑 가져오기/ });
 
@@ -506,11 +541,16 @@ describe('WalletsCard', () => {
       );
 
       const importButton = screen.getByRole('button', { name: /가져오기/i });
+      await user.click(importButton);
 
       const file = new File(['invalid json {'], 'wallet.json', { type: 'application/json' });
 
-      const fileInput = importButton.parentElement.querySelector('input[type="file"]');
-      await user.upload(fileInput, file);
+      const jsonMenuItem = await screen.findByRole('menuitem', { name: /JSON 파일에서 가져오기/i });
+      const fileInputs = document.querySelectorAll('input[type="file"]');
+      const jsonInput = Array.from(fileInputs).find(input => input.accept === 'application/json');
+
+      await user.click(jsonMenuItem);
+      await user.upload(jsonInput, file);
 
       await waitForModal();
       // importError === "지갑 파일을 읽지 못했습니다. JSON 형식을 확인해주세요."
@@ -536,14 +576,19 @@ describe('WalletsCard', () => {
       );
 
       const importButton = screen.getByRole('button', { name: /가져오기/i });
+      await user.click(importButton);
 
       const fileContent = JSON.stringify({
         wallet: { id: 'imported', name: '가져온 지갑', entries: [] },
       });
       const file = new File([fileContent], 'wallet.json', { type: 'application/json' });
 
-      const fileInput = importButton.parentElement.querySelector('input[type="file"]');
-      await user.upload(fileInput, file);
+      const jsonMenuItem = await screen.findByRole('menuitem', { name: /JSON 파일에서 가져오기/i });
+      const fileInputs = document.querySelectorAll('input[type="file"]');
+      const jsonInput = Array.from(fileInputs).find(input => input.accept === 'application/json');
+
+      await user.click(jsonMenuItem);
+      await user.upload(jsonInput, file);
 
       const dialog = await screen.findByRole('dialog', { name: /지갑 가져오기/ });
 

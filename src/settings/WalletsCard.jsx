@@ -205,21 +205,27 @@ export function WalletsCard({
   onConfirm,
 }) {
   const { t } = useI18n();
-  const importResetRef = useRef(null);
+  const jsonInputRef = useRef(null);
+  const csvInputRef = useRef(null);
   const [editModal, setEditModal] = useState({ open: false, wallet: null });
   const [importModal, setImportModal] = useState({ open: false, parsed: null, fileName: "", error: "" });
 
   const canAddWallet = state.wallets.length < MAX_WALLETS;
 
-  async function handleImportFile(file) {
+  function triggerImport(format) {
+    if (format === "json") {
+      jsonInputRef.current?.click();
+    } else if (format === "csv") {
+      csvInputRef.current?.click();
+    }
+  }
+
+  async function handleImportFile(file, format) {
     if (!file) return;
     try {
       const text = await file.text();
 
-      // Detect file type by extension or content
-      const isCSV = file.name.toLowerCase().endsWith(".csv") || file.type === "text/csv";
-
-      if (isCSV) {
+      if (format === "csv") {
         // Import from CSV using parseWalletCsv
         const { parseWalletCsv } = await import("../lib/csv.js");
         const result = parseWalletCsv(text, state.categories, state.labels);
@@ -292,10 +298,8 @@ export function WalletsCard({
         open: true,
         parsed: null,
         fileName: file.name,
-        error: t("settings.wallets.importError")
+        error: format === "csv" ? t("settings.wallets.importCsvError") : t("settings.wallets.importError")
       });
-    } finally {
-      importResetRef.current?.();
     }
   }
 
@@ -336,13 +340,43 @@ export function WalletsCard({
             </Text>
           </div>
           <Group gap="xs" wrap="nowrap">
-            <FileButton onChange={handleImportFile} accept="application/json,text/csv,.csv" resetRef={importResetRef}>
-              {(props) => (
-                <Button {...props} size="xs" variant="default" leftSection={<IconUpload size={14} />}>
+            <Menu position="bottom-end" withinPortal>
+              <Menu.Target>
+                <Button size="xs" variant="default" leftSection={<IconUpload size={14} />}>
                   {t("settings.wallets.import")}
                 </Button>
-              )}
-            </FileButton>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item leftSection={<IconUpload size={14} />} onClick={() => triggerImport("json")}>
+                  {t("settings.wallets.importJson")}
+                </Menu.Item>
+                <Menu.Item leftSection={<IconUpload size={14} />} onClick={() => triggerImport("csv")}>
+                  {t("settings.wallets.importCsv")}
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+            <input
+              ref={jsonInputRef}
+              type="file"
+              accept="application/json"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleImportFile(file, "json");
+                e.target.value = "";
+              }}
+            />
+            <input
+              ref={csvInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleImportFile(file, "csv");
+                e.target.value = "";
+              }}
+            />
             <Button size="xs" leftSection={<IconPlus size={14} />} onClick={onAddWallet} disabled={!canAddWallet}>
               {t("settings.wallets.add")}
             </Button>
