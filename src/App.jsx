@@ -247,12 +247,12 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
   );
 }
 
-function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categoryId, color }) {
+function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categoryId, color, categories }) {
   const t = useT();
   const [activeIndex, setActiveIndex] = useState(null);
   const series = useMemo(
-    () => aggregateCategoryBySubBucket(items, ledgerMode, periodStart, periodEnd, categoryId),
-    [items, ledgerMode, periodStart, periodEnd, categoryId],
+    () => aggregateCategoryBySubBucket(items, ledgerMode, periodStart, periodEnd, categoryId, categories),
+    [items, ledgerMode, periodStart, periodEnd, categoryId, categories],
   );
   useEffect(() => {
     setActiveIndex(null);
@@ -350,9 +350,9 @@ function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categor
   );
 }
 
-function CategoryLabelTotals({ items, categoryId, getLabel }) {
+function CategoryLabelTotals({ items, categoryId, getLabel, categories }) {
   const { t, formatMoney } = useI18n();
-  const rows = useMemo(() => aggregateCategoryByLabel(items, categoryId), [items, categoryId]);
+  const rows = useMemo(() => aggregateCategoryByLabel(items, categoryId, categories), [items, categoryId, categories]);
   if (!rows.length) return null;
   return (
     <Table withTableBorder={false} withColumnBorders={false} verticalSpacing={4}>
@@ -652,7 +652,7 @@ function App({ state, setState }) {
 
   const fullRange = useMemo(() => resolveFullRange(currentWallet.entries), [currentWallet]);
   const allOccurrences = useMemo(() => buildOccurrences(currentWallet.entries, fullRange), [currentWallet, fullRange]);
-  const buckets = useMemo(() => groupOccurrences(allOccurrences, ledgerMode), [allOccurrences, ledgerMode]);
+  const buckets = useMemo(() => groupOccurrences(allOccurrences, ledgerMode, state.categories), [allOccurrences, ledgerMode, state.categories]);
 
   const selectedBucket = useMemo(() => {
     const selectedKey = ledgerSelectedByMode[ledgerMode] || buckets[buckets.length - 1]?.key || null;
@@ -660,7 +660,7 @@ function App({ state, setState }) {
   }, [ledgerSelectedByMode, ledgerMode, buckets]);
 
   const totalBalance = selectedBucket?.cumulative ?? 0;
-  const periodFlow = useMemo(() => (selectedBucket ? sumSigned(selectedBucket.items) : 0), [selectedBucket]);
+  const periodFlow = useMemo(() => (selectedBucket ? sumSigned(selectedBucket.items, state.categories) : 0), [selectedBucket, state.categories]);
   const ledgerPeriodLabel = t(`modeLabel.${ledgerMode}`);
 
   const statsBucket = useMemo(() => {
@@ -669,7 +669,7 @@ function App({ state, setState }) {
   }, [statsSelectedByMode, ledgerMode, selectedBucket, buckets]);
 
   const statsItems = statsBucket?.items || [];
-  const statsFlow = useMemo(() => (statsBucket ? sumSigned(statsBucket.items) : 0), [statsBucket]);
+  const statsFlow = useMemo(() => (statsBucket ? sumSigned(statsBucket.items, state.categories) : 0), [statsBucket, state.categories]);
   const statsTotalBalance = statsBucket?.cumulative ?? 0;
 
   const selectedLedgerPageStart = ledgerPageByMode[ledgerMode] ?? Math.max(0, buckets.length - visibleCountForMode(ledgerMode));
@@ -1634,9 +1634,10 @@ function App({ state, setState }) {
                 periodEnd={statsBucket.end}
                 categoryId={statsCategoryModalId}
                 color={cat?.color || "#5C8DEF"}
+                categories={state.categories}
               />
               <Text size="xs" fw={700} c="dimmed" tt="uppercase" mt="xs">{t("stats.labelTotals")}</Text>
-              <CategoryLabelTotals items={statsBucket.items} categoryId={statsCategoryModalId} getLabel={getLabel} />
+              <CategoryLabelTotals items={statsBucket.items} categoryId={statsCategoryModalId} getLabel={getLabel} categories={state.categories} />
               <Divider />
               <Group justify="space-between">
                 <Text size="sm" c="dimmed">{t("stats.summary.count", { count: items.length })}</Text>
