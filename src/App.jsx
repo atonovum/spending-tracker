@@ -35,6 +35,7 @@ import {
   IconWallet,
 } from "@tabler/icons-react";
 import { loadState, normalizeState, saveState } from "./lib/storage.js";
+import { serializeWalletCsv, parseWalletCsv } from "./lib/csv.js";
 import {
   addDays,
   buildOccurrences,
@@ -1114,22 +1115,34 @@ function App({ state, setState }) {
     }
   }
 
-  function exportWallet(walletId) {
+  function exportWallet(walletId, format = "json") {
     const wallet = state.wallets.find((w) => w.id === walletId);
     if (!wallet) return;
-    const payload = {
-      version: 3,
-      exportedAt: new Date().toISOString(),
-      wallet,
-      categories: state.categories,
-      labels: state.labels,
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
+
     const safeName = wallet.name.replace(/[^\w\-가-힣]+/g, "_") || "wallet";
+    const dateStr = new Date().toISOString().slice(0, 10);
+    let blob, filename;
+
+    if (format === "csv") {
+      const csv = serializeWalletCsv(wallet, state.categories, state.labels);
+      blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      filename = `${safeName}-${dateStr}.csv`;
+    } else {
+      const payload = {
+        version: 3,
+        exportedAt: new Date().toISOString(),
+        wallet,
+        categories: state.categories,
+        labels: state.labels,
+      };
+      blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      filename = `${safeName}-${dateStr}.json`;
+    }
+
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${safeName}-${new Date().toISOString().slice(0, 10)}.json`;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

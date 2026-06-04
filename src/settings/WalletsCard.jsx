@@ -6,6 +6,7 @@ import {
   Card,
   FileButton,
   Group,
+  Menu,
   Modal,
   Paper,
   Select,
@@ -16,6 +17,7 @@ import {
 } from "@mantine/core";
 import {
   IconCheck,
+  IconChevronDown,
   IconDownload,
   IconPencil,
   IconPlus,
@@ -57,9 +59,21 @@ function WalletRow({ wallet, isSelected, total, onSelect, onEdit, onExport }) {
           <ActionIcon variant="subtle" onClick={onEdit} aria-label={t("settings.wallets.editAria")}>
             <IconPencil size={16} />
           </ActionIcon>
-          <ActionIcon variant="subtle" onClick={onExport} aria-label={t("settings.wallets.exportAria")}>
-            <IconDownload size={16} />
-          </ActionIcon>
+          <Menu position="bottom-end" withinPortal>
+            <Menu.Target>
+              <ActionIcon variant="subtle" aria-label={t("settings.wallets.exportAria")}>
+                <IconDownload size={16} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item leftSection={<IconDownload size={14} />} onClick={() => onExport("json")}>
+                {t("settings.wallets.exportJson")}
+              </Menu.Item>
+              <Menu.Item leftSection={<IconDownload size={14} />} onClick={() => onExport("csv")}>
+                {t("settings.wallets.exportCsv")}
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Group>
       </Group>
     </Paper>
@@ -201,10 +215,85 @@ export function WalletsCard({
     if (!file) return;
     try {
       const text = await file.text();
-      const parsed = JSON.parse(text);
-      setImportModal({ open: true, parsed, fileName: file.name, error: "" });
-    } catch {
-      setImportModal({ open: true, parsed: null, fileName: file.name, error: t("settings.wallets.importError") });
+
+      // Detect file type by extension or content
+      const isCSV = file.name.toLowerCase().endsWith(".csv") || file.type === "text/csv";
+
+      if (isCSV) {
+        // Import from CSV using parseWalletCsv
+        const { parseWalletCsv } = await import("../lib/csv.js");
+        const result = parseWalletCsv(text, state.categories, state.labels);
+
+        if (result.error === "invalidHeader") {
+          setImportModal({
+            open: true,
+            parsed: null,
+            fileName: file.name,
+            error: t("settings.wallets.importCsvError")
+          });
+          return;
+        }
+
+        if (result.rejected.length > 0) {
+          // Show error modal with missing categories
+          const missingCategories = new Set();
+          result.rejected.forEach((rej) => {
+            if (rej.reason === "missingCategory") {
+              missingCategories.add(`${rej.type}: ${rej.category}`);
+            }
+          });
+
+          if (missingCategories.size > 0) {
+            const categoryList = Array.from(missingCategories).join(", ");
+            setImportModal({
+              open: true,
+              parsed: null,
+              fileName: file.name,
+              error: `${t("settings.wallets.csvMissingCategories")}\n${categoryList}`
+            });
+            return;
+          }
+        }
+
+        // Convert CSV result to wallet format
+        const csvWallet = {
+          id: "", // Will be generated on import
+          name: file.name.replace(/\.csv$/i, ""),
+          entries: result.entries,
+        };
+
+        const parsed = {
+          wallet: csvWallet,
+          categories: state.categories,
+          labels: state.labels,
+        };
+
+        // Show info about unknown labels if any
+        let successMessage = "";
+        if (result.unknownLabels.size > 0) {
+          successMessage = t("settings.wallets.csvUnknownLabels", {
+            count: result.unknownLabels.size
+          });
+        }
+
+        setImportModal({
+          open: true,
+          parsed,
+          fileName: file.name,
+          error: successMessage
+        });
+      } else {
+        // Import from JSON
+        const parsed = JSON.parse(text);
+        setImportModal({ open: true, parsed, fileName: file.name, error: "" });
+      }
+    } catch (err) {
+      setImportModal({
+        open: true,
+        parsed: null,
+        fileName: file.name,
+        error: t("settings.wallets.importError")
+      });
     } finally {
       importResetRef.current?.();
     }
@@ -247,7 +336,7 @@ export function WalletsCard({
             </Text>
           </div>
           <Group gap="xs" wrap="nowrap">
-            <FileButton onChange={handleImportFile} accept="application/json" resetRef={importResetRef}>
+            <FileButton onChange={handleImportFile} accept="application/json,text/csv,.csv" resetRef={importResetRef}>
               {(props) => (
                 <Button {...props} size="xs" variant="default" leftSection={<IconUpload size={14} />}>
                   {t("settings.wallets.import")}
@@ -268,7 +357,7 @@ export function WalletsCard({
               total={walletTotals?.get(wallet.id)}
               onSelect={() => onSelectWallet(wallet.id)}
               onEdit={() => setEditModal({ open: true, wallet })}
-              onExport={() => onExportWallet(wallet.id)}
+              onExport={(format) => onExportWallet(wallet.id, format)}
             />
           ))}
         </Stack>
