@@ -294,72 +294,65 @@ describe('normalizeLabelIds', () => {
 });
 
 describe('signedAmount', () => {
-  it('returns positive for income string category', () => {
-    const item = { amount: 100, category: 'income' };
-    const result = signedAmount(item);
+  it('returns positive for income category by lookup', () => {
+    const categories = [{ id: 'cat-1', type: 'income', name: 'Salary' }];
+    const item = { amount: 100, categoryId: 'cat-1' };
+    const result = signedAmount(item, categories);
 
     expect(result).toBe(100);
   });
 
-  it('returns positive for salary string category', () => {
-    const item = { amount: 100, category: 'Monthly Salary' };
-    const result = signedAmount(item);
-
-    expect(result).toBe(100);
-  });
-
-  it('returns positive for gift string category', () => {
-    const item = { amount: 100, category: 'Birthday Gift' };
-    const result = signedAmount(item);
-
-    expect(result).toBe(100);
-  });
-
-  it('returns negative for expense string category', () => {
-    const item = { amount: 100, category: 'Food' };
-    const result = signedAmount(item);
+  it('returns negative for expense category by lookup', () => {
+    const categories = [{ id: 'cat-2', type: 'expense', name: 'Food' }];
+    const item = { amount: 100, categoryId: 'cat-2' };
+    const result = signedAmount(item, categories);
 
     expect(result).toBe(-100);
   });
 
-  it('handles category object with type=income', () => {
-    const item = { amount: 100, category: { type: 'income', name: 'Wages' } };
-    const result = signedAmount(item);
-
-    expect(result).toBe(100);
-  });
-
-  it('handles category object with type=expense', () => {
-    const item = { amount: 100, category: { type: 'expense', name: 'Food' } };
-    const result = signedAmount(item);
+  it('returns negative for unknown categoryId', () => {
+    const categories = [{ id: 'cat-1', type: 'income', name: 'Salary' }];
+    const item = { amount: 100, categoryId: 'cat-unknown' };
+    const result = signedAmount(item, categories);
 
     expect(result).toBe(-100);
   });
 
-  it('falls back to categoryId for string matching', () => {
-    const item = { amount: 100, categoryId: 'income-primary' };
-    const result = signedAmount(item);
+  it('returns negative when categoryId is missing', () => {
+    const categories = [{ id: 'cat-1', type: 'income', name: 'Salary' }];
+    const item = { amount: 100 };
+    const result = signedAmount(item, categories);
 
-    expect(result).toBe(100);
+    expect(result).toBe(-100);
   });
 
-  it('handles case-insensitive matching', () => {
-    const item = { amount: 100, category: 'INCOME' };
-    const result = signedAmount(item);
+  it('returns negative when categories array is empty', () => {
+    const item = { amount: 100, categoryId: 'cat-1' };
+    const result = signedAmount(item, []);
 
-    expect(result).toBe(100);
+    expect(result).toBe(-100);
+  });
+
+  it('handles UUID income category correctly', () => {
+    const categories = [{ id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', type: 'income', name: 'Freelance' }];
+    const item = { amount: 500, categoryId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' };
+    const result = signedAmount(item, categories);
+
+    expect(result).toBe(500);
   });
 
   it('handles negative amounts by taking absolute value', () => {
-    const item = { amount: -100, category: 'income' };
-    const result = signedAmount(item);
+    const categories = [{ id: 'cat-1', type: 'income', name: 'Salary' }];
+    const item = { amount: -100, categoryId: 'cat-1' };
+    const result = signedAmount(item, categories);
 
     expect(result).toBe(100);
   });
 
   it('returns 0 for missing amount', () => {
-    const item = { category: 'income' };
-    const result = signedAmount(item);
+    const categories = [{ id: 'cat-1', type: 'income', name: 'Salary' }];
+    const item = { categoryId: 'cat-1' };
+    const result = signedAmount(item, categories);
 
     expect(result).toBe(0);
   });
@@ -644,26 +637,31 @@ describe('buildOccurrences', () => {
 
 describe('sumSigned', () => {
   it('sums signed amounts correctly', () => {
-    const occurrences = [
-      { amount: 100, category: 'income' },
-      { amount: 50, category: 'expense' },
-      { amount: 30, category: 'income' },
+    const categories = [
+      { id: 'cat-income', type: 'income', name: 'Income' },
+      { id: 'cat-expense', type: 'expense', name: 'Expense' },
     ];
-    const result = sumSigned(occurrences);
+    const occurrences = [
+      { amount: 100, categoryId: 'cat-income' },
+      { amount: 50, categoryId: 'cat-expense' },
+      { amount: 30, categoryId: 'cat-income' },
+    ];
+    const result = sumSigned(occurrences, categories);
 
     expect(result).toBe(80);
   });
 
   it('returns 0 for empty array', () => {
-    expect(sumSigned([])).toBe(0);
+    expect(sumSigned([], [])).toBe(0);
   });
 
   it('handles floating point precision issues', () => {
+    const categories = [{ id: 'cat-income', type: 'income', name: 'Income' }];
     const occurrences = [
-      { amount: 0.1, category: 'income' },
-      { amount: 0.2, category: 'income' },
+      { amount: 0.1, categoryId: 'cat-income' },
+      { amount: 0.2, categoryId: 'cat-income' },
     ];
-    const result = sumSigned(occurrences);
+    const result = sumSigned(occurrences, categories);
 
     expect(result).toBeCloseTo(0.3, 10);
   });
@@ -852,12 +850,16 @@ describe('Time-dependent functions with fake timers', () => {
 
   describe('groupOccurrences', () => {
     it('groups occurrences by week correctly', () => {
-      const occurrences = [
-        { occurrenceDate: '2026-05-23', amount: 100, category: 'income' },
-        { occurrenceDate: '2026-05-24', amount: 50, category: 'expense' },
-        { occurrenceDate: '2026-05-29', amount: 30, category: 'income' },
+      const categories = [
+        { id: 'cat-income', type: 'income', name: 'Income' },
+        { id: 'cat-expense', type: 'expense', name: 'Expense' },
       ];
-      const result = groupOccurrences(occurrences, 'week');
+      const occurrences = [
+        { occurrenceDate: '2026-05-23', amount: 100, categoryId: 'cat-income' },
+        { occurrenceDate: '2026-05-24', amount: 50, categoryId: 'cat-expense' },
+        { occurrenceDate: '2026-05-29', amount: 30, categoryId: 'cat-income' },
+      ];
+      const result = groupOccurrences(occurrences, 'week', categories);
 
       expect(result.length).toBe(1);
       expect(result[0].income).toBe(130);
@@ -866,35 +868,44 @@ describe('Time-dependent functions with fake timers', () => {
     });
 
     it('calculates cumulative sum correctly', () => {
-      const occurrences = [
-        { occurrenceDate: '2026-05-16', amount: 100, category: 'income' },
-        { occurrenceDate: '2026-05-23', amount: 50, category: 'income' },
-        { occurrenceDate: '2026-05-29', amount: 30, category: 'expense' },
+      const categories = [
+        { id: 'cat-income', type: 'income', name: 'Income' },
+        { id: 'cat-expense', type: 'expense', name: 'Expense' },
       ];
-      const result = groupOccurrences(occurrences, 'week');
+      const occurrences = [
+        { occurrenceDate: '2026-05-16', amount: 100, categoryId: 'cat-income' },
+        { occurrenceDate: '2026-05-23', amount: 50, categoryId: 'cat-income' },
+        { occurrenceDate: '2026-05-29', amount: 30, categoryId: 'cat-expense' },
+      ];
+      const result = groupOccurrences(occurrences, 'week', categories);
 
       expect(result[0].cumulative).toBe(100);
       expect(result[1].cumulative).toBe(120);
     });
 
     it('skips future occurrences', () => {
+      const categories = [{ id: 'cat-income', type: 'income', name: 'Income' }];
       const occurrences = [
-        { occurrenceDate: '2026-05-29', amount: 100, category: 'income' },
-        { occurrenceDate: '2026-06-05', amount: 50, category: 'income' },
+        { occurrenceDate: '2026-05-29', amount: 100, categoryId: 'cat-income' },
+        { occurrenceDate: '2026-06-05', amount: 50, categoryId: 'cat-income' },
       ];
-      const result = groupOccurrences(occurrences, 'week');
+      const result = groupOccurrences(occurrences, 'week', categories);
 
       const totalIncome = result.reduce((sum, bucket) => sum + bucket.income, 0);
       expect(totalIncome).toBe(100);
     });
 
     it('batches items by day correctly', () => {
-      const occurrences = [
-        { occurrenceDate: '2026-05-23', amount: 100, category: 'income', id: '1' },
-        { occurrenceDate: '2026-05-23', amount: 50, category: 'expense', id: '2' },
-        { occurrenceDate: '2026-05-29', amount: 30, category: 'income', id: '3' },
+      const categories = [
+        { id: 'cat-income', type: 'income', name: 'Income' },
+        { id: 'cat-expense', type: 'expense', name: 'Expense' },
       ];
-      const result = groupOccurrences(occurrences, 'week');
+      const occurrences = [
+        { occurrenceDate: '2026-05-23', amount: 100, categoryId: 'cat-income', id: '1' },
+        { occurrenceDate: '2026-05-23', amount: 50, categoryId: 'cat-expense', id: '2' },
+        { occurrenceDate: '2026-05-29', amount: 30, categoryId: 'cat-income', id: '3' },
+      ];
+      const result = groupOccurrences(occurrences, 'week', categories);
 
       expect(result[0].items.length).toBe(3);
     });

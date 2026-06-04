@@ -70,10 +70,11 @@ export function buildSubBucketFrames(mode, periodStart, periodEnd) {
  * @param {Date} periodStart inclusive
  * @param {Date} periodEnd   inclusive
  * @param {string} categoryId
+ * @param {Array} categories optional category array for lookup
  * @returns {Array<{ key: string, label: string, total: number, count: number }>}
  *   `count` is the number of category items contributing to that sub-bucket.
  */
-export function aggregateCategoryBySubBucket(items, mode, periodStart, periodEnd, categoryId) {
+export function aggregateCategoryBySubBucket(items, mode, periodStart, periodEnd, categoryId, categories = []) {
   if (!Array.isArray(items)) return [];
   const frames = buildSubBucketFrames(mode, periodStart, periodEnd);
   if (!frames.length) return [];
@@ -85,7 +86,7 @@ export function aggregateCategoryBySubBucket(items, mode, periodStart, periodEnd
     if (!date) continue;
     const idx = frames.findIndex((f) => date >= f.start && date <= f.end);
     if (idx < 0) continue;
-    totals[idx] += Math.abs(signedAmount(item));
+    totals[idx] += Math.abs(signedAmount(item, categories));
     counts[idx] += 1;
   }
   return frames.map((f, i) => ({ key: f.key, label: f.label, total: totals[i], count: counts[i] }));
@@ -98,15 +99,16 @@ export function aggregateCategoryBySubBucket(items, mode, periodStart, periodEnd
  *
  * @param {Array} items raw occurrence items already scoped to a period
  * @param {string} categoryId
+ * @param {Array} categories optional category array for lookup
  * @returns {Array<{ labelId: string | null, count: number, amount: number }>}
  */
-export function aggregateCategoryByLabel(items, categoryId) {
+export function aggregateCategoryByLabel(items, categoryId, categories = []) {
   if (!Array.isArray(items)) return [];
   const map = new Map();
   for (const item of items) {
     if (item?.categoryId !== categoryId) continue;
     const ids = normalizeLabelIds(item);
-    const amount = Math.abs(signedAmount(item));
+    const amount = Math.abs(signedAmount(item, categories));
     if (!ids.length) {
       const cur = map.get(null) || { count: 0, amount: 0 };
       cur.count += 1;

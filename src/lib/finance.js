@@ -67,13 +67,24 @@ export function formatAxisTick(value) {
   return `${sign}${Math.round(abs)}`;
 }
 
-export function signedAmount(item) {
-  const category = item?.category || item?.categoryId || "";
-  if (typeof category === "string") {
-    const incomeLike = category.toLowerCase().includes("income") || category.toLowerCase().includes("salary") || category.toLowerCase().includes("gift");
-    return incomeLike ? Math.abs(item.amount || 0) : -Math.abs(item.amount || 0);
+export function signedAmount(item, categories = []) {
+  // If item already has a category object with type (e.g., from resolveEntryData), use it
+  if (item?.category && typeof item.category === "object" && item.category.type) {
+    return item.category.type === "income" ? Math.abs(item.amount || 0) : -Math.abs(item.amount || 0);
   }
-  return category?.type === "income" ? Math.abs(item.amount || 0) : -Math.abs(item.amount || 0);
+
+  // Otherwise, look up category by categoryId
+  const categoryId = item?.categoryId;
+  if (!categoryId) {
+    return -Math.abs(item.amount || 0);
+  }
+
+  const category = categories.find((cat) => cat.id === categoryId);
+  if (!category) {
+    return -Math.abs(item.amount || 0);
+  }
+
+  return category.type === "income" ? Math.abs(item.amount || 0) : -Math.abs(item.amount || 0);
 }
 
 export function resolveFullRange(entries) {
@@ -148,7 +159,7 @@ export function buildBucketFrames(mode, earliest, end) {
   return frames;
 }
 
-export function groupOccurrences(occurrences, mode) {
+export function groupOccurrences(occurrences, mode, categories = []) {
   const end = startOfDay(new Date());
   const earliest = occurrences
     .map((entry) => fromDateInput(entry.occurrenceDate))
@@ -162,7 +173,7 @@ export function groupOccurrences(occurrences, mode) {
     const key = bucketKeyForDate(mode, date, end);
     const bucket = map.get(key);
     if (!bucket) continue;
-    const signed = signedAmount(item);
+    const signed = signedAmount(item, categories);
     if (signed >= 0) bucket.income += signed;
     else bucket.expense += Math.abs(signed);
     bucket.net += signed;
@@ -232,8 +243,8 @@ export function buildOccurrences(entries, range) {
   return all;
 }
 
-export function sumSigned(occurrences) {
-  return occurrences.reduce((sum, item) => sum + signedAmount(item), 0);
+export function sumSigned(occurrences, categories = []) {
+  return occurrences.reduce((sum, item) => sum + signedAmount(item, categories), 0);
 }
 
 export function roundedAxisMax(value) {
