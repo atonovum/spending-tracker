@@ -348,7 +348,7 @@ describe('WalletsCard', () => {
   });
 
   describe('Exporting wallet', () => {
-    it('calls onExportWallet when export button is clicked', async () => {
+    it('calls onExportWallet with json format when JSON export is clicked', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <WalletsCard
@@ -362,7 +362,32 @@ describe('WalletsCard', () => {
       const exportButton = within(walletPaper).getByLabelText(/내보내기/i);
       await user.click(exportButton);
 
-      expect(mockHandlers.onExportWallet).toHaveBeenCalledWith('wallet-1');
+      // Wait for menu to appear and click JSON export
+      const jsonExportItem = await screen.findByText(/JSON으로 내보내기/i);
+      await user.click(jsonExportItem);
+
+      expect(mockHandlers.onExportWallet).toHaveBeenCalledWith('wallet-1', 'json');
+    });
+
+    it('calls onExportWallet with csv format when CSV export is clicked', async () => {
+      const user = userEvent.setup();
+      renderWithMantine(
+        <WalletsCard
+          state={mockState}
+          walletTotals={mockWalletTotals}
+          {...mockHandlers}
+        />
+      );
+
+      const walletPaper = screen.getByText('메인 지갑').closest('[class*="Paper"]');
+      const exportButton = within(walletPaper).getByLabelText(/내보내기/i);
+      await user.click(exportButton);
+
+      // Wait for menu to appear and click CSV export
+      const csvExportItem = await screen.findByText(/CSV로 내보내기/i);
+      await user.click(csvExportItem);
+
+      expect(mockHandlers.onExportWallet).toHaveBeenCalledWith('wallet-1', 'csv');
     });
   });
 
