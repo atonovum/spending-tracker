@@ -1333,7 +1333,10 @@ function App({ state, setState }) {
           onChange={(value) => {
             setActiveTab(value);
             if (value !== "stats") setStatsLabelFilterId(null);
-            if (value !== "search") setSearchActive(false);
+            if (value !== "search") {
+              setSearchActive(false);
+              setSearchText("");
+            }
             if (value === "ledger") {
               const visibleCount = visibleCountForMode(ledgerMode);
               const selectedKey = ledgerSelectedByMode[ledgerMode];
