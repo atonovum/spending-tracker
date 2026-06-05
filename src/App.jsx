@@ -1593,7 +1593,7 @@ function App({ state, setState }) {
         </ActionIcon>
       )}
 
-      <Modal opened={entryModalOpen} onClose={() => setEntryModalOpen(false)} title={editingEntry ? t("entry.edit") : t("entry.add")} centered size="lg">
+      <Modal opened={entryModalOpen} onClose={() => setEntryModalOpen(false)} title={editingEntry ? t("entry.edit") : t("entry.add")} centered size="lg" zIndex={201}>
         <EntryEditor
           categories={state.categories}
           labels={state.labels}
@@ -1620,6 +1620,7 @@ function App({ state, setState }) {
         title={t("entry.action.delete.scheduled.title")}
         centered
         size="md"
+        zIndex={202}
       >
         <Stack>
           <Text size="sm">{t("entry.action.delete.scheduled.body")}</Text>
@@ -1690,6 +1691,7 @@ function App({ state, setState }) {
         opened={statsCategoryModalOpen}
         onClose={() => setStatsCategoryModalOpen(false)}
         transitionProps={{ onExited: () => setStatsCategoryModalId(null) }}
+        zIndex={200}
         title={(() => {
           const cat = statsCategoryModalId ? getCategory(statsCategoryModalId) : null;
           if (!cat) return t("stats.column.category");
