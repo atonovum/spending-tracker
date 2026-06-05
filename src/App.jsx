@@ -125,11 +125,11 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
 
     return (
       <svg viewBox={`0 0 ${width} ${height}`} className="block w-full select-none" style={{ height: "auto", maxHeight: 260 }}>
-        {[minTick, (minTick + maxTick) / 2, maxTick].map((tick) => {
+        {[minTick, (minTick + maxTick) / 2, maxTick].map((tick, index) => {
           const ratio = (tick - minTick) / tickRange;
           const y = baseY - ratio * graphH;
           return (
-            <g key={tick}>
+            <g key={index}>
               <line x1={padX} x2={width - padX} y1={y} y2={y} stroke="#F0EDE7" strokeWidth="1" />
               <text x="8" y={y + 4} className="fill-muted text-[12px]">
                 {formatAxisTick(tick)}
@@ -186,11 +186,11 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="block w-full select-none" style={{ height: "auto", maxHeight: 260 }}>
-      {[0, midTick, maxTick].map((tick) => {
+      {[0, midTick, maxTick].map((tick, index) => {
         const ratio = tick / maxTick;
         const y = baseY - ratio * graphH;
         return (
-          <g key={tick}>
+          <g key={index}>
             <line x1={padX} x2={width - padX} y1={y} y2={y} stroke="#e2e8f0" strokeWidth="1" />
             <text x="8" y={y + 4} className="fill-slate-500 text-[12px]">
               {formatAxisTick(tick)}
@@ -293,11 +293,11 @@ function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categor
       style={{ height: "auto", maxHeight: 200 }}
       onClick={() => setActiveIndex(null)}
     >
-      {[0, midTick, maxTick].map((tick) => {
+      {[0, midTick, maxTick].map((tick, index) => {
         const ratio = tick / maxTick;
         const y = baseY - ratio * graphH;
         return (
-          <g key={tick}>
+          <g key={index}>
             <line x1={padX} x2={width - padX} y1={y} y2={y} stroke="#F0EDE7" strokeWidth="1" />
             <text x="6" y={y + 4} className="fill-muted text-[11px]">{formatAxisTick(tick)}</text>
           </g>
