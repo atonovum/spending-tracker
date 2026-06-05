@@ -1913,13 +1913,21 @@ function AppRoot() {
 
   useEffect(() => {
     let cancelled = false;
+    const localUpdatedAt = typeof state.updatedAt === "number" ? state.updatedAt : 0;
+    const isDevSeedMode = import.meta.env.VITE_INCLUDE_SAMPLE === "true";
+
+    // Dev seed guard: skip remote fetch when using fresh sample seed (updatedAt=0)
+    // to prevent old KV state from overwriting the sample data.
+    if (isDevSeedMode && localUpdatedAt === 0) {
+      return;
+    }
+
     fetchRemoteState().then(({ state: remote, updatedAt }) => {
       if (cancelled) return;
       remoteRevRef.current = updatedAt;
       if (!remote) return;
       // Tier 2: if local is strictly newer than remote, keep local and push it.
       // Otherwise, overwrite local with remote (last-write-wins read path).
-      const localUpdatedAt = typeof state.updatedAt === "number" ? state.updatedAt : 0;
       const remoteUpdatedAt = typeof updatedAt === "number" ? updatedAt : 0;
       if (localUpdatedAt > remoteUpdatedAt) {
         return; // skipNextPush stays false → next push will write local up to KV
