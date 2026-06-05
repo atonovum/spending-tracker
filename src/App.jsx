@@ -637,6 +637,7 @@ function App({ state, setState }) {
   const [editingEntry, setEditingEntry] = useState(null);
   const [deleteConfirmEntry, setDeleteConfirmEntry] = useState(null);
   const [statsCategoryModalId, setStatsCategoryModalId] = useState(null);
+  const [statsCategoryModalOpen, setStatsCategoryModalOpen] = useState(false);
   const [pendingExpanded, setPendingExpanded] = useState(false);
 
   useEffect(() => {
@@ -980,7 +981,7 @@ function App({ state, setState }) {
                 <Table.Tr
                   key={category.id}
                   className="cursor-pointer"
-                  onClick={() => setStatsCategoryModalId(category.id)}
+                  onClick={() => { setStatsCategoryModalId(category.id); setStatsCategoryModalOpen(true); }}
                 >
                   <Table.Td className="text-center">
                     <Group gap={6} justify="center" wrap="nowrap">
@@ -1683,8 +1684,9 @@ function App({ state, setState }) {
       </Modal>
 
       <Modal
-        opened={!!statsCategoryModalId}
-        onClose={() => setStatsCategoryModalId(null)}
+        opened={statsCategoryModalOpen}
+        onClose={() => setStatsCategoryModalOpen(false)}
+        transitionProps={{ onExited: () => setStatsCategoryModalId(null) }}
         title={(() => {
           const cat = statsCategoryModalId ? getCategory(statsCategoryModalId) : null;
           if (!cat) return t("stats.column.category");
@@ -1735,10 +1737,7 @@ function App({ state, setState }) {
               <Divider />
               <EntryList
                 items={items}
-                onEdit={(item) => {
-                  setStatsCategoryModalId(null);
-                  openEditEntry(item);
-                }}
+                onEdit={(item) => openEditEntry(item)}
               />
             </Stack>
           );
