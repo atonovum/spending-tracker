@@ -15,7 +15,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { IconCheck, IconChevronRight, IconPencil, IconPlus, IconTrash } from "@tabler/icons-react";
+import { Check, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
 import { useT } from "../lib/i18n.jsx";
 import { buildLabelStats, usageText } from "./shared.jsx";
 
@@ -39,7 +39,7 @@ function LabelEditModal({ opened, initial, onClose, onSubmit }) {
           required
         />
         <Group justify="flex-end" pt="sm">
-          <Button leftSection={<IconCheck size={16} />} onClick={handleSave} disabled={!name.trim()}>
+          <Button leftSection={<Check size={16} />} onClick={handleSave} disabled={!name.trim()}>
             {t("entry.action.save")}
           </Button>
         </Group>
@@ -59,10 +59,10 @@ function LabelRow({ label, stat, onEdit, onDelete }) {
         </div>
         <Group gap={4} wrap="nowrap">
           <ActionIcon variant="subtle" onClick={onEdit} aria-label={t("settings.editAria")}>
-            <IconPencil size={16} />
+            <Pencil size={16} />
           </ActionIcon>
           <ActionIcon variant="subtle" color="red" onClick={onDelete} aria-label={t("settings.deleteAria")}>
-            <IconTrash size={16} />
+            <Trash2 size={16} />
           </ActionIcon>
         </Group>
       </Group>
@@ -144,7 +144,7 @@ function LabelsManager({ opened, onClose, labels, stats, onSave, onDelete, onCon
                 placeholder={t("settings.labels.namePlaceholder")}
                 className="flex-1"
               />
-              <Button leftSection={<IconPlus size={14} />} onClick={commitNew} disabled={!draftName.trim()}>
+              <Button leftSection={<Plus size={14} />} onClick={commitNew} disabled={!draftName.trim()}>
                 {t("settings.labels.addBtn")}
               </Button>
             </Group>
@@ -177,7 +177,7 @@ export function LabelsCard({ state, onSaveLabel, onDeleteLabel, onConfirm }) {
           <Title order={4}>{t("settings.labels")}</Title>
           <Group gap="xs">
             <Badge variant="light">{state.labels.length}</Badge>
-            <IconChevronRight size={18} />
+            <ChevronRight size={18} />
           </Group>
         </Group>
       </Card>

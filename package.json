@@ -15,7 +15,6 @@
     "@mantine/core": "^7.13.4",
     "@mantine/hooks": "^7.13.4",
     "@mantine/notifications": "^7.13.4",
-    "@tabler/icons-react": "^3.17.0",
     "dayjs": "^1.11.13",
     "papaparse": "^5.5.3",
     "react": "^18.3.1",

@@ -16,16 +16,15 @@ import {
   Title,
 } from "@mantine/core";
 import {
-  IconCheck,
-  IconChevronDown,
-  IconDownload,
-  IconPencil,
-  IconPlus,
-  IconStar,
-  IconStarFilled,
-  IconTrash,
-  IconUpload,
-} from "@tabler/icons-react";
+  Check,
+  ChevronDown,
+  Download,
+  Pencil,
+  Plus,
+  Star,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { MAX_WALLETS } from "../lib/finance.js";
 import { useI18n } from "../lib/i18n.jsx";
 
@@ -41,7 +40,7 @@ function WalletRow({ wallet, isSelected, total, onSelect, onEdit, onExport }) {
             onClick={onSelect}
             aria-label={isSelected ? t("settings.wallets.selectedAria") : t("settings.wallets.selectAria")}
           >
-            {isSelected ? <IconStarFilled size={16} /> : <IconStar size={16} />}
+            <Star size={16} fill={isSelected ? "currentColor" : "none"} />
           </ActionIcon>
           <div className="min-w-0">
             <Group gap="xs" wrap="nowrap">
@@ -57,19 +56,19 @@ function WalletRow({ wallet, isSelected, total, onSelect, onEdit, onExport }) {
         </Group>
         <Group gap={4} wrap="nowrap">
           <ActionIcon variant="subtle" onClick={onEdit} aria-label={t("settings.wallets.editAria")}>
-            <IconPencil size={16} />
+            <Pencil size={16} />
           </ActionIcon>
           <Menu position="bottom-end" withinPortal>
             <Menu.Target>
               <ActionIcon variant="subtle" aria-label={t("settings.wallets.exportAria")}>
-                <IconDownload size={16} />
+                <Download size={16} />
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item leftSection={<IconDownload size={14} />} onClick={() => onExport("json")}>
+              <Menu.Item leftSection={<Download size={14} />} onClick={() => onExport("json")}>
                 {t("settings.wallets.exportJson")}
               </Menu.Item>
-              <Menu.Item leftSection={<IconDownload size={14} />} onClick={() => onExport("csv")}>
+              <Menu.Item leftSection={<Download size={14} />} onClick={() => onExport("csv")}>
                 {t("settings.wallets.exportCsv")}
               </Menu.Item>
             </Menu.Dropdown>
@@ -115,14 +114,14 @@ function WalletEditModal({ opened, wallet, isOnly, onClose, onRename, onDelete }
           <Button
             color="red"
             variant="light"
-            leftSection={<IconTrash size={16} />}
+            leftSection={<Trash2 size={16} />}
             onClick={onDelete}
             disabled={isOnly}
             title={isOnly ? t("settings.wallets.minimum") : ""}
           >
             {t("settings.wallets.deleteAction")}
           </Button>
-          <Button leftSection={<IconCheck size={16} />} onClick={handleSave} disabled={!draft.trim()}>
+          <Button leftSection={<Check size={16} />} onClick={handleSave} disabled={!draft.trim()}>
             {t("entry.action.save")}
           </Button>
         </Group>
@@ -181,7 +180,7 @@ function ImportModal({ opened, onClose, parsed, fileName, wallets, onConfirm, er
         )}
         <Group justify="flex-end" pt="sm">
           <Button
-            leftSection={<IconCheck size={16} />}
+            leftSection={<Check size={16} />}
             onClick={handleConfirm}
             disabled={!incoming || (target === "__new__" && !canCreateNew)}
           >
@@ -342,15 +341,15 @@ export function WalletsCard({
           <Group gap="xs" wrap="nowrap">
             <Menu position="bottom-end" withinPortal>
               <Menu.Target>
-                <Button size="xs" variant="default" leftSection={<IconUpload size={14} />}>
+                <Button size="xs" variant="default" leftSection={<Upload size={14} />}>
                   {t("settings.wallets.import")}
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item leftSection={<IconUpload size={14} />} onClick={() => triggerImport("json")}>
+                <Menu.Item leftSection={<Upload size={14} />} onClick={() => triggerImport("json")}>
                   {t("settings.wallets.importJson")}
                 </Menu.Item>
-                <Menu.Item leftSection={<IconUpload size={14} />} onClick={() => triggerImport("csv")}>
+                <Menu.Item leftSection={<Upload size={14} />} onClick={() => triggerImport("csv")}>
                   {t("settings.wallets.importCsv")}
                 </Menu.Item>
               </Menu.Dropdown>
@@ -377,7 +376,7 @@ export function WalletsCard({
                 e.target.value = "";
               }}
             />
-            <Button size="xs" leftSection={<IconPlus size={14} />} onClick={onAddWallet} disabled={!canAddWallet}>
+            <Button size="xs" leftSection={<Plus size={14} />} onClick={onAddWallet} disabled={!canAddWallet}>
               {t("settings.wallets.add")}
             </Button>
           </Group>
