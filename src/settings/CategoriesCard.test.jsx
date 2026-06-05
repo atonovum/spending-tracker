@@ -54,14 +54,10 @@ describe('CategoriesCard', () => {
       const nameInput = screen.getByLabelText(/이름/i);
       await user.type(nameInput, '쇼핑');
 
-      // Mantine 7 searchable Select renders an input wired to a label "아이콘";
-      // find the label element first, then its associated input.
-      const iconLabel = await screen.findByText('아이콘');
-      const iconInputId = iconLabel.getAttribute('for');
-      const iconSelect = document.getElementById(iconInputId);
-      await user.click(iconSelect);
-      const cartOption = await screen.findByRole('option', { name: /쇼핑/ });
-      await user.click(cartOption);
+      // IconPicker now uses a grid layout with UnstyledButton components
+      // Find and click the cart icon button - use exact match to avoid "쇼핑백"
+      const cartIconButton = await screen.findByRole('button', { name: '쇼핑 (Shopping)' });
+      await user.click(cartIconButton);
 
       const colorInput = screen.getByLabelText(/색상/i);
       await user.clear(colorInput);

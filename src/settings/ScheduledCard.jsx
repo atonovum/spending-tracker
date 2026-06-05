@@ -11,7 +11,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { IconChevronRight } from "@tabler/icons-react";
+import { ChevronRight } from "lucide-react";
 import { CategoryIcon } from "../lib/categoryIcons.jsx";
 import { normalizeLabelIds } from "../lib/finance.js";
 import { useI18n } from "../lib/i18n.jsx";
@@ -105,7 +105,7 @@ export function ScheduledCard({ scheduledEntries, getCategory, getLabel, onEditE
           <Title order={4}>{t("settings.scheduled")}</Title>
           <Group gap="xs">
             <Badge variant="light">{scheduledEntries.length}</Badge>
-            <IconChevronRight size={18} />
+            <ChevronRight size={18} />
           </Group>
         </Group>
       </Card>

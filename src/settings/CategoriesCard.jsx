@@ -21,32 +21,23 @@ import {
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import {
-  IconArrowsJoin,
-  IconCheck,
-  IconChevronRight,
-  IconPencil,
-  IconPlus,
-  IconTrash,
-  IconX,
-} from "@tabler/icons-react";
-import { CATEGORY_ICON_KEYS, CategoryIcon, getCategoryIconComponent } from "../lib/categoryIcons.jsx";
+  Merge,
+  Check,
+  ChevronRight,
+  Pencil,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
+import { CategoryIcon } from "../lib/categoryIcons.jsx";
 import { useT } from "../lib/i18n.jsx";
 import { buildCategoryStats, usageText } from "./shared.jsx";
+import { IconPicker } from "./IconPicker.jsx";
 
 const DEFAULT_CATEGORY_COLORS = {
   expense: "#F08A8A",
   income: "#5BB97A",
 };
-
-function IconOption({ option }) {
-  const Cmp = getCategoryIconComponent(option.value);
-  return (
-    <Group gap="xs" wrap="nowrap">
-      <Cmp size={16} stroke={1.8} />
-      <span>{option.label}</span>
-    </Group>
-  );
-}
 
 function InlineCategoryForm({ initial, defaultType, onCancel, onSubmit }) {
   const t = useT();
@@ -74,23 +65,15 @@ function InlineCategoryForm({ initial, defaultType, onCancel, onSubmit }) {
     });
   }
 
-  const iconOptions = CATEGORY_ICON_KEYS.map((key) => ({ value: key, label: t(`iconKey.${key}`) }));
-
   return (
     <Paper withBorder radius="card" p="sm" className="bg-slate-50">
       <Stack gap="xs">
         <Text size="sm" fw={700}>{isEdit ? t("settings.categories.editTitle") : t("settings.categories.newTitle")}</Text>
         <TextInput label={t("settings.categories.field.name")} value={name} onChange={(event) => setName(event.currentTarget.value)} required size="sm" />
-        <Select
+        <IconPicker
           label={t("settings.categories.field.icon")}
-          data={iconOptions}
           value={icon}
           onChange={(value) => setIcon(value || "spark")}
-          allowDeselect={false}
-          searchable
-          renderOption={IconOption}
-          leftSection={<CategoryIcon category={{ icon }} size={16} />}
-          size="sm"
         />
         <ColorInput
           label={t("settings.categories.field.color")}
@@ -101,8 +84,8 @@ function InlineCategoryForm({ initial, defaultType, onCancel, onSubmit }) {
           size="sm"
         />
         <Group justify="flex-end" gap="xs">
-          <Button variant="subtle" leftSection={<IconX size={14} />} size="xs" onClick={onCancel}>{t("entry.action.cancel")}</Button>
-          <Button leftSection={<IconCheck size={14} />} size="xs" onClick={handleSubmit} disabled={!name.trim()}>{t("entry.action.save")}</Button>
+          <Button variant="subtle" leftSection={<X size={14} />} size="xs" onClick={onCancel}>{t("entry.action.cancel")}</Button>
+          <Button leftSection={<Check size={14} />} size="xs" onClick={handleSubmit} disabled={!name.trim()}>{t("entry.action.save")}</Button>
         </Group>
       </Stack>
     </Paper>
@@ -140,7 +123,7 @@ function MergeModal({ opened, sources, candidates, onClose, onConfirm }) {
           allowDeselect={false}
         />
         <Group justify="flex-end" pt="sm">
-          <Button color="indigo" leftSection={<IconCheck size={16} />} onClick={() => onConfirm(target)} disabled={!target}>
+          <Button color="indigo" leftSection={<Check size={16} />} onClick={() => onConfirm(target)} disabled={!target}>
             {t("settings.categories.mergeBtn")}
           </Button>
         </Group>
@@ -174,10 +157,10 @@ function CategoryRow({ category, stat, checked, onToggle, onEdit, onDelete }) {
         </Group>
         <Group gap={4} wrap="nowrap">
           <ActionIcon variant="subtle" onClick={onEdit} aria-label={t("settings.editAria")}>
-            <IconPencil size={16} />
+            <Pencil size={16} />
           </ActionIcon>
           <ActionIcon variant="subtle" color="red" onClick={onDelete} aria-label={t("settings.deleteAria")}>
-            <IconTrash size={16} />
+            <Trash2 size={16} />
           </ActionIcon>
         </Group>
       </Group>
@@ -336,7 +319,7 @@ function CategoriesManager({
                   size="xs"
                   variant="light"
                   color="indigo"
-                  leftSection={<IconArrowsJoin size={14} />}
+                  leftSection={<Merge size={14} />}
                   onClick={startMerge}
                   disabled={!canMerge}
                 >
@@ -344,7 +327,7 @@ function CategoriesManager({
                 </Button>
                 <Button
                   size="xs"
-                  leftSection={<IconPlus size={14} />}
+                  leftSection={<Plus size={14} />}
                   onClick={() => setForm({ open: true, initial: null })}
                 >
                   {t("settings.categories.add")}
@@ -378,7 +361,7 @@ export function CategoriesCard({ state, onSaveCategory, onDeleteCategory, onMerg
           <Title order={4}>{t("settings.categories")}</Title>
           <Group gap="xs">
             <Badge variant="light">{state.categories.length}</Badge>
-            <IconChevronRight size={18} />
+            <ChevronRight size={18} />
           </Group>
         </Group>
       </Card>

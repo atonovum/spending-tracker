@@ -23,17 +23,17 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import {
-  IconArrowLeft,
-  IconArrowRight,
-  IconCheck,
-  IconChevronDown,
-  IconChevronUp,
-  IconClock,
-  IconPlus,
-  IconSearch,
-  IconTrash,
-  IconWallet,
-} from "@tabler/icons-react";
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Plus,
+  Search,
+  Trash2,
+  Wallet,
+} from "lucide-react";
 import { loadState, normalizeState, saveState } from "./lib/storage.js";
 import { serializeWalletCsv, parseWalletCsv } from "./lib/csv.js";
 import {
@@ -542,7 +542,7 @@ function BucketScroller({ buckets, selectedKey, onSelect, statsBucketLabel, acti
     <Stack gap="xs" mb="sm">
       <Group gap="xs" wrap="nowrap" w="100%">
         <ActionIcon variant="default" onClick={() => shift(-1)} disabled={selectedIndex <= 0}>
-          <IconArrowLeft size={16} />
+          <ArrowLeft size={16} />
         </ActionIcon>
         <Box
           ref={scrollerRef}
@@ -569,7 +569,7 @@ function BucketScroller({ buckets, selectedKey, onSelect, statsBucketLabel, acti
           </Group>
         </Box>
         <ActionIcon variant="default" onClick={() => shift(1)} disabled={selectedIndex < 0 || selectedIndex >= buckets.length - 1}>
-          <IconArrowRight size={16} />
+          <ArrowRight size={16} />
         </ActionIcon>
       </Group>
       <Text size="xs" c="dimmed" ta="center">
@@ -1012,7 +1012,7 @@ function App({ state, setState }) {
               value={searchText}
               onChange={(e) => { setSearchText(e.currentTarget.value); setSearchActive(true); }}
               placeholder={t("search.placeholder")}
-              leftSection={<IconSearch size={16} />}
+              leftSection={<Search size={16} />}
             />
             <SimpleGrid cols={2}>
               <Select
@@ -1304,7 +1304,7 @@ function App({ state, setState }) {
           <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
             <Select
               className="w-52"
-              leftSection={<IconWallet size={16} />}
+              leftSection={<Wallet size={16} />}
               data={state.wallets.map((wallet) => ({ value: wallet.id, label: wallet.name }))}
               value={state.selectedWalletId}
               onChange={(value) => {
@@ -1447,12 +1447,12 @@ function App({ state, setState }) {
                   >
                     <Group justify="space-between" wrap="nowrap">
                       <Group gap={6} wrap="nowrap">
-                        <IconClock size={16} className="text-muted" />
+                        <Clock size={16} className="text-muted" />
                         <Text fw={700} size="sm">{t("ledger.pending", { count: pendingScheduled.length })}</Text>
                       </Group>
                       <Group gap="xs" wrap="nowrap">
                         <Text size="sm" c="dimmed">{formatMoney(pendingTotal)}</Text>
-                        {pendingExpanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+                        {pendingExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </Group>
                     </Group>
                     {pendingExpanded && (
@@ -1585,7 +1585,7 @@ function App({ state, setState }) {
           onClick={openNewEntry}
           aria-label={t("ledger.fab.add")}
         >
-          <IconPlus size={24} />
+          <Plus size={24} />
         </ActionIcon>
       )}
 
@@ -1886,11 +1886,11 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
       {repeat !== "none" && <TextInput label={t("entry.field.repeatEnd")} type="date" value={repeatEndDate} onChange={(e) => setRepeatEndDate(e.currentTarget.value)} placeholder={t("entry.field.repeatEnd.placeholder")} />}
       <Group justify="space-between" pt="sm">
         <Group>
-          {onDelete && <Button color="red" variant="light" leftSection={<IconTrash size={16} />} onClick={onDelete}>{t("entry.action.delete")}</Button>}
+          {onDelete && <Button color="red" variant="light" leftSection={<Trash2 size={16} />} onClick={onDelete}>{t("entry.action.delete")}</Button>}
         </Group>
         <Group>
           <Button
-            leftSection={<IconCheck size={16} />}
+            leftSection={<Check size={16} />}
             onClick={() => onSubmit({ date, amount: Number(amount), categoryId, labelIds, note, repeat, repeatEndDate: repeat === "none" ? "" : repeatEndDate })}
           >
             {t("entry.action.save")}
