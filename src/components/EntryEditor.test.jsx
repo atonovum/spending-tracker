@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithMantine, createMockState, waitForModal } from '../settings/testUtils.jsx';
 import App from '../App.jsx';
@@ -63,20 +63,32 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     localStorage.setItem('spending-tracker-v3', JSON.stringify(mockState));
   });
 
-  it('should show confirmation modal when deleting a scheduled entry from Settings', async () => {
-    const user = userEvent.setup();
-    renderWithMantine(<App />);
-
+  async function openScheduledEntryEditor(user, note) {
     // Navigate to Settings tab
     const settingsTab = screen.getByRole('tab', { name: /settings/i });
     await user.click(settingsTab);
 
-    // Find and click on the scheduled transaction card
-    const scheduledCard = screen.getByText('Monthly subscription');
+    // Find and click the Scheduled Transactions card
+    const scheduledHeading = screen.getByRole('heading', { name: /Scheduled/i });
+    const scheduledCard = scheduledHeading.closest('div[class*="Card"]') || scheduledHeading.parentElement;
     await user.click(scheduledCard);
 
-    // Wait for the entry editor modal to open
+    // Wait for ScheduledModal to open
     await waitForModal();
+
+    // Find the entry by note inside the modal
+    const entryCard = screen.getByText(note).closest('div[class*="Paper"]');
+    await user.click(entryCard);
+
+    // Wait for EntryEditor modal to open
+    await waitForModal();
+  }
+
+  it('should show confirmation modal when deleting a scheduled entry from Settings', async () => {
+    const user = userEvent.setup();
+    renderWithMantine(<App />);
+
+    await openScheduledEntryEditor(user, 'Monthly subscription');
 
     // Click the delete button
     const deleteButton = screen.getByRole('button', { name: /삭제/i });
@@ -92,12 +104,7 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     const user = userEvent.setup();
     renderWithMantine(<App />);
 
-    const settingsTab = screen.getByRole('tab', { name: /settings/i });
-    await user.click(settingsTab);
-
-    const scheduledCard = screen.getByText('Monthly subscription');
-    await user.click(scheduledCard);
-    await waitForModal();
+    await openScheduledEntryEditor(user, 'Monthly subscription');
 
     const deleteButton = screen.getByRole('button', { name: /삭제/i });
     await user.click(deleteButton);
@@ -113,12 +120,7 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     const user = userEvent.setup();
     renderWithMantine(<App />);
 
-    const settingsTab = screen.getByRole('tab', { name: /settings/i });
-    await user.click(settingsTab);
-
-    const scheduledCard = screen.getByText('Monthly subscription');
-    await user.click(scheduledCard);
-    await waitForModal();
+    await openScheduledEntryEditor(user, 'Monthly subscription');
 
     const deleteButton = screen.getByRole('button', { name: /삭제/i });
     await user.click(deleteButton);
@@ -128,8 +130,10 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     const stopFutureButton = screen.getByText('반복만 중단 (권장)').closest('button');
     await user.click(stopFutureButton);
 
-    // Modal should close
-    expect(screen.queryByText('예약 거래 삭제')).not.toBeInTheDocument();
+    // Wait for modal to close (Mantine animations)
+    await waitFor(() => {
+      expect(screen.queryByText('예약 거래 삭제')).not.toBeInTheDocument();
+    });
 
     // Entry should still exist with repeatEndDate set to yesterday
     const savedState = JSON.parse(localStorage.getItem('spending-tracker-v3'));
@@ -148,12 +152,7 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     const user = userEvent.setup();
     renderWithMantine(<App />);
 
-    const settingsTab = screen.getByRole('tab', { name: /settings/i });
-    await user.click(settingsTab);
-
-    const scheduledCard = screen.getByText('Monthly subscription');
-    await user.click(scheduledCard);
-    await waitForModal();
+    await openScheduledEntryEditor(user, 'Monthly subscription');
 
     const deleteButton = screen.getByRole('button', { name: /삭제/i });
     await user.click(deleteButton);
@@ -163,8 +162,10 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     const deleteAllButton = screen.getByText('모든 기록 삭제').closest('button');
     await user.click(deleteAllButton);
 
-    // Modal should close
-    expect(screen.queryByText('예약 거래 삭제')).not.toBeInTheDocument();
+    // Wait for modal to close (Mantine animations)
+    await waitFor(() => {
+      expect(screen.queryByText('예약 거래 삭제')).not.toBeInTheDocument();
+    });
 
     // Entry should be deleted
     const savedState = JSON.parse(localStorage.getItem('spending-tracker-v3'));
@@ -176,27 +177,24 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     const user = userEvent.setup();
     renderWithMantine(<App />);
 
-    const settingsTab = screen.getByRole('tab', { name: /settings/i });
-    await user.click(settingsTab);
+    // Get initial state before opening
+    const initialState = JSON.parse(localStorage.getItem('spending-tracker-v3'));
+    const initialEntry = initialState.wallets[0].entries.find(e => e.id === 'sched-1');
 
-    const scheduledCard = screen.getByText('Monthly subscription');
-    await user.click(scheduledCard);
-    await waitForModal();
+    await openScheduledEntryEditor(user, 'Monthly subscription');
 
     const deleteButton = screen.getByRole('button', { name: /삭제/i });
     await user.click(deleteButton);
     await waitForModal();
 
-    // Get initial state
-    const initialState = JSON.parse(localStorage.getItem('spending-tracker-v3'));
-    const initialEntry = initialState.wallets[0].entries.find(e => e.id === 'sched-1');
-
     // Click "Cancel"
     const cancelButton = screen.getByRole('button', { name: /취소/i });
     await user.click(cancelButton);
 
-    // Modal should close
-    expect(screen.queryByText('예약 거래 삭제')).not.toBeInTheDocument();
+    // Wait for modal to close (Mantine animations)
+    await waitFor(() => {
+      expect(screen.queryByText('예약 거래 삭제')).not.toBeInTheDocument();
+    });
 
     // Entry should remain unchanged
     const savedState = JSON.parse(localStorage.getItem('spending-tracker-v3'));
@@ -208,12 +206,7 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     const user = userEvent.setup();
     renderWithMantine(<App />);
 
-    const settingsTab = screen.getByRole('tab', { name: /settings/i });
-    await user.click(settingsTab);
-
-    const scheduledCard = screen.getByText('Future only');
-    await user.click(scheduledCard);
-    await waitForModal();
+    await openScheduledEntryEditor(user, 'Future only');
 
     const deleteButton = screen.getByRole('button', { name: /삭제/i });
     await user.click(deleteButton);
@@ -233,11 +226,7 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     const user = userEvent.setup();
     renderWithMantine(<App />);
 
-    // Navigate to Ledger tab
-    const ledgerTab = screen.getByRole('tab', { name: /ledger/i });
-    await user.click(ledgerTab);
-
-    // Find and click on a regular (non-scheduled) entry
+    // Ledger tab is default, find and click on a regular (non-scheduled) entry
     // The entry we added has today's date, so it should appear
     const entryCard = screen.getByText('One-time expense');
     await user.click(entryCard);
