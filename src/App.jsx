@@ -38,6 +38,7 @@ import { loadState, normalizeState, saveState } from "./lib/storage.js";
 import { serializeWalletCsv, parseWalletCsv } from "./lib/csv.js";
 import {
   addDays,
+  bucketKeyForDate,
   buildOccurrences,
   buildPendingScheduledOccurrences,
   formatAxisTick,
@@ -1609,6 +1610,12 @@ function App({ state, setState }) {
           } : null}
           onSubmit={(payload) => {
             upsertEntry(payload);
+            const entryDate = fromDateInput(payload.date);
+            if (entryDate) {
+              const key = bucketKeyForDate(ledgerMode, entryDate);
+              setLedgerSelectedByMode((prev) => ({ ...prev, [ledgerMode]: key }));
+              setStatsSelectedByMode((prev) => ({ ...prev, [ledgerMode]: key }));
+            }
             setEntryModalOpen(false);
           }}
         />
