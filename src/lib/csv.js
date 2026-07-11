@@ -23,6 +23,13 @@ function pickUnusedColor(usedColors) {
   return CATEGORY_COLOR_PALETTE[Math.floor(Math.random() * CATEGORY_COLOR_PALETTE.length)];
 }
 
+function sortEntriesByNewestDate(entries) {
+  return [...entries].sort((a, b) => {
+    if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+    return 0;
+  });
+}
+
 /**
  * Serialize a wallet to CSV format
  * @param {Object} wallet - The wallet object with entries
@@ -38,7 +45,7 @@ export function serializeWalletCsv(wallet, categories, labels) {
   // Map to track which Labels values need quoting (when individual label names contain semicolons)
   const labelsNeedQuoting = new Map();
 
-  for (const entry of wallet.entries) {
+  for (const entry of sortEntriesByNewestDate(wallet.entries)) {
     const category = categoryMap.get(entry.categoryId);
     if (!category) continue; // Skip entries with unknown category
 
@@ -195,5 +202,6 @@ export function parseWalletCsv(text, categories, labels) {
     });
   }
 
+  result.entries = sortEntriesByNewestDate(result.entries);
   return result;
 }

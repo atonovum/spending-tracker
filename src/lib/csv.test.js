@@ -73,8 +73,29 @@ describe("serializeWalletCsv", () => {
     const csv = serializeWalletCsv(wallet, categories, labels);
     const lines = csv.split("\n");
     expect(lines[0]).toBe("Date,Type,Category,Amount,Note,Labels");
-    expect(lines[1]).toBe("2026-01-15,Income,Salary,50000,Salary,Work");
-    expect(lines[2]).toBe("2026-01-20,Expense,Groceries,30000,Weekly shopping,Variable;Events");
+    expect(lines[1]).toBe("2026-01-20,Expense,Groceries,30000,Weekly shopping,Variable;Events");
+    expect(lines[2]).toBe("2026-01-15,Income,Salary,50000,Salary,Work");
+  });
+
+  it("should serialize entries newest-first by date", () => {
+    const wallet = {
+      id: "w1",
+      name: "Test",
+      entries: [
+        { id: "old", date: "2026-01-10", amount: 1000, categoryId: "cat2", labelIds: [], note: "old", repeat: "none", repeatEndDate: "" },
+        { id: "new", date: "2026-01-20", amount: 2000, categoryId: "cat2", labelIds: [], note: "new", repeat: "none", repeatEndDate: "" },
+        { id: "middle", date: "2026-01-15", amount: 1500, categoryId: "cat2", labelIds: [], note: "middle", repeat: "none", repeatEndDate: "" },
+      ],
+    };
+
+    const csv = serializeWalletCsv(wallet, categories, labels);
+    const lines = csv.split("\n");
+
+    expect(lines.slice(1, 4).map((line) => line.split(",")[0])).toEqual([
+      "2026-01-20",
+      "2026-01-15",
+      "2026-01-10",
+    ]);
   });
 
   it("should handle empty note and no labels", () => {
@@ -271,6 +292,21 @@ describe("parseWalletCsv", () => {
     expect(result.rejected).toEqual([]);
   });
 
+  it("should parse entries newest-first by date", () => {
+    const csv = `Date,Type,Category,Amount,Note,Labels
+2026-01-10,Expense,Groceries,1000,old,
+2026-01-20,Expense,Groceries,2000,new,
+2026-01-15,Expense,Groceries,1500,middle,`;
+
+    const result = parseWalletCsv(csv, categories, labels);
+
+    expect(result.entries.map((entry) => entry.date)).toEqual([
+      "2026-01-20",
+      "2026-01-15",
+      "2026-01-10",
+    ]);
+  });
+
   it("should parse multiple entries with labels", () => {
     const csv = `Date,Type,Category,Amount,Note,Labels
 2026-01-15,Income,Salary,50000,Salary,Work
@@ -278,18 +314,18 @@ describe("parseWalletCsv", () => {
     const result = parseWalletCsv(csv, categories, labels);
     expect(result.entries).toHaveLength(2);
     expect(result.entries[0]).toMatchObject({
-      date: "2026-01-15",
-      amount: 50000,
-      categoryId: "cat1",
-      labelIds: ["lbl3"],
-      note: "Salary",
-    });
-    expect(result.entries[1]).toMatchObject({
       date: "2026-01-20",
       amount: 30000,
       categoryId: "cat2",
       labelIds: ["lbl1", "lbl2"],
       note: "Weekly shopping",
+    });
+    expect(result.entries[1]).toMatchObject({
+      date: "2026-01-15",
+      amount: 50000,
+      categoryId: "cat1",
+      labelIds: ["lbl3"],
+      note: "Salary",
     });
   });
 
@@ -334,8 +370,8 @@ describe("parseWalletCsv", () => {
     const result = parseWalletCsv(csv, lowercaseCategories, labels);
     expect(result.entries).toHaveLength(2);
     expect(result.newCategories).toHaveLength(0);
-    expect(result.entries[0].categoryId).toBe("cat1");
-    expect(result.entries[1].categoryId).toBe("cat2");
+    expect(result.entries[0].categoryId).toBe("cat2");
+    expect(result.entries[1].categoryId).toBe("cat1");
   });
 
   it("should reuse same auto-created category for multiple rows", () => {
@@ -487,21 +523,21 @@ describe("parseWalletCsv", () => {
 
     // Compare excluding IDs (which are regenerated)
     expect(result.entries[0]).toMatchObject({
-      date: wallet.entries[0].date,
-      amount: wallet.entries[0].amount,
-      categoryId: wallet.entries[0].categoryId,
-      labelIds: wallet.entries[0].labelIds,
-      note: wallet.entries[0].note,
-      repeat: "none", // CSV doesn't preserve repeat
-      repeatEndDate: "",
-    });
-
-    expect(result.entries[1]).toMatchObject({
       date: wallet.entries[1].date,
       amount: wallet.entries[1].amount,
       categoryId: wallet.entries[1].categoryId,
       labelIds: wallet.entries[1].labelIds,
       note: wallet.entries[1].note,
+      repeat: "none", // CSV doesn't preserve repeat
+      repeatEndDate: "",
+    });
+
+    expect(result.entries[1]).toMatchObject({
+      date: wallet.entries[0].date,
+      amount: wallet.entries[0].amount,
+      categoryId: wallet.entries[0].categoryId,
+      labelIds: wallet.entries[0].labelIds,
+      note: wallet.entries[0].note,
       repeat: "none",
       repeatEndDate: "",
     });
