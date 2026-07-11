@@ -299,9 +299,16 @@ export function buildPendingScheduledOccurrences(wallet, selectedRange) {
   if (windowStart > end) return [];
   const result = [];
   for (const entry of wallet.entries) {
-    if ((entry.repeat || "none") === "none") continue;
+    const repeat = entry.repeat || "none";
     const origin = fromDateInput(entry.date);
     if (!origin || origin > end) continue;
+    if (repeat === "none") {
+      if (origin < windowStart) continue;
+      const view = withOccurrence(entry, origin);
+      view.note = entry.note || "메모 없음";
+      result.push(view);
+      continue;
+    }
     const repeatEnd = validDate(entry.repeatEndDate) ? fromDateInput(entry.repeatEndDate) : null;
     if (repeatEnd && repeatEnd < windowStart) continue;
     const next = nextOccurrenceOnOrAfter(entry, windowStart, end);

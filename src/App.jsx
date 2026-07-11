@@ -795,8 +795,12 @@ function EntryList({ items, onEdit }) {
                       </div>
                     </div>
                     {item.note && (
-                      <div className="text-left text-xs font-medium text-muted pl-1">
-                        {item.note}
+                      <div className="grid grid-cols-[auto,1fr,auto] gap-3">
+                        <span aria-hidden="true" className="w-10" />
+                        <div className="text-left text-xs font-medium text-muted">
+                          {item.note}
+                        </div>
+                        <span aria-hidden="true" />
                       </div>
                     )}
                   </Stack>
