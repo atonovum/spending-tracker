@@ -16,6 +16,7 @@ yarn-error.log*
 # Claude Code / oh-my-claudecode local state
 .omc/
 .claude/
+.omo/
 
 # Editor
 .idea/
@@ -27,3 +28,5 @@ yarn-error.log*
 .dev.vars*
 !.dev.vars.example
 !.env.example
+
+coverage/

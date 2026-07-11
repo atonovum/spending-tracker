@@ -1,0 +1,7123 @@
+{
+  "version": 3,
+  "wallets": [
+    {
+      "id": "wallet_converted",
+      "name": "Cash Wallet",
+      "entries": [
+        {
+          "id": "mrg808w61t5g3pq7mze",
+          "date": "2025-11-01",
+          "amount": 3891923,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "이월 자금",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6mnij0cm6xz8",
+          "date": "2025-11-01",
+          "amount": 48830,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6d44b3juvwq",
+          "date": "2025-11-03",
+          "amount": 330000,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6oo7xlo2f73",
+          "date": "2025-11-05",
+          "amount": 30000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66wdxtrwknz8",
+          "date": "2025-11-06",
+          "amount": 17290,
+          "categoryId": "income_other",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "법인카드 정산",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6tz2ykfc8mt",
+          "date": "2025-11-08",
+          "amount": 366416,
+          "categoryId": "mrg808w6flg32jkg4sn",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64t630sgcu84",
+          "date": "2025-11-10",
+          "amount": 20000,
+          "categoryId": "education",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "파고다 스피킹 책",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6nbwr6nnuk9",
+          "date": "2025-11-15",
+          "amount": 22380,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "기초케어",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6fnlg7emd4ch",
+          "date": "2025-11-15",
+          "amount": 48900,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "휴지",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6s7e3tu3jyts",
+          "date": "2025-11-19",
+          "amount": 7890,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "쿠팡와우 월회비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ny6u3j1z6pi",
+          "date": "2025-11-20",
+          "amount": 16420,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6klxqhxsmsj",
+          "date": "2025-11-21",
+          "amount": 34600,
+          "categoryId": "income_other",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "법인카드 정산",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6h2qifg0fx8g",
+          "date": "2025-11-21",
+          "amount": 48483,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w616gv1zaks11",
+          "date": "2025-11-22",
+          "amount": 28300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w63wj4av1iinq",
+          "date": "2025-11-23",
+          "amount": 26000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w60immuc538rl6",
+          "date": "2025-11-24",
+          "amount": 27500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w68k97biyuz1q",
+          "date": "2025-11-24",
+          "amount": 922566,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "법인카드",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6orvd7m9fouh",
+          "date": "2025-11-25",
+          "amount": 11800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w61sis7ovz3ki",
+          "date": "2025-11-25",
+          "amount": 363000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "부동산 중개비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6g8pznzr2jx9",
+          "date": "2025-11-25",
+          "amount": 672601,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6msx04okpvie",
+          "date": "2025-11-26",
+          "amount": 43000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6qeosxk4xte",
+          "date": "2025-11-26",
+          "amount": 13400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w68v8gv5uebnc",
+          "date": "2025-11-26",
+          "amount": 32000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6epe5evx40n",
+          "date": "2025-11-27",
+          "amount": 6500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6m8e6bd6v82o",
+          "date": "2025-11-27",
+          "amount": 43000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6mlt98nppw5",
+          "date": "2025-11-28",
+          "amount": 15000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6q1nean88hnk",
+          "date": "2025-11-28",
+          "amount": 36000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6scamcusjm0g",
+          "date": "2025-11-29",
+          "amount": 12800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6hfug5eco7mb",
+          "date": "2025-11-29",
+          "amount": 29300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6q30k71twcd",
+          "date": "2025-11-29",
+          "amount": 1500,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "애플 결제, 뭔지는 모르겠음",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6t2m8a2iflx",
+          "date": "2025-11-30",
+          "amount": 17900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6sdtayo4yb1j",
+          "date": "2025-11-30",
+          "amount": 60000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w67hvycankgkg",
+          "date": "2025-11-30",
+          "amount": 44190,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w634uycqn06wl",
+          "date": "2025-12-01",
+          "amount": 18900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6mv6rs16d1hs",
+          "date": "2025-12-01",
+          "amount": 29000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ojcetwyey98",
+          "date": "2025-12-01",
+          "amount": 1957970,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "막내이모 주식 자금 -> 생활비로 전환",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6xas99txyjn",
+          "date": "2025-12-02",
+          "amount": 16000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6cfoyfd9cklk",
+          "date": "2025-12-03",
+          "amount": 1990,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6qoukia6yuof",
+          "date": "2025-12-03",
+          "amount": 38000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64i1eeszuqud",
+          "date": "2025-12-04",
+          "amount": 11400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6stuz4sn749",
+          "date": "2025-12-04",
+          "amount": 35500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6n5m0rrsv03",
+          "date": "2025-12-05",
+          "amount": 20500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6b4ny3dl7ndu",
+          "date": "2025-12-05",
+          "amount": 29000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w61iqbs0o68uw",
+          "date": "2025-12-05",
+          "amount": 44000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "UpNote 구매",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6kg5nfe4esd8",
+          "date": "2025-12-06",
+          "amount": 288291,
+          "categoryId": "mrg808w6flg32jkg4sn",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6cdpwo9frt8d",
+          "date": "2025-12-06",
+          "amount": 23900,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "기초케어 (세라마이드)",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6g2igrweim7e",
+          "date": "2025-12-06",
+          "amount": 13500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6np8ki5rgya",
+          "date": "2025-12-07",
+          "amount": 25500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6g2q8ocdqo3",
+          "date": "2025-12-08",
+          "amount": 19500,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w63iw1mqxt4wa",
+          "date": "2025-12-08",
+          "amount": 6600,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6o4cq1pj2mqs",
+          "date": "2025-12-09",
+          "amount": 16000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66pzfu6nerbd",
+          "date": "2025-12-10",
+          "amount": 30000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6fvoeffqehfs",
+          "date": "2025-12-11",
+          "amount": 13200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w65ge7rrihm",
+          "date": "2025-12-12",
+          "amount": 40000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6agz5nqpyei8",
+          "date": "2025-12-12",
+          "amount": 13700,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6msqinlgv6g9",
+          "date": "2025-12-13",
+          "amount": 8920,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6c9zg0dx4dtl",
+          "date": "2025-12-14",
+          "amount": 26400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6bmn89yskl9i",
+          "date": "2025-12-14",
+          "amount": 26510,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "마스크팩, 영양제",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6tclv8moqh8e",
+          "date": "2025-12-15",
+          "amount": 15400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6jr786z0goqn",
+          "date": "2025-12-16",
+          "amount": 19500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lasdf9z1zda",
+          "date": "2025-12-16",
+          "amount": 40800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6kcv32ris3ll",
+          "date": "2025-12-17",
+          "amount": 15100,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6nye7blwwzkn",
+          "date": "2025-12-17",
+          "amount": 13000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6r2790i0z2v",
+          "date": "2025-12-18",
+          "amount": 17900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6buo9xibmvvg",
+          "date": "2025-12-19",
+          "amount": 36500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6z0abojw2l4n",
+          "date": "2025-12-19",
+          "amount": 17300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6qm3mhw5p7s",
+          "date": "2025-12-19",
+          "amount": 7890,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "쿠팡 월회비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6a9x2xiek62",
+          "date": "2025-12-20",
+          "amount": 10000,
+          "categoryId": "entertainment",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "관상 상세 분석 서비스",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6rynr3p3txxa",
+          "date": "2025-12-20",
+          "amount": 25900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ptxoyheb8y",
+          "date": "2025-12-20",
+          "amount": 60000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "입주청소 예약금",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6wo9oi6xd04",
+          "date": "2025-12-21",
+          "amount": 8790,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6kmt2552i2df",
+          "date": "2025-12-22",
+          "amount": 48483,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "인터넷",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6bpxse4agxye",
+          "date": "2025-12-22",
+          "amount": 54000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w69jqgcjq7v9p",
+          "date": "2025-12-23",
+          "amount": 34600,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "법인카드정산",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6a6mkz8pctea",
+          "date": "2025-12-24",
+          "amount": 655405,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "법인카드",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6r8vo4ylzm9s",
+          "date": "2025-12-25",
+          "amount": 26000,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w68ejeywqnqx9",
+          "date": "2025-12-25",
+          "amount": 30000,
+          "categoryId": "entertainment",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마 사주",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w67tjtwtc2oe",
+          "date": "2025-12-25",
+          "amount": 2000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "붕어빵",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w694k1x5qk1g",
+          "date": "2025-12-26",
+          "amount": 200000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "입주청소",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6rtombuus28o",
+          "date": "2025-12-26",
+          "amount": 490428,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "현대카드",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6sy6k0jvdei",
+          "date": "2025-12-27",
+          "amount": 560379,
+          "categoryId": "mrg808w65gy4eub9c0b",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lwuj01jznlj",
+          "date": "2025-12-28",
+          "amount": 29000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6rnlcsuo0lwk",
+          "date": "2025-12-29",
+          "amount": 148873,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "현대카드",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ltquastv9cq",
+          "date": "2025-12-30",
+          "amount": 3000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "붕어빵+오뎅",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6z8gmh4cl4qe",
+          "date": "2025-12-31",
+          "amount": 60000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6e55z2dzuwnm",
+          "date": "2026-01-01",
+          "amount": 29000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w61cts39ixrsu",
+          "date": "2026-01-01",
+          "amount": 17000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6w374oy11wzq",
+          "date": "2026-01-02",
+          "amount": 200000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "변호사 상담비용",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6c9zdsz25d05",
+          "date": "2026-01-02",
+          "amount": 7000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "붕어빵+오뎅",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6v7ghh5tt7dn",
+          "date": "2026-01-03",
+          "amount": 1000000,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "막내이모 주식 자금 -> 생활비로 전환",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6i0e16evsd4h",
+          "date": "2026-01-03",
+          "amount": 276565,
+          "categoryId": "mrg808w6flg32jkg4sn",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ayt94d76s2u",
+          "date": "2026-01-04",
+          "amount": 1990,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6dwulude3d3g",
+          "date": "2026-01-04",
+          "amount": 33900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6e7bggsb7xon",
+          "date": "2026-01-05",
+          "amount": 29000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6r9cj0or81w",
+          "date": "2026-01-07",
+          "amount": 34900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w689mcyqaegl",
+          "date": "2026-01-08",
+          "amount": 19500,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6adv78bosopf",
+          "date": "2026-01-08",
+          "amount": 21300,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6owatp6zgjx",
+          "date": "2026-01-08",
+          "amount": 28400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6z2eti5e18m9",
+          "date": "2026-01-10",
+          "amount": 11100,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6w45tq8wsdqt",
+          "date": "2026-01-10",
+          "amount": 67600,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "착불 택배비 (소파+탁자)",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6mez5a5haozq",
+          "date": "2026-01-10",
+          "amount": 36400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w635xgmax6ewv",
+          "date": "2026-01-11",
+          "amount": 5800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w63jsxizhjem8",
+          "date": "2026-01-11",
+          "amount": 5500,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ul1q78d40kg",
+          "date": "2026-01-11",
+          "amount": 14000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6seknqdsu3oq",
+          "date": "2026-01-12",
+          "amount": 2500000,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "막내이모 주식자금 -> 생활비로 전환",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6a9a2gek6lsa",
+          "date": "2026-01-12",
+          "amount": 11900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6pnolm8am71",
+          "date": "2026-01-12",
+          "amount": 21200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w67g52i9corue",
+          "date": "2026-01-12",
+          "amount": 35000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64oeyazvtmmj",
+          "date": "2026-01-12",
+          "amount": 40000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w68tdxrmlg1tp",
+          "date": "2026-01-14",
+          "amount": 22000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6i5ac93iiq5",
+          "date": "2026-01-14",
+          "amount": 61,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "현대카드 이자",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w68v7zbdhqsy2",
+          "date": "2026-01-14",
+          "amount": 25800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6t1lwvti1cu",
+          "date": "2026-01-15",
+          "amount": 18600,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6opzie44h42j",
+          "date": "2026-01-17",
+          "amount": 4000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6h7wykhzo9o",
+          "date": "2026-01-17",
+          "amount": 18700,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6eqdh7lwja1e",
+          "date": "2026-01-18",
+          "amount": 17000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "택배비 착불 (거실장)",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6m049kng5m8",
+          "date": "2026-01-18",
+          "amount": 19400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6xxzg0iaj69",
+          "date": "2026-01-19",
+          "amount": 7890,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "쿠팡와우월회비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w68zvzauumwme",
+          "date": "2026-01-19",
+          "amount": 21000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lipf2ti24x",
+          "date": "2026-01-19",
+          "amount": 2040,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마 병원비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w69vwy0yqx577",
+          "date": "2026-01-19",
+          "amount": 18000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w62rvm5krvgac",
+          "date": "2026-01-19",
+          "amount": 15500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w65bx6pua0d2b",
+          "date": "2026-01-19",
+          "amount": 14400,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66gshnviqih",
+          "date": "2026-01-19",
+          "amount": 15700,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ishr5rcexjn",
+          "date": "2026-01-19",
+          "amount": 6100,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w60kw69xbo239",
+          "date": "2026-01-20",
+          "amount": 24000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w61fghxdkjwm6",
+          "date": "2026-01-20",
+          "amount": 10100,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6kxs2cbbgrl8",
+          "date": "2026-01-20",
+          "amount": 4200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w61eiryt6gypz",
+          "date": "2026-01-20",
+          "amount": 6400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6cyixhgkzg3d",
+          "date": "2026-01-21",
+          "amount": 10800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6tzcmf1ykc3k",
+          "date": "2026-01-21",
+          "amount": 12200,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6o403t7llmsp",
+          "date": "2026-01-21",
+          "amount": 15000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6a1b9zih93h",
+          "date": "2026-01-21",
+          "amount": 24900,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마 입원 생필품",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66i39btm881",
+          "date": "2026-01-21",
+          "amount": 10900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6z0337t3sle",
+          "date": "2026-01-21",
+          "amount": 45000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64879u215p13",
+          "date": "2026-01-21",
+          "amount": 8800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6b43xs868xuf",
+          "date": "2026-01-21",
+          "amount": 300000,
+          "categoryId": "income_other",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "엄마 주거 급여",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6muy649j7657",
+          "date": "2026-01-21",
+          "amount": 11200,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w695ggpmq6f9g",
+          "date": "2026-01-21",
+          "amount": 49281,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "인터넷",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6e6fyu2twlh",
+          "date": "2026-01-21",
+          "amount": 23630,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "도시가스",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lgqk2whme4",
+          "date": "2026-01-21",
+          "amount": 2000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "삼쩜삼 환급조회",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6owy2coinkn",
+          "date": "2026-01-22",
+          "amount": 10800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w69433ush33t8",
+          "date": "2026-01-22",
+          "amount": 6000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w68bo7zydyhpp",
+          "date": "2026-01-22",
+          "amount": 3000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6muz3jaar9d",
+          "date": "2026-01-22",
+          "amount": 11300,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6tm49fmu0igj",
+          "date": "2026-01-22",
+          "amount": 3000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6rg2bme1gplk",
+          "date": "2026-01-22",
+          "amount": 17500,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6q4nyq98ik3c",
+          "date": "2026-01-22",
+          "amount": 35200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66nb7viodb17",
+          "date": "2026-01-23",
+          "amount": 5338950,
+          "categoryId": "incentive",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6f3h9m8tp7zo",
+          "date": "2026-01-23",
+          "amount": 1760730,
+          "categoryId": "salary",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6w41kjoximk",
+          "date": "2026-01-23",
+          "amount": 15400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6vc00akv9iym",
+          "date": "2026-01-23",
+          "amount": 15000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w688uwbqvtiht",
+          "date": "2026-01-23",
+          "amount": 18900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6o6n8pjkorkc",
+          "date": "2026-01-23",
+          "amount": 5100,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6h5dsmmb6x9a",
+          "date": "2026-01-23",
+          "amount": 1598520,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마 돈 (대인보험 잔금)",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6qlva08mqor",
+          "date": "2026-01-23",
+          "amount": 3000000,
+          "categoryId": "mrg808w6tlzsztk89wa",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6fyr7xdn45r",
+          "date": "2026-01-23",
+          "amount": 230000,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "에어팟4",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ijxp7b9kmcq",
+          "date": "2026-01-24",
+          "amount": 500000,
+          "categoryId": "income_other",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "엄마 주거급여+용돈선불",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w61tshyuzsvd3i",
+          "date": "2026-01-24",
+          "amount": 17500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64c4j4lbe7pj",
+          "date": "2026-01-24",
+          "amount": 26200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w65vfowpm2qy",
+          "date": "2026-01-25",
+          "amount": 20800,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "상의 - 니트",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w62w744wqviah",
+          "date": "2026-01-25",
+          "amount": 16900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6tbhg7tm805k",
+          "date": "2026-01-25",
+          "amount": 9800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w684un9ltul7g",
+          "date": "2026-01-26",
+          "amount": 34000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w696oc399usfs",
+          "date": "2026-01-26",
+          "amount": 5500,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마 택배비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6cxjbikl17z",
+          "date": "2026-01-26",
+          "amount": 4800,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마 택배비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6nx13xiv5gz9",
+          "date": "2026-01-26",
+          "amount": 34600,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "법인카드",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w650ikmnvc7o3",
+          "date": "2026-01-26",
+          "amount": 1785065,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6n3pzl5bagso",
+          "date": "2026-01-26",
+          "amount": 900000,
+          "categoryId": "rent",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6kmq93293rm",
+          "date": "2026-01-27",
+          "amount": 22600,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6v5a16st0d1k",
+          "date": "2026-01-28",
+          "amount": 4500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6k00qtqsc8mo",
+          "date": "2026-01-28",
+          "amount": 33800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6bs7gochsj9m",
+          "date": "2026-01-29",
+          "amount": 16700,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6uun1nqkzpln",
+          "date": "2026-01-29",
+          "amount": 4800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6rh6tl2xbs9g",
+          "date": "2026-01-29",
+          "amount": 31700,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6hj09u92uw0j",
+          "date": "2026-01-30",
+          "amount": 18600,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6o7lu9n2pct",
+          "date": "2026-01-30",
+          "amount": 13420,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w61ois8kaxu52",
+          "date": "2026-01-31",
+          "amount": 35900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w638mrmfijzp2",
+          "date": "2026-01-31",
+          "amount": 6300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6dp0o5o3r15w",
+          "date": "2026-02-01",
+          "amount": 86361,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6t3f5e02prg",
+          "date": "2026-02-01",
+          "amount": 29000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6wp0nqjkejws",
+          "date": "2026-02-01",
+          "amount": 3300,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "택배비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w69mjwfym5ofu",
+          "date": "2026-02-02",
+          "amount": 25450,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64sr9fo1q2gq",
+          "date": "2026-02-02",
+          "amount": 1000,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "신한할인캐시백",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6j2iah88iq6",
+          "date": "2026-02-02",
+          "amount": 15000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6uqyy6v7me9k",
+          "date": "2026-02-03",
+          "amount": 18500,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6h17xl8downf",
+          "date": "2026-02-03",
+          "amount": 10000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마 병원비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6rmsy7pcust",
+          "date": "2026-02-03",
+          "amount": 58500,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마담배값",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6sylshrn4pks",
+          "date": "2026-02-03",
+          "amount": 1500,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마라이터",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6gq4huc2ra9j",
+          "date": "2026-02-03",
+          "amount": 44000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6her7hwkvk6h",
+          "date": "2026-02-03",
+          "amount": 7000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마 다이소",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6kowlkmpzntj",
+          "date": "2026-02-03",
+          "amount": 11400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6q2kuet2d1zg",
+          "date": "2026-02-03",
+          "amount": 35,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "캐시백",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lrwmzvj4sj",
+          "date": "2026-02-03",
+          "amount": 16400,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6km8kw0g8wi",
+          "date": "2026-02-03",
+          "amount": 8100,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "택배비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w61s7o9ksyncv",
+          "date": "2026-02-03",
+          "amount": 4500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w68fi8z2jo7ct",
+          "date": "2026-02-04",
+          "amount": 1990,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6tv18saj1cr",
+          "date": "2026-02-04",
+          "amount": 3200,
+          "categoryId": "transport",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w60wn4aokl3oq",
+          "date": "2026-02-05",
+          "amount": 29000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6sbdloarjk5",
+          "date": "2026-02-06",
+          "amount": 22800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6livtjc5yydr",
+          "date": "2026-02-06",
+          "amount": 15000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6usojweuy2b",
+          "date": "2026-02-06",
+          "amount": 38600,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "피부과",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6c5wjihgtt9b",
+          "date": "2026-02-06",
+          "amount": 6300,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "피부과 약",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6k6g8odvvqe",
+          "date": "2026-02-06",
+          "amount": 13200,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w65ogf1pybk1n",
+          "date": "2026-02-06",
+          "amount": 18400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w67rg4l88z51q",
+          "date": "2026-02-07",
+          "amount": 432679,
+          "categoryId": "mrg808w6flg32jkg4sn",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6v6wfxfg669j",
+          "date": "2026-02-07",
+          "amount": 17500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6awukki7tqt6",
+          "date": "2026-02-08",
+          "amount": 19500,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ddh1cf8d1gb",
+          "date": "2026-02-08",
+          "amount": 24400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ktgkeuemu29",
+          "date": "2026-02-09",
+          "amount": 5500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6heflevilquo",
+          "date": "2026-02-09",
+          "amount": 20000,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "피부과",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6wo8fjh9npml",
+          "date": "2026-02-09",
+          "amount": 17900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w65ka93pdnl3s",
+          "date": "2026-02-09",
+          "amount": 41000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ba874avrx7",
+          "date": "2026-02-09",
+          "amount": 4500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6oqd51gzr6jq",
+          "date": "2026-02-10",
+          "amount": 50000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64pybedg7xst",
+          "date": "2026-02-11",
+          "amount": 18000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6yn1jj56aeu",
+          "date": "2026-02-11",
+          "amount": 19100,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w65bsoxzurqts",
+          "date": "2026-02-11",
+          "amount": 67165,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "1월 관리비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6g83vj60g0bp",
+          "date": "2026-02-12",
+          "amount": 18400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6db7w3eqltfb",
+          "date": "2026-02-12",
+          "amount": 40000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w697ax5rz5mj",
+          "date": "2026-02-13",
+          "amount": 6000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6eyrlmes41we",
+          "date": "2026-02-13",
+          "amount": 30800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6n52q8qkrge",
+          "date": "2026-02-14",
+          "amount": 20100,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6zfldm2qfeza",
+          "date": "2026-02-14",
+          "amount": 63520,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "생필품",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ojvye4x150k",
+          "date": "2026-02-15",
+          "amount": 18900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w611sziwgwldiq",
+          "date": "2026-02-15",
+          "amount": 20100,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ptmivtksj08",
+          "date": "2026-02-15",
+          "amount": 2200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6j1j3i3sa7mr",
+          "date": "2026-02-16",
+          "amount": 16800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w61kz1bqed48g",
+          "date": "2026-02-16",
+          "amount": 5600,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6h9x0gsuglfa",
+          "date": "2026-02-17",
+          "amount": 4800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6i94nxkt6kwr",
+          "date": "2026-02-17",
+          "amount": 30290,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6z5cj742e2e",
+          "date": "2026-02-17",
+          "amount": 63260,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ipyhqoz35d",
+          "date": "2026-02-17",
+          "amount": 27100,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6s6smhutb2vk",
+          "date": "2026-02-19",
+          "amount": 7890,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6o41rmqtuy6",
+          "date": "2026-02-19",
+          "amount": 20000,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w63vy299tgpxy",
+          "date": "2026-02-19",
+          "amount": 10510,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "수도요금",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6sbnxd8qdst",
+          "date": "2026-02-20",
+          "amount": 14600,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6hcbk4bzi6zw",
+          "date": "2026-02-20",
+          "amount": 9300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6vgxvqkndm6",
+          "date": "2026-02-20",
+          "amount": 118160,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "가스비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w69166w3pepxs",
+          "date": "2026-02-21",
+          "amount": 12300,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6qpsy4fdl6d",
+          "date": "2026-02-21",
+          "amount": 10800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6jgucc2pl4fa",
+          "date": "2026-02-21",
+          "amount": 62000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "예지점심약속",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6k1f2v2hcpso",
+          "date": "2026-02-21",
+          "amount": 39900,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "예지 생일선물",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6smt5xcq6ryl",
+          "date": "2026-02-21",
+          "amount": 39900,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "진희님 생일선물",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w67edk24cbd5h",
+          "date": "2026-02-21",
+          "amount": 39920,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6hb6zudvpqwp",
+          "date": "2026-02-22",
+          "amount": 4500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w65cop4xq7h3k",
+          "date": "2026-02-23",
+          "amount": 48483,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "SK브로드밴드 (해지전까지 요금나감)",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6w8mn2gfybz",
+          "date": "2026-02-23",
+          "amount": 15000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lm144pcpyeh",
+          "date": "2026-02-23",
+          "amount": 14900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w62jd59ok4oks",
+          "date": "2026-02-24",
+          "amount": 1080,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "음쓰봉투",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w62zffjzuzvxv",
+          "date": "2026-02-24",
+          "amount": 11900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6hluqf0t65hv",
+          "date": "2026-02-24",
+          "amount": 10400,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6zjfm3mlzwvk",
+          "date": "2026-02-24",
+          "amount": 34810,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "법카",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w60dx5ng0ydv98",
+          "date": "2026-02-24",
+          "amount": 16300,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6zlc4ywai1hm",
+          "date": "2026-02-25",
+          "amount": 5314750,
+          "categoryId": "salary",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w68s4n1nmpgp",
+          "date": "2026-02-25",
+          "amount": 23870,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "대전세무서",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6l535yxp6xy",
+          "date": "2026-02-25",
+          "amount": 1774650,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6slbj9iwn6z",
+          "date": "2026-02-26",
+          "amount": 4500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w67948636aab9",
+          "date": "2026-02-26",
+          "amount": 900000,
+          "categoryId": "rent",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w660e9odk2yp5",
+          "date": "2026-02-26",
+          "amount": 14300,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ma32qitu4al",
+          "date": "2026-02-26",
+          "amount": 24040,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "엄마 병원비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ilebps60f1e",
+          "date": "2026-02-26",
+          "amount": 38142,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "전기세",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6azxw0vz3o5c",
+          "date": "2026-02-27",
+          "amount": 9600,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "바이크",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6dpeyz28x0dq",
+          "date": "2026-02-27",
+          "amount": 11200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ufzt1fcqw2d",
+          "date": "2026-02-27",
+          "amount": 99000,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "PDT",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w67qd6lwazoq6",
+          "date": "2026-02-27",
+          "amount": 14600,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lkdmqxw1is",
+          "date": "2026-02-27",
+          "amount": 18640,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6dg4n93i4zwe",
+          "date": "2026-02-28",
+          "amount": 23700,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w67nh5nr80rpe",
+          "date": "2026-02-28",
+          "amount": 14220,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6bup45wpwnu",
+          "date": "2026-03-01",
+          "amount": 29000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w676xy61b7eml",
+          "date": "2026-03-01",
+          "amount": 14800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6i4g6hgagvi8",
+          "date": "2026-03-01",
+          "amount": 16700,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lzt4g380dgp",
+          "date": "2026-03-02",
+          "amount": 23800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6aktjxb5rqp",
+          "date": "2026-03-02",
+          "amount": 6000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6vumbw0467qn",
+          "date": "2026-03-02",
+          "amount": 20900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lemfohxeiu",
+          "date": "2026-03-02",
+          "amount": 24300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w61tsanjllpdr",
+          "date": "2026-03-02",
+          "amount": 3320,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "신한카드캐시백",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6gqgotdnms6m",
+          "date": "2026-03-02",
+          "amount": 810,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "음쓰봉투",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6hgf2zf9e56v",
+          "date": "2026-03-03",
+          "amount": 34810,
+          "categoryId": "income_other",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "법인카드 정산",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ftx0re3a07s",
+          "date": "2026-03-03",
+          "amount": 1990,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lyfgpfbmp5j",
+          "date": "2026-03-03",
+          "amount": 13900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6b4vxbcqjla6",
+          "date": "2026-03-03",
+          "amount": 1000,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "종이가방",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64awwswrwazg",
+          "date": "2026-03-03",
+          "amount": 5,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "캐시백",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w60qic0k03fksq",
+          "date": "2026-03-03",
+          "amount": 2200,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6hlx03e4kw1",
+          "date": "2026-03-04",
+          "amount": 4800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6osghhjvr2br",
+          "date": "2026-03-04",
+          "amount": 14900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6inq8jjeo8c",
+          "date": "2026-03-04",
+          "amount": 29000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6adxthufzw6m",
+          "date": "2026-03-04",
+          "amount": 6400,
+          "categoryId": "transport",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6r6mhajcqsp",
+          "date": "2026-03-04",
+          "amount": 22350,
+          "categoryId": "transport",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6saxo9anigce",
+          "date": "2026-03-04",
+          "amount": 15800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6hsjkzs56f2s",
+          "date": "2026-03-05",
+          "amount": 16000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64xmhcs5ickw",
+          "date": "2026-03-05",
+          "amount": 7100,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6p8xie9awsse",
+          "date": "2026-03-06",
+          "amount": 353654,
+          "categoryId": "mrg808w6flg32jkg4sn",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6la1kr59dow",
+          "date": "2026-03-06",
+          "amount": 17500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64h7v3qdgbhf",
+          "date": "2026-03-06",
+          "amount": 1350,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "음쓰봉투",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6tyblhjcxbj",
+          "date": "2026-03-06",
+          "amount": 108680,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "쿠팡",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6y0j7s5kdw77",
+          "date": "2026-03-06",
+          "amount": 14440,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "쿠팡 환불",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6gqbwb2sjo9",
+          "date": "2026-03-07",
+          "amount": 19500,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6uy35yqrg66",
+          "date": "2026-03-07",
+          "amount": 16000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lh1579lqxn9",
+          "date": "2026-03-07",
+          "amount": 23300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6cwlpqxoyfel",
+          "date": "2026-03-07",
+          "amount": 11990,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w62mc423gk6tg",
+          "date": "2026-03-07",
+          "amount": 21290,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lyeab8ipsc",
+          "date": "2026-03-08",
+          "amount": 8900,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6w9iy4by8ls",
+          "date": "2026-03-08",
+          "amount": 15500,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6b74535jrprd",
+          "date": "2026-03-08",
+          "amount": 12300,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6hn6rn2jqpa",
+          "date": "2026-03-08",
+          "amount": 1050,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "세금환급",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ba85gx3zjc",
+          "date": "2026-03-08",
+          "amount": 15200,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66s10q53i1na",
+          "date": "2026-03-08",
+          "amount": 20780,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w637t2z0e1xz3",
+          "date": "2026-03-09",
+          "amount": 18400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lgyl7h0mvmh",
+          "date": "2026-03-09",
+          "amount": 150000,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "당근 키보드",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6nvf3va8c17a",
+          "date": "2026-03-09",
+          "amount": 14160,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6v3h4cqljyq",
+          "date": "2026-03-09",
+          "amount": 1340,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "세금환급",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6y3ugzw5uo8",
+          "date": "2026-03-10",
+          "amount": 20400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6g6tqod23ob",
+          "date": "2026-03-10",
+          "amount": 13900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w67ih8b2jolme",
+          "date": "2026-03-10",
+          "amount": 6000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6m8agkr3qvan",
+          "date": "2026-03-11",
+          "amount": 17500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6cr1plavzien",
+          "date": "2026-03-11",
+          "amount": 1,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6z4gnjrfop4g",
+          "date": "2026-03-11",
+          "amount": 40000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66pu2t2t1bvn",
+          "date": "2026-03-11",
+          "amount": 19300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6jec2ngheqi",
+          "date": "2026-03-11",
+          "amount": 420,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6gjdw22vorui",
+          "date": "2026-03-11",
+          "amount": 400,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6385mde5iewe",
+          "date": "2026-03-12",
+          "amount": 67740,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "관리비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6dt7kdxxn6ji",
+          "date": "2026-03-12",
+          "amount": 23780,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6mrsavd52c7",
+          "date": "2026-03-12",
+          "amount": 5200,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마 병원 서류 발급비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6cva3wqzyrta",
+          "date": "2026-03-12",
+          "amount": 14400,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6vrjacyve3o",
+          "date": "2026-03-12",
+          "amount": 6020,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "KPass 환급",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6gzavwrj0gz",
+          "date": "2026-03-12",
+          "amount": 11200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6tl5h7zozvqe",
+          "date": "2026-03-12",
+          "amount": 21600,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w65z20gcdomvu",
+          "date": "2026-03-12",
+          "amount": 11100,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6z6duifqucg",
+          "date": "2026-03-12",
+          "amount": 15300,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66gqz0ikpuh",
+          "date": "2026-03-12",
+          "amount": 10000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "네이버페이카드",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w663esila8je9",
+          "date": "2026-03-13",
+          "amount": 29900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6jaqs1ejgy0b",
+          "date": "2026-03-13",
+          "amount": 10400,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w63l9lhz9mjg3",
+          "date": "2026-03-13",
+          "amount": 11700,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6upcvla9vuzl",
+          "date": "2026-03-14",
+          "amount": 5700,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w69b5yf7dexs",
+          "date": "2026-03-14",
+          "amount": 4180,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "인쇄비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6pxd2qyclgng",
+          "date": "2026-03-14",
+          "amount": 15124,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "다이소",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66m7zkyttgdp",
+          "date": "2026-03-14",
+          "amount": 19000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ioarqff3wu",
+          "date": "2026-03-14",
+          "amount": 9000,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6u55mp9v1tvl",
+          "date": "2026-03-16",
+          "amount": 15000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6zg7u7x7rijk",
+          "date": "2026-03-16",
+          "amount": 2500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6uffytvuyfsl",
+          "date": "2026-03-16",
+          "amount": 2250,
+          "categoryId": "transport",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6e908xe6ujok",
+          "date": "2026-03-16",
+          "amount": 10400,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6igj6ey15h6s",
+          "date": "2026-03-16",
+          "amount": 19820,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6fhukj3azqjs",
+          "date": "2026-03-17",
+          "amount": 24000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64zrax3wwxhp",
+          "date": "2026-03-17",
+          "amount": 4500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6olm93zlzhke",
+          "date": "2026-03-17",
+          "amount": 15300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6bqaafv36j1m",
+          "date": "2026-03-18",
+          "amount": 16500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6yntwecq6by",
+          "date": "2026-03-18",
+          "amount": 16000,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6mjbnqm53xmf",
+          "date": "2026-03-18",
+          "amount": 51050,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6gads5u1mw79",
+          "date": "2026-03-19",
+          "amount": 7890,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6m64kb050ybd",
+          "date": "2026-03-19",
+          "amount": 18400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6kiframie5v",
+          "date": "2026-03-19",
+          "amount": 24000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ijy69t9c2s",
+          "date": "2026-03-20",
+          "amount": 21700,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w65n566pby1v4",
+          "date": "2026-03-20",
+          "amount": 13900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6wy9kne44jg",
+          "date": "2026-03-20",
+          "amount": 7200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6btwsom1l1zn",
+          "date": "2026-03-20",
+          "amount": 11400,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66gjzuj9zp7y",
+          "date": "2026-03-20",
+          "amount": 55110,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w673yklpvbo69",
+          "date": "2026-03-21",
+          "amount": 16300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6bls7chfpzap",
+          "date": "2026-03-21",
+          "amount": 26800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6crirc9wbka",
+          "date": "2026-03-22",
+          "amount": 14800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6gqdo7q7ney",
+          "date": "2026-03-22",
+          "amount": 35700,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "법인카드정산",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w65xkv77cw7j5",
+          "date": "2026-03-22",
+          "amount": 30300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6jdscxxp9a7n",
+          "date": "2026-03-22",
+          "amount": 12900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w61h5a0nvlp3w",
+          "date": "2026-03-22",
+          "amount": 1,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "은행인증",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6zmfyoldxdvj",
+          "date": "2026-03-22",
+          "amount": 3030,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "SK브로드밴드",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6wxmjhi2349",
+          "date": "2026-03-23",
+          "amount": 14900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6vip10c6qqn",
+          "date": "2026-03-23",
+          "amount": 35700,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "법인카드",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6s2nguxmiitd",
+          "date": "2026-03-23",
+          "amount": 21000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "세탁소",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w65qnzwhi8m2l",
+          "date": "2026-03-23",
+          "amount": 4000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6d6fr8ld0gk",
+          "date": "2026-03-24",
+          "amount": 5336880,
+          "categoryId": "salary",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w68mncc8oa806",
+          "date": "2026-03-24",
+          "amount": 19900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66h5dgnh4wk4",
+          "date": "2026-03-24",
+          "amount": 10500,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6tus5e7phny",
+          "date": "2026-03-24",
+          "amount": 6000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6sb8v3myohjd",
+          "date": "2026-03-24",
+          "amount": 28000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6444vxn4kxhe",
+          "date": "2026-03-24",
+          "amount": 9700,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6a1chwq2odzi",
+          "date": "2026-03-24",
+          "amount": 7100,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6i7cm2pqbfg",
+          "date": "2026-03-24",
+          "amount": 77000,
+          "categoryId": "beauty",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ukwpgc3w2m",
+          "date": "2026-03-24",
+          "amount": 2900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6rq2y1pbed5c",
+          "date": "2026-03-24",
+          "amount": 924600,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6uepd4405zd",
+          "date": "2026-03-25",
+          "amount": 17800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6rvhgzshonmo",
+          "date": "2026-03-25",
+          "amount": 800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6z0jwke3e43n",
+          "date": "2026-03-25",
+          "amount": 4800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6w5q81zhn17b",
+          "date": "2026-03-25",
+          "amount": 30000,
+          "categoryId": "beauty",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "병원 상담비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6d413143lqz6",
+          "date": "2026-03-26",
+          "amount": 900000,
+          "categoryId": "rent",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6brapq8teyk",
+          "date": "2026-03-26",
+          "amount": 18400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6gzv39r8jtzu",
+          "date": "2026-03-27",
+          "amount": 23400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w69bogjyaymdj",
+          "date": "2026-03-29",
+          "amount": 16000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "세탁비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6m2xvioa1wrl",
+          "date": "2026-03-29",
+          "amount": 45000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마담배",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6v1kple8mir",
+          "date": "2026-03-30",
+          "amount": 6800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w60ogumb1qopnl",
+          "date": "2026-03-30",
+          "amount": 7000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마 택배비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w62exef6z7ynw",
+          "date": "2026-03-31",
+          "amount": 29000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6l55pwrvgny",
+          "date": "2026-03-31",
+          "amount": 14600,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6n4l1u8to71",
+          "date": "2026-03-31",
+          "amount": 10000,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w62xwz913q1uy",
+          "date": "2026-03-31",
+          "amount": 5000,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "캐시백",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ed65bwx2j3b",
+          "date": "2026-04-02",
+          "amount": 14700,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w63n4ey6fchop",
+          "date": "2026-04-03",
+          "amount": 4300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66bggcfm4fzm",
+          "date": "2026-04-03",
+          "amount": 18550,
+          "categoryId": "transport",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6yum6nrx2xvq",
+          "date": "2026-04-03",
+          "amount": 8150,
+          "categoryId": "transport",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6tl1ptfu5kto",
+          "date": "2026-04-04",
+          "amount": 1990,
+          "categoryId": "subscription",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ljmq3xxe84",
+          "date": "2026-04-04",
+          "amount": 328126,
+          "categoryId": "mrg808w6flg32jkg4sn",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w61dxhmww2pa3",
+          "date": "2026-04-05",
+          "amount": 6000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6wulcxaxhulm",
+          "date": "2026-04-05",
+          "amount": 29000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ll5d2qboq7",
+          "date": "2026-04-05",
+          "amount": 447,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "집주인 한테 잘못 보낸 돈 500 - 캐시백 53",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6dx08jt9fxgc",
+          "date": "2026-04-06",
+          "amount": 20000,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "피부과",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66xgde5gee4m",
+          "date": "2026-04-07",
+          "amount": 14200,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6uuai92p02m",
+          "date": "2026-04-07",
+          "amount": 15600,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6xsjd9oavrdd",
+          "date": "2026-04-08",
+          "amount": 19500,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6lzdibh9k4y",
+          "date": "2026-04-08",
+          "amount": 15100,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w69frch115uju",
+          "date": "2026-04-08",
+          "amount": 4500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6y5z3boxwxa9",
+          "date": "2026-04-10",
+          "amount": 25000,
+          "categoryId": "entertainment",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "여권사진",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6f4acyz4pyee",
+          "date": "2026-04-10",
+          "amount": 32000,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "노스카나+애크논",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6zxgek6jucek",
+          "date": "2026-04-10",
+          "amount": 50960,
+          "categoryId": "entertainment",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "여권 재발급",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w68hxfbdllc5a",
+          "date": "2026-04-11",
+          "amount": 7800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6z6hbp2f1fo",
+          "date": "2026-04-12",
+          "amount": 40000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6yjf06ew5um",
+          "date": "2026-04-12",
+          "amount": 5800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w65jx9gsgwun9",
+          "date": "2026-04-12",
+          "amount": 600,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6mld0ehznxy",
+          "date": "2026-04-12",
+          "amount": 3000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6g7292jc1vgm",
+          "date": "2026-04-13",
+          "amount": 66882,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6oz9prjfy91j",
+          "date": "2026-04-13",
+          "amount": 18800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ghxjb64r055",
+          "date": "2026-04-13",
+          "amount": 76000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ngm52ohbo3",
+          "date": "2026-04-13",
+          "amount": 10000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6cxdprm9w8pm",
+          "date": "2026-04-13",
+          "amount": 13700,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마다이소",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6yn5fszca47c",
+          "date": "2026-04-13",
+          "amount": 68,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "현금캐시백",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ffpcn02nfn",
+          "date": "2026-04-13",
+          "amount": 11500,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6wub9ic9a0ok",
+          "date": "2026-04-13",
+          "amount": 19700,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w684kklw21rwa",
+          "date": "2026-04-14",
+          "amount": 11840,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "수도",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6zbcueu8ldvg",
+          "date": "2026-04-14",
+          "amount": 180865,
+          "categoryId": "travel",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "일본 마쓰야마 여행 호텔비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6c3o2qui7ri9",
+          "date": "2026-04-14",
+          "amount": 699708,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "일본 마쓰야마 여행 - 예지",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w62g2nvy09n3q",
+          "date": "2026-04-14",
+          "amount": 4500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w67070qeg0ofh",
+          "date": "2026-04-14",
+          "amount": 14400,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6xb6r1nr5sy9",
+          "date": "2026-04-14",
+          "amount": 1620,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w639xcc16d9m8",
+          "date": "2026-04-14",
+          "amount": 4140,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마 법원 우편",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6w2hkz1a8at",
+          "date": "2026-04-14",
+          "amount": 1460,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6zkp1n3hnznp",
+          "date": "2026-04-14",
+          "amount": 1200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6sw2e27ljhqh",
+          "date": "2026-04-16",
+          "amount": 14500,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6mjle1l9x9zg",
+          "date": "2026-04-17",
+          "amount": 45400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6fue4dqmlali",
+          "date": "2026-04-17",
+          "amount": 12000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6uymzb3wicd",
+          "date": "2026-04-17",
+          "amount": 4500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w67qe41y8vuvd",
+          "date": "2026-04-18",
+          "amount": 7500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6hsztq63vwj6",
+          "date": "2026-04-20",
+          "amount": 17500,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64xko8cuimem",
+          "date": "2026-04-20",
+          "amount": 6600,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6g9dihuoqf2k",
+          "date": "2026-04-20",
+          "amount": 18000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w69o523pavtrs",
+          "date": "2026-04-20",
+          "amount": 48880,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6g54cam7uauc",
+          "date": "2026-04-21",
+          "amount": 4650,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6sk53gm12go",
+          "date": "2026-04-21",
+          "amount": 128600,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "이불",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w603a858bqujl",
+          "date": "2026-04-21",
+          "amount": 10500,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66qetbgcd82w",
+          "date": "2026-04-21",
+          "amount": 10900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w66mywibin57w",
+          "date": "2026-04-21",
+          "amount": 4500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w604l1p9cn6ow",
+          "date": "2026-04-22",
+          "amount": 1,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "은행인증",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6t3vcoff5shp",
+          "date": "2026-04-22",
+          "amount": 12000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6x9i9nob9hz",
+          "date": "2026-04-22",
+          "amount": 1200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6uv7c9tn5ngf",
+          "date": "2026-04-23",
+          "amount": 146440,
+          "categoryId": "income_other",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "법인카드정산",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6f6dsja8zq3n",
+          "date": "2026-04-23",
+          "amount": 12300,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6yoevp1yod4h",
+          "date": "2026-04-23",
+          "amount": 600,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6db7cf37wuz",
+          "date": "2026-04-23",
+          "amount": 68000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "진희님 술 (대신비용)",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6ldx01ojonv8",
+          "date": "2026-04-24",
+          "amount": 4949390,
+          "categoryId": "salary",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6f4vm767oin4",
+          "date": "2026-04-24",
+          "amount": 287710,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w63vus7m30kpu",
+          "date": "2026-04-25",
+          "amount": 9200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w638k89g1c1pi",
+          "date": "2026-04-26",
+          "amount": 900000,
+          "categoryId": "rent",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6o04ynxbt7e",
+          "date": "2026-04-27",
+          "amount": 16100,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6h1us1jvukpi",
+          "date": "2026-04-27",
+          "amount": 34000,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "진희님 대신비용",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6zunomjvj7w",
+          "date": "2026-04-27",
+          "amount": 261480,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w64g11fr7790m",
+          "date": "2026-04-27",
+          "amount": 9000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6etxxdv4a5nk",
+          "date": "2026-04-27",
+          "amount": 70,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "전기요금",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6mwoufshkaet",
+          "date": "2026-04-30",
+          "amount": 8500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w63d6wbkkcyna",
+          "date": "2026-05-01",
+          "amount": 29000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6a90yextp7ye",
+          "date": "2026-05-01",
+          "amount": 64540,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "Usb 멀티 허브",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w69xij0c1o34g",
+          "date": "2026-05-02",
+          "amount": 2200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6xwg35t6i1a",
+          "date": "2026-05-03",
+          "amount": 5300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6rtwde6j7lz",
+          "date": "2026-05-04",
+          "amount": 1990,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6be50zq7aqom",
+          "date": "2026-05-04",
+          "amount": 16900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6bn6hokm9zij",
+          "date": "2026-05-04",
+          "amount": 11000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6vjnbzj3dgua",
+          "date": "2026-05-04",
+          "amount": 5500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6isitjaarow",
+          "date": "2026-05-04",
+          "amount": 3000,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "캐시백",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6qocjjcldyjh",
+          "date": "2026-05-04",
+          "amount": 30000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6xbejkhrfjs9",
+          "date": "2026-05-04",
+          "amount": 7200,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6yqfgbhby1yl",
+          "date": "2026-05-04",
+          "amount": 20000,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "상담비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w69e9tj5ukf5l",
+          "date": "2026-05-04",
+          "amount": 2000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6up71s5x4aso",
+          "date": "2026-05-04",
+          "amount": 20200,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6t448bxr5h3",
+          "date": "2026-05-05",
+          "amount": 165766,
+          "categoryId": "entertainment",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "Codex",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6dxx9da3g0r",
+          "date": "2026-05-05",
+          "amount": 29000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "Gemini",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6qm731c10sdf",
+          "date": "2026-05-05",
+          "amount": 33184,
+          "categoryId": "entertainment",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "Codex",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w63kxk7wggszp",
+          "date": "2026-05-06",
+          "amount": 1024600,
+          "categoryId": "travel",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "항공권 (예지+나) 카드값",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6fwn6m70tdin",
+          "date": "2026-05-06",
+          "amount": 451000,
+          "categoryId": "beauty",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "제모(피부과)",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6llmzvvwr8so",
+          "date": "2026-05-06",
+          "amount": 5000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6evfgyc78gb",
+          "date": "2026-05-06",
+          "amount": 10000,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "상담비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6xmxzhumlnu",
+          "date": "2026-05-06",
+          "amount": 13200,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w6um7vma94ec",
+          "date": "2026-05-06",
+          "amount": 5300,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7yctj8wzgtna",
+          "date": "2026-05-07",
+          "amount": 2150,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7nnnme7bmces",
+          "date": "2026-05-07",
+          "amount": 2800000,
+          "categoryId": "beauty",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "교정",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7y6elgek5yob",
+          "date": "2026-05-07",
+          "amount": 13000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7ap8vcdfuxyb",
+          "date": "2026-05-07",
+          "amount": 21050,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w77nree86doj6",
+          "date": "2026-05-08",
+          "amount": 19500,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7rimrzbiursq",
+          "date": "2026-05-08",
+          "amount": 17060,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7r4k6b2pvh3e",
+          "date": "2026-05-08",
+          "amount": 2100,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7vj0dus6g2se",
+          "date": "2026-05-08",
+          "amount": 23000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7e4dw6bwl74",
+          "date": "2026-05-09",
+          "amount": 396830,
+          "categoryId": "mrg808w6flg32jkg4sn",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w75ndlf178x1q",
+          "date": "2026-05-09",
+          "amount": 23000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7h0htqqnf7t",
+          "date": "2026-05-09",
+          "amount": 5500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7bz04tc9ay5p",
+          "date": "2026-05-10",
+          "amount": 59306,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "책장",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7bq3m3fajyzc",
+          "date": "2026-05-12",
+          "amount": 40000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7oriqawo5i0h",
+          "date": "2026-05-12",
+          "amount": 15500,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7drxs11olb8u",
+          "date": "2026-05-14",
+          "amount": 15600,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7uj2i5u58t9",
+          "date": "2026-05-15",
+          "amount": 400000,
+          "categoryId": "mrg808w6tlzsztk89wa",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "8160 만큼 옮기고, 8200만원 상환",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7kodnjoccd4q",
+          "date": "2026-05-15",
+          "amount": 1000000,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "엄마 용돈 반환",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w79j6e8nbmvrt",
+          "date": "2026-05-15",
+          "amount": 66290,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "관리비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w72i145gjcu9f",
+          "date": "2026-05-15",
+          "amount": 11840,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "수도",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w73uwa347fc4l",
+          "date": "2026-05-16",
+          "amount": 62000,
+          "categoryId": "beauty",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "두피 스케일링 + 커트",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7c33cgn0h2p",
+          "date": "2026-05-17",
+          "amount": 19100,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "종량제+폐기물스티커",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7ihltwa17k1m",
+          "date": "2026-05-18",
+          "amount": 138000,
+          "categoryId": "subscription",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "Investing Pro 1년",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7x43fkg561p",
+          "date": "2026-05-18",
+          "amount": 20600,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7ocwt5rsys5b",
+          "date": "2026-05-18",
+          "amount": 10000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "커피값+택배선불",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7ny87izut21",
+          "date": "2026-05-19",
+          "amount": 15800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7txqg4cawaa",
+          "date": "2026-05-19",
+          "amount": 15200,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7c9i8e7wvzxm",
+          "date": "2026-05-19",
+          "amount": 16700,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7illp6ljdm4",
+          "date": "2026-05-19",
+          "amount": 15900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7ku5os6sxwod",
+          "date": "2026-05-19",
+          "amount": 20000,
+          "categoryId": "beauty",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "염증주사",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7d6h70nmi3ni",
+          "date": "2026-05-19",
+          "amount": 30000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7ehsjnm1zr1n",
+          "date": "2026-05-19",
+          "amount": 10500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w79gmezr04oao",
+          "date": "2026-05-19",
+          "amount": 37500,
+          "categoryId": "healthcare",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "약국: 안약+반창고",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7djsgvcjqr8",
+          "date": "2026-05-19",
+          "amount": 230000,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "주방수납장+잠옷+실내화",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7tz6w2rxyrs7",
+          "date": "2026-05-20",
+          "amount": 36260,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "편의점 (아이스크림+종량제) / 네이버페이 -40000원",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7m23il5mvmds",
+          "date": "2026-05-20",
+          "amount": 9000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7yvntrx9b3ca",
+          "date": "2026-05-20",
+          "amount": 25900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w72zpmqfsegvg",
+          "date": "2026-05-20",
+          "amount": 19260,
+          "categoryId": "utility",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "가스비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7ntwx3a5kgwg",
+          "date": "2026-05-21",
+          "amount": 5100,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "회사 음식",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7a96y1u8celq",
+          "date": "2026-05-21",
+          "amount": 26500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w71zuttkx2z2s",
+          "date": "2026-05-22",
+          "amount": 101500,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "택시비 (신갈->공항)",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7m3jv93fgu1c",
+          "date": "2026-05-22",
+          "amount": 5890050,
+          "categoryId": "salary",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7qa4m0jk3q8k",
+          "date": "2026-05-22",
+          "amount": 673340,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "법인카드 정산",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7tr858dnjq1",
+          "date": "2026-05-22",
+          "amount": 201945,
+          "categoryId": "entertainment",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "마쓰야마 여행 경비",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w72fq84ncc14",
+          "date": "2026-05-23",
+          "amount": 198475,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "단톤 반팔티 3장",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7ch2wydtheef",
+          "date": "2026-05-24",
+          "amount": 147619,
+          "categoryId": "entertainment",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "마쓰야마 여행 경비 정산",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7jvxu29viz3",
+          "date": "2026-05-24",
+          "amount": 15000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w74a9a1ih3mmh",
+          "date": "2026-05-24",
+          "amount": 8900,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "지갑",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w75czxg9zi8q7",
+          "date": "2026-05-24",
+          "amount": 8000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "종량제",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w75izvi46dyp9",
+          "date": "2026-05-24",
+          "amount": 13100,
+          "categoryId": "transport",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "공항버스 취소 수수료: 1700",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w78zbvvb66lk8",
+          "date": "2026-05-25",
+          "amount": 26400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w78mc8nuguz4e",
+          "date": "2026-05-26",
+          "amount": 51100,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "해운대 달맞이빵",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7p3y6v73z4w",
+          "date": "2026-05-26",
+          "amount": 24500,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7heg739gutd",
+          "date": "2026-05-26",
+          "amount": 24100,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7l0efxb3cpwo",
+          "date": "2026-05-26",
+          "amount": 17300,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7226nm33h9ka",
+          "date": "2026-05-26",
+          "amount": 18285,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "보조배터리",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w71gq7sdfclfy",
+          "date": "2026-05-26",
+          "amount": 4890,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "필름 벽지",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w77b4rgyjrzru",
+          "date": "2026-05-26",
+          "amount": 956350,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "법카",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7olzbkxk779",
+          "date": "2026-05-26",
+          "amount": 3116450,
+          "categoryId": "mrg808w6o2pl8htahf",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "할부: 모니터+세탁기+책",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7yfarlloa63c",
+          "date": "2026-05-26",
+          "amount": 900000,
+          "categoryId": "rent",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w738waxk3no34",
+          "date": "2026-05-27",
+          "amount": 15370,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7qco0yolmixi",
+          "date": "2026-05-28",
+          "amount": 13600,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7hnmnvqt96gg",
+          "date": "2026-05-28",
+          "amount": 24800,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7lsblxs3bc2",
+          "date": "2026-05-29",
+          "amount": 15700,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w77jgjyr5wfbr",
+          "date": "2026-05-29",
+          "amount": 23000,
+          "categoryId": "expense_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "택배비 착불",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7a7aa943oj7f",
+          "date": "2026-05-29",
+          "amount": 43740,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "막내이모 마스크",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7rvet9ekshkj",
+          "date": "2026-05-31",
+          "amount": 24500,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w71nrrh1otzms",
+          "date": "2026-06-01",
+          "amount": 8830,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7bmdcgvodefj",
+          "date": "2026-06-01",
+          "amount": 2000,
+          "categoryId": "income_other",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "캐시백",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w70uepbn4zqa2c",
+          "date": "2026-06-01",
+          "amount": 15100,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w73upu8a3p0oc",
+          "date": "2026-06-01",
+          "amount": 18900,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7stxdbvt4wa8",
+          "date": "2026-06-02",
+          "amount": 23000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7v9c556geft8",
+          "date": "2026-06-02",
+          "amount": 25000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7jun8xwk63lg",
+          "date": "2026-06-03",
+          "amount": 18400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7dtx326ugx4m",
+          "date": "2026-06-04",
+          "amount": 17400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w78n3ppnaeiu7",
+          "date": "2026-06-04",
+          "amount": 15900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7claqejjcs1g",
+          "date": "2026-06-04",
+          "amount": 29150,
+          "categoryId": "transport",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "후불교통카드",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w74hc9bylll8z",
+          "date": "2026-06-04",
+          "amount": 8800,
+          "categoryId": "subscription",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "Spendee 구독",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7mselse63zd",
+          "date": "2026-06-04",
+          "amount": 1990,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w714r9pv58kq2",
+          "date": "2026-06-05",
+          "amount": 16000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7lwsqjou8r2d",
+          "date": "2026-06-06",
+          "amount": 70788,
+          "categoryId": "mrg808w6flg32jkg4sn",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7q60r1s1krvg",
+          "date": "2026-06-06",
+          "amount": 16400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w749sw9mppy6z",
+          "date": "2026-06-06",
+          "amount": 23000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7x36wgkzumi",
+          "date": "2026-06-07",
+          "amount": 15400,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7xwpljud1ndq",
+          "date": "2026-06-07",
+          "amount": 27000,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7jo1226ddvfl",
+          "date": "2026-06-07",
+          "amount": 56450,
+          "categoryId": "shopping",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7a6vnimepjz7",
+          "date": "2026-06-08",
+          "amount": 19500,
+          "categoryId": "subscription",
+          "labelIds": [
+            "fixed"
+          ],
+          "note": "유튜브 프리미엄",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7e7xlmyl0osb",
+          "date": "2026-06-08",
+          "amount": 12900,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w705zylpztrdja",
+          "date": "2026-06-08",
+          "amount": 21800,
+          "categoryId": "food_drink",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        },
+        {
+          "id": "mrg808w7z8qago4q6yh",
+          "date": "2026-06-08",
+          "amount": 15000,
+          "categoryId": "transport",
+          "labelIds": [
+            "variable"
+          ],
+          "note": "",
+          "repeat": "none",
+          "repeatEndDate": ""
+        }
+      ]
+    }
+  ],
+  "selectedWalletId": "wallet_converted",
+  "categories": [
+    {
+      "id": "salary",
+      "name": "Salary",
+      "type": "income",
+      "color": "#1565c0",
+      "icon": "salary"
+    },
+    {
+      "id": "incentive",
+      "name": "Incentive",
+      "type": "income",
+      "color": "#43a047",
+      "icon": "gift"
+    },
+    {
+      "id": "income_other",
+      "name": "Other",
+      "type": "income",
+      "color": "#0288d1",
+      "icon": "wallet"
+    },
+    {
+      "id": "food_drink",
+      "name": "Food & Drink",
+      "type": "expense",
+      "color": "#c62828",
+      "icon": "food"
+    },
+    {
+      "id": "groceries",
+      "name": "Groceries",
+      "type": "expense",
+      "color": "#ef6c00",
+      "icon": "cart"
+    },
+    {
+      "id": "shopping",
+      "name": "Shopping",
+      "type": "expense",
+      "color": "#6a1b9a",
+      "icon": "cart"
+    },
+    {
+      "id": "transport",
+      "name": "Transport",
+      "type": "expense",
+      "color": "#0277bd",
+      "icon": "bus"
+    },
+    {
+      "id": "rent",
+      "name": "Rent",
+      "type": "expense",
+      "color": "#37474f",
+      "icon": "house"
+    },
+    {
+      "id": "utility",
+      "name": "Utility Bills",
+      "type": "expense",
+      "color": "#00897b",
+      "icon": "utility"
+    },
+    {
+      "id": "entertainment",
+      "name": "Entertainment",
+      "type": "expense",
+      "color": "#d81b60",
+      "icon": "entertainment"
+    },
+    {
+      "id": "travel",
+      "name": "Travel",
+      "type": "expense",
+      "color": "#1976d2",
+      "icon": "travel"
+    },
+    {
+      "id": "healthcare",
+      "name": "Healthcare",
+      "type": "expense",
+      "color": "#2e7d32",
+      "icon": "hospital"
+    },
+    {
+      "id": "education",
+      "name": "Education",
+      "type": "expense",
+      "color": "#5d4037",
+      "icon": "study"
+    },
+    {
+      "id": "subscription",
+      "name": "Subscription",
+      "type": "expense",
+      "color": "#7e57c2",
+      "icon": "subscription"
+    },
+    {
+      "id": "car",
+      "name": "Car",
+      "type": "expense",
+      "color": "#455a64",
+      "icon": "car"
+    },
+    {
+      "id": "hobby",
+      "name": "Hobby",
+      "type": "expense",
+      "color": "#ff7043",
+      "icon": "hobby"
+    },
+    {
+      "id": "beauty",
+      "name": "Beauty",
+      "type": "expense",
+      "color": "#ec407a",
+      "icon": "spark"
+    },
+    {
+      "id": "expense_other",
+      "name": "Other",
+      "type": "expense",
+      "color": "#78909c",
+      "icon": "spark"
+    },
+    {
+      "id": "mrg808w6flg32jkg4sn",
+      "name": "Loan Interest",
+      "type": "expense",
+      "color": "#f4511e",
+      "icon": "spark"
+    },
+    {
+      "id": "mrg808w6o2pl8htahf",
+      "name": "Credit Card",
+      "type": "expense",
+      "color": "#546e7a",
+      "icon": "spark"
+    },
+    {
+      "id": "mrg808w65gy4eub9c0b",
+      "name": "Investment Profit",
+      "type": "income",
+      "color": "#ab47bc",
+      "icon": "spark"
+    },
+    {
+      "id": "mrg808w6tlzsztk89wa",
+      "name": "Investment",
+      "type": "expense",
+      "color": "#8d6e63",
+      "icon": "spark"
+    }
+  ],
+  "labels": [
+    {
+      "id": "fixed",
+      "name": "Fixed"
+    },
+    {
+      "id": "variable",
+      "name": "Variable"
+    },
+    {
+      "id": "events",
+      "name": "Events"
+    },
+    {
+      "id": "lieu",
+      "name": "Payment in lieu of"
+    }
+  ],
+  "language": "ko"
+}

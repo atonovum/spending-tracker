@@ -130,7 +130,7 @@ function WalletEditModal({ opened, wallet, isOnly, onClose, onRename, onDelete }
   );
 }
 
-function ImportModal({ opened, onClose, parsed, fileName, wallets, onConfirm, error }) {
+function ImportModal({ opened, onClose, parsed, fileName, wallets, onConfirm, error, newCategories = [], newLabels = [] }) {
   const { t } = useI18n();
   const [target, setTarget] = useState("__new__");
   const incoming = parsed?.wallet || (Array.isArray(parsed?.wallets) ? parsed.wallets[0] : null);
@@ -166,6 +166,45 @@ function ImportModal({ opened, onClose, parsed, fileName, wallets, onConfirm, er
                 count: incomingCount,
               })}
             </Text>
+            {(newCategories.length > 0 || newLabels.length > 0) && (
+              <Stack gap="xs" p="xs" style={{ border: "1px solid var(--mantine-color-gray-3)", borderRadius: "var(--mantine-radius-md)" }}>
+                {newCategories.length > 0 && (
+                  <div>
+                    <Text size="xs" fw={700} c="dimmed" mb={4}>
+                      {t("settings.wallets.csvNewCategories", { count: newCategories.length })}
+                    </Text>
+                    <Group gap="xs">
+                      {newCategories.map((cat) => (
+                        <Badge
+                          key={cat.id}
+                          variant="filled"
+                          style={{ backgroundColor: cat.color }}
+                          size="sm"
+                        >
+                          {cat.name} ({cat.type === "income"
+                            ? t("settings.categories.tab.income", { count: 0 }).replace(" (0)", "")
+                            : t("settings.categories.tab.expense", { count: 0 }).replace(" (0)", "")})
+                        </Badge>
+                      ))}
+                    </Group>
+                  </div>
+                )}
+                {newLabels.length > 0 && (
+                  <div style={{ marginTop: newCategories.length > 0 ? 8 : 0 }}>
+                    <Text size="xs" fw={700} c="dimmed" mb={4}>
+                      {t("settings.wallets.csvNewLabels", { count: newLabels.length })}
+                    </Text>
+                    <Group gap="xs">
+                      {newLabels.map((lbl) => (
+                        <Badge key={lbl.id} variant="light" color="gray" size="sm">
+                          {lbl.name}
+                        </Badge>
+                      ))}
+                    </Group>
+                  </div>
+                )}
+              </Stack>
+            )}
             <Select
               label={t("settings.wallets.importTarget")}
               data={data}
@@ -207,7 +246,7 @@ export function WalletsCard({
   const jsonInputRef = useRef(null);
   const csvInputRef = useRef(null);
   const [editModal, setEditModal] = useState({ open: false, wallet: null });
-  const [importModal, setImportModal] = useState({ open: false, parsed: null, fileName: "", error: "" });
+  const [importModal, setImportModal] = useState({ open: false, parsed: null, fileName: "", error: "", newCategories: [], newLabels: [] });
 
   const canAddWallet = state.wallets.length < MAX_WALLETS;
 
@@ -234,7 +273,9 @@ export function WalletsCard({
             open: true,
             parsed: null,
             fileName: file.name,
-            error: t("settings.wallets.importCsvError")
+            error: t("settings.wallets.importCsvError"),
+            newCategories: [],
+            newLabels: [],
           });
           return;
         }
@@ -252,38 +293,34 @@ export function WalletsCard({
           labels: [...state.labels, ...result.newLabels],
         };
 
-        const infoParts = [];
-        if (result.newCategories.length > 0) {
-          infoParts.push(t("settings.wallets.csvNewCategories", { count: result.newCategories.length }));
-        }
-        if (result.newLabels.length > 0) {
-          infoParts.push(t("settings.wallets.csvNewLabels", { count: result.newLabels.length }));
-        }
-
         setImportModal({
           open: true,
           parsed,
           fileName: file.name,
-          error: infoParts.join("\n"),
+          error: "",
+          newCategories: result.newCategories || [],
+          newLabels: result.newLabels || [],
         });
       } else {
         // Import from JSON
         const parsed = JSON.parse(text);
-        setImportModal({ open: true, parsed, fileName: file.name, error: "" });
+        setImportModal({ open: true, parsed, fileName: file.name, error: "", newCategories: [], newLabels: [] });
       }
     } catch (err) {
       setImportModal({
         open: true,
         parsed: null,
         fileName: file.name,
-        error: format === "csv" ? t("settings.wallets.importCsvError") : t("settings.wallets.importError")
+        error: format === "csv" ? t("settings.wallets.importCsvError") : t("settings.wallets.importError"),
+        newCategories: [],
+        newLabels: [],
       });
     }
   }
 
   function confirmImport(targetWalletId) {
     onImportWallet(importModal.parsed, targetWalletId);
-    setImportModal({ open: false, parsed: null, fileName: "", error: "" });
+    setImportModal({ open: false, parsed: null, fileName: "", error: "", newCategories: [], newLabels: [] });
   }
 
   function requestDelete(wallet) {
@@ -386,12 +423,14 @@ export function WalletsCard({
 
       <ImportModal
         opened={importModal.open}
-        onClose={() => setImportModal({ open: false, parsed: null, fileName: "", error: "" })}
+        onClose={() => setImportModal({ open: false, parsed: null, fileName: "", error: "", newCategories: [], newLabels: [] })}
         parsed={importModal.parsed}
         fileName={importModal.fileName}
         wallets={state.wallets}
         onConfirm={confirmImport}
         error={importModal.error}
+        newCategories={importModal.newCategories}
+        newLabels={importModal.newLabels}
       />
     </>
   );
