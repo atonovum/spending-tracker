@@ -495,6 +495,7 @@ function CategoryLabelTotals({ items, categoryId, getLabel, categories }) {
 
 function PieChart({ items, type }) {
   const { t, formatMoney } = useI18n();
+  const isMobile = useMediaQuery("(max-width: 48em)");
   const width = 400;
   const height = 400;
   const cx = width / 2;
@@ -541,7 +542,6 @@ function PieChart({ items, type }) {
           strokeLinejoin="round"
         />
       ))}
-      {/* donut hole */}
       <circle cx={cx} cy={cy} r={radius * 0.58} fill={CHART.surface} />
       <circle cx={cx} cy={cy} r={radius * 0.58} fill="none" stroke={CHART.grid} strokeWidth="1" />
       <text
@@ -549,7 +549,8 @@ function PieChart({ items, type }) {
         y={cy - 8}
         textAnchor="middle"
         dominantBaseline="central"
-        className="fill-muted text-[12px]"
+        className="fill-muted"
+        style={{ fontSize: isMobile ? 10 : 12 }}
       >
         {t(type === "income" ? "stats.totalIncome" : "stats.totalExpense")}
       </text>
@@ -558,8 +559,7 @@ function PieChart({ items, type }) {
         y={cy + 12}
         textAnchor="middle"
         dominantBaseline="central"
-        className="text-[19px]"
-        style={{ fill: CHART.ink, fontWeight: 800, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}
+        style={{ fill: CHART.ink, fontWeight: 800, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", fontSize: isMobile ? 15 : 19 }}
       >
         {formatMoney(sum)}
       </text>
@@ -590,8 +590,7 @@ function PieChart({ items, type }) {
               y={py}
               textAnchor="middle"
               dominantBaseline="central"
-              className="text-[11px]"
-              style={{ fill: CHART.ink, fontWeight: 600 }}
+              style={{ fill: CHART.ink, fontWeight: 600, fontSize: isMobile ? 13 : 11 }}
             >
               {percentText}
             </text>
@@ -767,7 +766,7 @@ function EntryList({ items, onEdit }) {
                       <CategoryIcon category={category} size={18} />
                     </span>
                     <div className="min-w-0 text-left">
-                      <div className="truncate font-semibold text-ink">
+                      <div className="truncate text-sm sm:text-base font-semibold text-ink">
                         {category.name}
                         {itemLabels.map((lbl) => (
                           <span
@@ -783,7 +782,7 @@ function EntryList({ items, onEdit }) {
                     </div>
                     <div className="text-right">
                       <div
-                        className="font-bold"
+                        className="text-sm sm:text-base font-bold"
                         style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
                       >
                         {formatTransactionMoney(signedAmount(item), currency)}
@@ -1955,7 +1954,7 @@ function App({ state, setState }) {
                                           <CategoryIcon category={category} size={18} />
                                         </span>
                                         <div className="min-w-0 text-left">
-                                          <div className="truncate font-semibold text-ink">
+                                          <div className="truncate text-sm sm:text-base font-semibold text-ink">
                                             {category.name}
                                             {itemLabels.map((lbl) => (
                                               <span
@@ -1971,7 +1970,7 @@ function App({ state, setState }) {
                                         </div>
                                         <div className="text-right">
                                           <div
-                                            className="font-bold"
+                                            className="text-sm sm:text-base font-bold"
                                             style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
                                           >
                                             {formatTransactionMoney(signedAmount(item), currency)}
@@ -2225,6 +2224,7 @@ function App({ state, setState }) {
 
 function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }) {
   const t = useT();
+  const isMobile = useMediaQuery("(max-width: 48em)");
   const initialCategory = categories.find((c) => c.id === entry?.categoryId);
   const initialLabelIds = normalizeLabelIds(entry);
 
@@ -2340,7 +2340,7 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
             data={labels.map((label) => ({ value: label.id, label: label.name }))}
             value={labelIds}
             onChange={setLabelIds}
-            searchable
+            searchable={!isMobile}
             clearable
             hidePickedOptions
             placeholder={t("entry.field.label")}
