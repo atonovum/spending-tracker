@@ -7,6 +7,22 @@ function uid() {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
+const CATEGORY_COLOR_PALETTE = [
+  "#c62828", "#ef6c00", "#6a1b9a", "#0277bd", "#37474f",
+  "#00897b", "#d81b60", "#1976d2", "#2e7d32", "#5d4037",
+  "#7e57c2", "#455a64", "#ff7043", "#ec407a", "#78909c",
+  "#1565c0", "#43a047", "#0288d1", "#8d6e63", "#546e7a",
+  "#3949ab", "#f4511e", "#00acc1", "#7cb342", "#ab47bc",
+];
+
+function pickUnusedColor(usedColors) {
+  const available = CATEGORY_COLOR_PALETTE.filter((c) => !usedColors.has(c));
+  if (available.length > 0) {
+    return available[Math.floor(Math.random() * available.length)];
+  }
+  return CATEGORY_COLOR_PALETTE[Math.floor(Math.random() * CATEGORY_COLOR_PALETTE.length)];
+}
+
 /**
  * Serialize a wallet to CSV format
  * @param {Object} wallet - The wallet object with entries
@@ -84,6 +100,8 @@ export function parseWalletCsv(text, categories, labels) {
     entries: [],
     rejected: [],
     unknownLabels: new Set(),
+    newCategories: [],
+    newLabels: [],
     error: null,
   };
 
@@ -102,10 +120,11 @@ export function parseWalletCsv(text, categories, labels) {
 
   const categoryMap = new Map();
   for (const cat of categories) {
-    const key = `${cat.type}:${cat.name}`;
+    const key = `${cat.type.toLowerCase()}:${cat.name}`;
     categoryMap.set(key, cat.id);
   }
 
+  const usedColors = new Set(categories.map((cat) => cat.color));
   const labelNameToId = new Map(labels.map((lbl) => [lbl.name, lbl.id]));
 
   for (let i = 0; i < parsed.data.length; i++) {
@@ -134,30 +153,33 @@ export function parseWalletCsv(text, categories, labels) {
       continue;
     }
 
-    // Match category by (Type, Category name)
-    const categoryKey = `${row.Type}:${row.Category}`;
-    const categoryId = categoryMap.get(categoryKey);
+    // Match category by (type, name) — case-insensitive type, auto-create if missing
+    const type = row.Type.toLowerCase();
+    const categoryKey = `${type}:${row.Category}`;
+    let categoryId = categoryMap.get(categoryKey);
     if (!categoryId) {
-      result.rejected.push({
-        row: rowNumber,
-        reason: "missingCategory",
-        category: row.Category,
-        type: row.Type,
-      });
-      continue;
+      const newId = uid();
+      const color = pickUnusedColor(usedColors);
+      usedColors.add(color);
+      const newCat = { id: newId, name: row.Category, type, color, icon: "spark" };
+      result.newCategories.push(newCat);
+      categoryMap.set(categoryKey, newId);
+      categoryId = newId;
     }
 
-    // Parse labels
+    // Parse labels — auto-create if missing
     const labelIds = [];
     if (row.Labels && row.Labels.trim()) {
       const labelNames = row.Labels.split(";").map((name) => name.trim()).filter(Boolean);
       for (const name of labelNames) {
-        const labelId = labelNameToId.get(name);
-        if (labelId) {
-          labelIds.push(labelId);
-        } else {
-          result.unknownLabels.add(name);
+        let labelId = labelNameToId.get(name);
+        if (!labelId) {
+          const newId = uid();
+          result.newLabels.push({ id: newId, name });
+          labelNameToId.set(name, newId);
+          labelId = newId;
         }
+        labelIds.push(labelId);
       }
     }
 

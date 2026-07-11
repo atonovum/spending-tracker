@@ -306,18 +306,46 @@ describe("parseWalletCsv", () => {
     });
   });
 
-  it("should reject row with missing category", () => {
+  it("should auto-create missing category", () => {
     const csv = `Date,Type,Category,Amount,Note,Labels
 2026-01-15,Expense,Unknown,10000,Test,`;
     const result = parseWalletCsv(csv, categories, labels);
-    expect(result.entries).toHaveLength(0);
-    expect(result.rejected).toHaveLength(1);
-    expect(result.rejected[0]).toMatchObject({
-      row: 2,
-      reason: "missingCategory",
-      category: "Unknown",
-      type: "Expense",
+    expect(result.entries).toHaveLength(1);
+    expect(result.rejected).toHaveLength(0);
+    expect(result.newCategories).toHaveLength(1);
+    expect(result.newCategories[0]).toMatchObject({
+      name: "Unknown",
+      type: "expense",
+      icon: "spark",
     });
+    expect(result.newCategories[0].id).toBeDefined();
+    expect(result.newCategories[0].color).toBeDefined();
+    expect(result.entries[0].categoryId).toBe(result.newCategories[0].id);
+  });
+
+  it("should match existing category case-insensitively on type", () => {
+    const lowercaseCategories = [
+      { id: "cat1", name: "Salary", type: "income" },
+      { id: "cat2", name: "Groceries", type: "expense" },
+    ];
+    const csv = `Date,Type,Category,Amount,Note,Labels
+2026-01-15,Income,Salary,50000,Test,
+2026-01-16,Expense,Groceries,30000,Test,`;
+    const result = parseWalletCsv(csv, lowercaseCategories, labels);
+    expect(result.entries).toHaveLength(2);
+    expect(result.newCategories).toHaveLength(0);
+    expect(result.entries[0].categoryId).toBe("cat1");
+    expect(result.entries[1].categoryId).toBe("cat2");
+  });
+
+  it("should reuse same auto-created category for multiple rows", () => {
+    const csv = `Date,Type,Category,Amount,Note,Labels
+2026-01-15,Expense,NewCat,10000,First,
+2026-01-16,Expense,NewCat,20000,Second,`;
+    const result = parseWalletCsv(csv, categories, labels);
+    expect(result.entries).toHaveLength(2);
+    expect(result.newCategories).toHaveLength(1);
+    expect(result.entries[0].categoryId).toBe(result.entries[1].categoryId);
   });
 
   it("should reject row with invalid date format", () => {
@@ -352,14 +380,29 @@ describe("parseWalletCsv", () => {
     expect(result.entries[0].amount).toBe(30000);
   });
 
-  it("should track unknown labels but not reject row", () => {
+  it("should auto-create unknown labels", () => {
     const csv = `Date,Type,Category,Amount,Note,Labels
 2026-01-15,Income,Salary,50000,Test,Work;UnknownLabel;Events`;
     const result = parseWalletCsv(csv, categories, labels);
     expect(result.entries).toHaveLength(1);
-    expect(result.entries[0].labelIds).toEqual(["lbl3", "lbl2"]);
-    expect(result.unknownLabels).toContain("UnknownLabel");
+    expect(result.newLabels).toHaveLength(1);
+    expect(result.newLabels[0]).toMatchObject({ name: "UnknownLabel" });
+    expect(result.newLabels[0].id).toBeDefined();
+    expect(result.entries[0].labelIds).toHaveLength(3);
+    expect(result.entries[0].labelIds[0]).toBe("lbl3");
+    expect(result.entries[0].labelIds[1]).toBe(result.newLabels[0].id);
+    expect(result.entries[0].labelIds[2]).toBe("lbl2");
     expect(result.rejected).toHaveLength(0);
+  });
+
+  it("should reuse same auto-created label for multiple rows", () => {
+    const csv = `Date,Type,Category,Amount,Note,Labels
+2026-01-15,Income,Salary,50000,First,NewLabel
+2026-01-16,Income,Salary,30000,Second,NewLabel`;
+    const result = parseWalletCsv(csv, categories, labels);
+    expect(result.entries).toHaveLength(2);
+    expect(result.newLabels).toHaveLength(1);
+    expect(result.entries[0].labelIds[0]).toBe(result.entries[1].labelIds[0]);
   });
 
   it("should parse CSV with RFC 4180 escaped commas", () => {

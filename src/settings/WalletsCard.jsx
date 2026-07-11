@@ -239,53 +239,32 @@ export function WalletsCard({
           return;
         }
 
-        if (result.rejected.length > 0) {
-          // Show error modal with missing categories
-          const missingCategories = new Set();
-          result.rejected.forEach((rej) => {
-            if (rej.reason === "missingCategory") {
-              missingCategories.add(`${rej.type}: ${rej.category}`);
-            }
-          });
-
-          if (missingCategories.size > 0) {
-            const categoryList = Array.from(missingCategories).join(", ");
-            setImportModal({
-              open: true,
-              parsed: null,
-              fileName: file.name,
-              error: `${t("settings.wallets.csvMissingCategories")}\n${categoryList}`
-            });
-            return;
-          }
-        }
-
         // Convert CSV result to wallet format
         const csvWallet = {
-          id: "", // Will be generated on import
+          id: "",
           name: file.name.replace(/\.csv$/i, ""),
           entries: result.entries,
         };
 
         const parsed = {
           wallet: csvWallet,
-          categories: state.categories,
-          labels: state.labels,
+          categories: [...state.categories, ...result.newCategories],
+          labels: [...state.labels, ...result.newLabels],
         };
 
-        // Show info about unknown labels if any
-        let successMessage = "";
-        if (result.unknownLabels.size > 0) {
-          successMessage = t("settings.wallets.csvUnknownLabels", {
-            count: result.unknownLabels.size
-          });
+        const infoParts = [];
+        if (result.newCategories.length > 0) {
+          infoParts.push(t("settings.wallets.csvNewCategories", { count: result.newCategories.length }));
+        }
+        if (result.newLabels.length > 0) {
+          infoParts.push(t("settings.wallets.csvNewLabels", { count: result.newLabels.length }));
         }
 
         setImportModal({
           open: true,
           parsed,
           fileName: file.name,
-          error: successMessage
+          error: infoParts.join("\n"),
         });
       } else {
         // Import from JSON
