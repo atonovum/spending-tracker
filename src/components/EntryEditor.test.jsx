@@ -77,7 +77,8 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     await waitForModal();
 
     // Find the entry by note inside the modal
-    const entryCard = screen.getByText(note).closest('div[class*="Paper"]');
+    const modal = screen.getByRole('dialog');
+    const entryCard = within(modal).getByText(note).closest('div[class*="Paper"]');
     await user.click(entryCard);
 
     // Wait for EntryEditor modal to open

@@ -1,0 +1,579 @@
+Date,Type,Category,Amount,Note,Labels
+2025-11-01,income,Other,3891923,이월 자금,Variable
+2025-11-01,expense,Food & Drink,48830,,Variable
+2025-11-03,expense,Healthcare,330000,,Variable
+2025-11-05,expense,Subscription,30000,,Fixed
+2025-11-06,income,Other,17290,법인카드 정산,Fixed
+2025-11-08,expense,Loan Interest,366416,,Fixed
+2025-11-10,expense,Education,20000,파고다 스피킹 책,Variable
+2025-11-15,expense,Shopping,22380,기초케어,Variable
+2025-11-15,expense,Shopping,48900,휴지,Variable
+2025-11-19,expense,Subscription,7890,쿠팡와우 월회비,Fixed
+2025-11-20,expense,Food & Drink,16420,,Variable
+2025-11-21,income,Other,34600,법인카드 정산,Fixed
+2025-11-21,expense,Utility Bills,48483,,Fixed
+2025-11-22,expense,Food & Drink,28300,,Variable
+2025-11-23,expense,Food & Drink,26000,,Variable
+2025-11-24,expense,Food & Drink,27500,,Variable
+2025-11-24,expense,Credit Card,922566,법인카드,Variable
+2025-11-25,expense,Transport,11800,,Variable
+2025-11-25,expense,Other,363000,부동산 중개비,Variable
+2025-11-25,expense,Credit Card,672601,,Variable
+2025-11-26,expense,Food & Drink,43000,,Variable
+2025-11-26,expense,Food & Drink,13400,,Variable
+2025-11-26,expense,Food & Drink,32000,,Variable
+2025-11-27,expense,Food & Drink,6500,,Variable
+2025-11-27,expense,Food & Drink,43000,,Variable
+2025-11-28,expense,Food & Drink,15000,,Variable
+2025-11-28,expense,Food & Drink,36000,,Variable
+2025-11-29,expense,Food & Drink,12800,,Variable
+2025-11-29,expense,Food & Drink,29300,,Variable
+2025-11-29,expense,Other,1500,"애플 결제, 뭔지는 모르겠음",Variable
+2025-11-30,expense,Food & Drink,17900,,Variable
+2025-11-30,expense,Subscription,60000,,Fixed
+2025-11-30,expense,Food & Drink,44190,,Variable
+2025-12-01,expense,Food & Drink,18900,,Variable
+2025-12-01,expense,Subscription,29000,,Fixed
+2025-12-01,income,Other,1957970,막내이모 주식 자금 -> 생활비로 전환,Variable
+2025-12-02,expense,Food & Drink,16000,,Variable
+2025-12-03,expense,Subscription,1990,,Fixed
+2025-12-03,expense,Food & Drink,38000,,Variable
+2025-12-04,expense,Food & Drink,11400,,Variable
+2025-12-04,expense,Food & Drink,35500,,Variable
+2025-12-05,expense,Food & Drink,20500,,Variable
+2025-12-05,expense,Subscription,29000,,Fixed
+2025-12-05,expense,Other,44000,UpNote 구매,Variable
+2025-12-06,expense,Loan Interest,288291,,Fixed
+2025-12-06,expense,Shopping,23900,기초케어 (세라마이드),Variable
+2025-12-06,expense,Food & Drink,13500,,Variable
+2025-12-07,expense,Food & Drink,25500,,Variable
+2025-12-08,expense,Subscription,19500,,Fixed
+2025-12-08,expense,Transport,6600,,Variable
+2025-12-09,expense,Food & Drink,16000,,Variable
+2025-12-10,expense,Food & Drink,30000,,Variable
+2025-12-11,expense,Food & Drink,13200,,Variable
+2025-12-12,expense,Subscription,40000,,Fixed
+2025-12-12,expense,Food & Drink,13700,,Variable
+2025-12-13,expense,Food & Drink,8920,,Variable
+2025-12-14,expense,Food & Drink,26400,,Variable
+2025-12-14,expense,Shopping,26510,"마스크팩, 영양제",Variable
+2025-12-15,expense,Food & Drink,15400,,Variable
+2025-12-16,expense,Food & Drink,19500,,Variable
+2025-12-16,expense,Food & Drink,40800,,Variable
+2025-12-17,expense,Food & Drink,15100,,Variable
+2025-12-17,expense,Food & Drink,13000,,Variable
+2025-12-18,expense,Food & Drink,17900,,Variable
+2025-12-19,expense,Food & Drink,36500,,Variable
+2025-12-19,expense,Food & Drink,17300,,Variable
+2025-12-19,expense,Subscription,7890,쿠팡 월회비,Fixed
+2025-12-20,expense,Entertainment,10000,관상 상세 분석 서비스,Variable
+2025-12-20,expense,Food & Drink,25900,,Variable
+2025-12-20,expense,Other,60000,입주청소 예약금,Variable
+2025-12-21,expense,Shopping,8790,,Variable
+2025-12-22,expense,Utility Bills,48483,인터넷,Fixed
+2025-12-22,expense,Food & Drink,54000,,Variable
+2025-12-23,income,Other,34600,법인카드정산,Variable
+2025-12-24,expense,Credit Card,655405,법인카드,Variable
+2025-12-25,expense,Shopping,26000,,Variable
+2025-12-25,expense,Entertainment,30000,엄마 사주,Variable
+2025-12-25,expense,Food & Drink,2000,붕어빵,Variable
+2025-12-26,expense,Other,200000,입주청소,Variable
+2025-12-26,expense,Credit Card,490428,현대카드,Variable
+2025-12-27,income,Investment Profit,560379,,Variable
+2025-12-28,expense,Food & Drink,29000,,Variable
+2025-12-29,expense,Credit Card,148873,현대카드,Variable
+2025-12-30,expense,Food & Drink,3000,붕어빵+오뎅,Variable
+2025-12-31,expense,Subscription,60000,,Fixed
+2026-01-01,expense,Subscription,29000,,Fixed
+2026-01-01,expense,Subscription,17000,,Fixed
+2026-01-02,expense,Other,200000,변호사 상담비용,Variable
+2026-01-02,expense,Food & Drink,7000,붕어빵+오뎅,Variable
+2026-01-03,income,Other,1000000,막내이모 주식 자금 -> 생활비로 전환,Variable
+2026-01-03,expense,Loan Interest,276565,,Fixed
+2026-01-04,expense,Subscription,1990,,Fixed
+2026-01-04,expense,Food & Drink,33900,,Variable
+2026-01-05,expense,Subscription,29000,,Fixed
+2026-01-07,expense,Food & Drink,34900,,Variable
+2026-01-08,expense,Subscription,19500,,Fixed
+2026-01-08,expense,Transport,21300,,Variable
+2026-01-08,expense,Food & Drink,28400,,Variable
+2026-01-10,expense,Food & Drink,11100,,Variable
+2026-01-10,expense,Other,67600,착불 택배비 (소파+탁자),Variable
+2026-01-10,expense,Food & Drink,36400,,Variable
+2026-01-11,expense,Transport,5800,,Variable
+2026-01-11,expense,Transport,5500,,Variable
+2026-01-11,expense,Food & Drink,14000,,Variable
+2026-01-12,income,Other,2500000,막내이모 주식자금 -> 생활비로 전환,Variable
+2026-01-12,expense,Transport,11900,,Variable
+2026-01-12,expense,Food & Drink,21200,,Variable
+2026-01-12,expense,Food & Drink,35000,,Variable
+2026-01-12,expense,Subscription,40000,,Fixed
+2026-01-14,expense,Food & Drink,22000,,Variable
+2026-01-14,income,Other,61,현대카드 이자,Variable
+2026-01-14,expense,Food & Drink,25800,,Variable
+2026-01-15,expense,Food & Drink,18600,,Variable
+2026-01-17,expense,Food & Drink,4000,,Variable
+2026-01-17,expense,Food & Drink,18700,,Variable
+2026-01-18,expense,Other,17000,택배비 착불 (거실장),Variable
+2026-01-18,expense,Food & Drink,19400,,Variable
+2026-01-19,expense,Subscription,7890,쿠팡와우월회비,Fixed
+2026-01-19,expense,Transport,21000,,Variable
+2026-01-19,expense,Other,2040,엄마 병원비,Variable
+2026-01-19,expense,Transport,18000,,Variable
+2026-01-19,expense,Food & Drink,15500,,Variable
+2026-01-19,expense,Transport,14400,,Variable
+2026-01-19,expense,Transport,15700,,Variable
+2026-01-19,expense,Food & Drink,6100,,Variable
+2026-01-20,expense,Transport,24000,,Variable
+2026-01-20,expense,Transport,10100,,Variable
+2026-01-20,expense,Food & Drink,4200,,Variable
+2026-01-20,expense,Food & Drink,6400,,Variable
+2026-01-21,expense,Transport,10800,,Variable
+2026-01-21,expense,Transport,12200,,Variable
+2026-01-21,expense,Food & Drink,15000,,Variable
+2026-01-21,expense,Other,24900,엄마 입원 생필품,Variable
+2026-01-21,expense,Transport,10900,,Variable
+2026-01-21,expense,Food & Drink,45000,,Variable
+2026-01-21,expense,Food & Drink,8800,,Variable
+2026-01-21,income,Other,300000,엄마 주거 급여,Fixed
+2026-01-21,expense,Transport,11200,,Variable
+2026-01-21,expense,Utility Bills,49281,인터넷,Fixed
+2026-01-21,expense,Utility Bills,23630,도시가스,Fixed
+2026-01-21,expense,Other,2000,삼쩜삼 환급조회,Variable
+2026-01-22,expense,Transport,10800,,Variable
+2026-01-22,expense,Food & Drink,6000,,Variable
+2026-01-22,expense,Food & Drink,3000,,Variable
+2026-01-22,expense,Transport,11300,,Variable
+2026-01-22,expense,Food & Drink,3000,,Variable
+2026-01-22,expense,Transport,17500,,Variable
+2026-01-22,expense,Food & Drink,35200,,Variable
+2026-01-23,income,Incentive,5338950,,Fixed
+2026-01-23,income,Salary,1760730,,Fixed
+2026-01-23,expense,Food & Drink,15400,,Variable
+2026-01-23,expense,Transport,15000,,Variable
+2026-01-23,expense,Transport,18900,,Variable
+2026-01-23,expense,Food & Drink,5100,,Variable
+2026-01-23,expense,Other,1598520,엄마 돈 (대인보험 잔금),Variable
+2026-01-23,expense,Investment,3000000,,Fixed
+2026-01-23,expense,Shopping,230000,에어팟4,Variable
+2026-01-24,income,Other,500000,엄마 주거급여+용돈선불,Fixed
+2026-01-24,expense,Food & Drink,17500,,Variable
+2026-01-24,expense,Food & Drink,26200,,Variable
+2026-01-25,expense,Shopping,20800,상의 - 니트,Variable
+2026-01-25,expense,Food & Drink,16900,,Variable
+2026-01-25,expense,Food & Drink,9800,,Variable
+2026-01-26,expense,Food & Drink,34000,,Variable
+2026-01-26,expense,Other,5500,엄마 택배비,Variable
+2026-01-26,expense,Other,4800,엄마 택배비,Variable
+2026-01-26,expense,Credit Card,34600,법인카드,Variable
+2026-01-26,expense,Credit Card,1785065,,Variable
+2026-01-26,expense,Rent,900000,,Fixed
+2026-01-27,expense,Food & Drink,22600,,Variable
+2026-01-28,expense,Food & Drink,4500,,Variable
+2026-01-28,expense,Food & Drink,33800,,Variable
+2026-01-29,expense,Food & Drink,16700,,Variable
+2026-01-29,expense,Food & Drink,4800,,Variable
+2026-01-29,expense,Food & Drink,31700,,Variable
+2026-01-30,expense,Food & Drink,18600,,Variable
+2026-01-30,expense,Shopping,13420,,Variable
+2026-01-31,expense,Food & Drink,35900,,Variable
+2026-01-31,expense,Food & Drink,6300,,Variable
+2026-02-01,expense,Shopping,86361,,Variable
+2026-02-01,expense,Subscription,29000,,Fixed
+2026-02-01,expense,Other,3300,택배비,Variable
+2026-02-02,expense,Food & Drink,25450,,Variable
+2026-02-02,income,Other,1000,신한할인캐시백,Variable
+2026-02-02,expense,Food & Drink,15000,,Variable
+2026-02-03,expense,Transport,18500,,Variable
+2026-02-03,expense,Other,10000,엄마 병원비,Variable
+2026-02-03,expense,Other,58500,엄마담배값,Variable
+2026-02-03,expense,Other,1500,엄마라이터,Variable
+2026-02-03,expense,Food & Drink,44000,,Variable
+2026-02-03,expense,Other,7000,엄마 다이소,Variable
+2026-02-03,expense,Food & Drink,11400,,Variable
+2026-02-03,income,Other,35,캐시백,Variable
+2026-02-03,expense,Transport,16400,,Variable
+2026-02-03,expense,Other,8100,택배비,Variable
+2026-02-03,expense,Food & Drink,4500,,Variable
+2026-02-04,expense,Subscription,1990,,Fixed
+2026-02-04,expense,Transport,3200,,Fixed
+2026-02-05,expense,Subscription,29000,,Fixed
+2026-02-06,expense,Food & Drink,22800,,Variable
+2026-02-06,expense,Transport,15000,,Variable
+2026-02-06,expense,Healthcare,38600,피부과,Variable
+2026-02-06,expense,Healthcare,6300,피부과 약,Variable
+2026-02-06,expense,Transport,13200,,Variable
+2026-02-06,expense,Food & Drink,18400,,Variable
+2026-02-07,expense,Loan Interest,432679,,Fixed
+2026-02-07,expense,Food & Drink,17500,,Variable
+2026-02-08,expense,Subscription,19500,,Fixed
+2026-02-08,expense,Food & Drink,24400,,Variable
+2026-02-09,expense,Food & Drink,5500,,Variable
+2026-02-09,expense,Healthcare,20000,피부과,Variable
+2026-02-09,expense,Transport,17900,,Variable
+2026-02-09,expense,Food & Drink,41000,,Variable
+2026-02-09,expense,Food & Drink,4500,,Variable
+2026-02-10,expense,Food & Drink,50000,,Variable
+2026-02-11,expense,Food & Drink,18000,,Variable
+2026-02-11,expense,Food & Drink,19100,,Variable
+2026-02-11,expense,Utility Bills,67165,1월 관리비,Fixed
+2026-02-12,expense,Food & Drink,18400,,Variable
+2026-02-12,expense,Subscription,40000,,Fixed
+2026-02-13,expense,Food & Drink,6000,,Variable
+2026-02-13,expense,Food & Drink,30800,,Variable
+2026-02-14,expense,Food & Drink,20100,,Variable
+2026-02-14,expense,Shopping,63520,생필품,Variable
+2026-02-15,expense,Food & Drink,18900,,Variable
+2026-02-15,expense,Food & Drink,20100,,Variable
+2026-02-15,expense,Food & Drink,2200,,Variable
+2026-02-16,expense,Food & Drink,16800,,Variable
+2026-02-16,expense,Food & Drink,5600,,Variable
+2026-02-17,expense,Food & Drink,4800,,Variable
+2026-02-17,expense,Shopping,30290,,Variable
+2026-02-17,expense,Shopping,63260,,Variable
+2026-02-17,expense,Shopping,27100,,Variable
+2026-02-19,expense,Subscription,7890,,Fixed
+2026-02-19,expense,Healthcare,20000,,Variable
+2026-02-19,expense,Utility Bills,10510,수도요금,Fixed
+2026-02-20,expense,Transport,14600,,Variable
+2026-02-20,expense,Food & Drink,9300,,Variable
+2026-02-20,expense,Utility Bills,118160,가스비,Fixed
+2026-02-21,expense,Transport,12300,,Variable
+2026-02-21,expense,Transport,10800,,Variable
+2026-02-21,expense,Food & Drink,62000,예지점심약속,Variable
+2026-02-21,expense,Other,39900,예지 생일선물,Variable
+2026-02-21,expense,Other,39900,진희님 생일선물,Variable
+2026-02-21,expense,Shopping,39920,,Variable
+2026-02-22,expense,Food & Drink,4500,,Variable
+2026-02-23,expense,Other,48483,SK브로드밴드 (해지전까지 요금나감),Variable
+2026-02-23,expense,Transport,15000,,Variable
+2026-02-23,expense,Transport,14900,,Variable
+2026-02-24,expense,Other,1080,음쓰봉투,Variable
+2026-02-24,expense,Transport,11900,,Variable
+2026-02-24,expense,Transport,10400,,Variable
+2026-02-24,expense,Credit Card,34810,법카,Variable
+2026-02-24,expense,Transport,16300,,Variable
+2026-02-25,income,Salary,5314750,,Fixed
+2026-02-25,income,Other,23870,대전세무서,Variable
+2026-02-25,expense,Credit Card,1774650,,Variable
+2026-02-26,expense,Food & Drink,4500,,Variable
+2026-02-26,expense,Rent,900000,,Fixed
+2026-02-26,expense,Transport,14300,,Variable
+2026-02-26,expense,Other,24040,엄마 병원비,Fixed
+2026-02-26,expense,Utility Bills,38142,전기세,Fixed
+2026-02-27,expense,Transport,9600,바이크,Variable
+2026-02-27,expense,Food & Drink,11200,,Variable
+2026-02-27,expense,Healthcare,99000,PDT,Variable
+2026-02-27,expense,Transport,14600,,Variable
+2026-02-27,expense,Food & Drink,18640,,Variable
+2026-02-28,expense,Food & Drink,23700,,Variable
+2026-02-28,expense,Food & Drink,14220,,Variable
+2026-03-01,expense,Subscription,29000,,Fixed
+2026-03-01,expense,Food & Drink,14800,,Variable
+2026-03-01,expense,Food & Drink,16700,,Variable
+2026-03-02,expense,Food & Drink,23800,,Variable
+2026-03-02,expense,Food & Drink,6000,,Variable
+2026-03-02,expense,Food & Drink,20900,,Variable
+2026-03-02,expense,Food & Drink,24300,,Variable
+2026-03-02,income,Other,3320,신한카드캐시백,Variable
+2026-03-02,expense,Other,810,음쓰봉투,Variable
+2026-03-03,income,Other,34810,법인카드 정산,Fixed
+2026-03-03,expense,Subscription,1990,,Fixed
+2026-03-03,expense,Transport,13900,,Variable
+2026-03-03,expense,Shopping,1000,종이가방,Variable
+2026-03-03,income,Other,5,캐시백,Variable
+2026-03-03,expense,Shopping,2200,,Variable
+2026-03-04,expense,Transport,4800,,Variable
+2026-03-04,expense,Transport,14900,,Variable
+2026-03-04,expense,Subscription,29000,,Fixed
+2026-03-04,expense,Transport,6400,,Fixed
+2026-03-04,expense,Transport,22350,,Fixed
+2026-03-04,expense,Transport,15800,,Variable
+2026-03-05,expense,Food & Drink,16000,,Variable
+2026-03-05,expense,Shopping,7100,,Variable
+2026-03-06,expense,Loan Interest,353654,,Fixed
+2026-03-06,expense,Food & Drink,17500,,Variable
+2026-03-06,expense,Shopping,1350,음쓰봉투,Variable
+2026-03-06,expense,Shopping,108680,쿠팡,Variable
+2026-03-06,income,Other,14440,쿠팡 환불,Variable
+2026-03-07,expense,Subscription,19500,,Fixed
+2026-03-07,expense,Food & Drink,16000,,Variable
+2026-03-07,expense,Food & Drink,23300,,Variable
+2026-03-07,expense,Shopping,11990,,Variable
+2026-03-07,expense,Shopping,21290,,Variable
+2026-03-08,expense,Shopping,8900,,Variable
+2026-03-08,expense,Shopping,15500,,Variable
+2026-03-08,expense,Transport,12300,,Variable
+2026-03-08,income,Other,1050,세금환급,Variable
+2026-03-08,expense,Transport,15200,,Variable
+2026-03-08,expense,Shopping,20780,,Variable
+2026-03-09,expense,Food & Drink,18400,,Variable
+2026-03-09,expense,Shopping,150000,당근 키보드,Variable
+2026-03-09,expense,Transport,14160,,Variable
+2026-03-09,income,Other,1340,세금환급,Variable
+2026-03-10,expense,Food & Drink,20400,,Variable
+2026-03-10,expense,Transport,13900,,Variable
+2026-03-10,expense,Food & Drink,6000,,Variable
+2026-03-11,expense,Food & Drink,17500,,Variable
+2026-03-11,income,Other,1,,Variable
+2026-03-11,expense,Subscription,40000,,Fixed
+2026-03-11,expense,Food & Drink,19300,,Variable
+2026-03-11,expense,Other,420,,Variable
+2026-03-11,expense,Other,400,,Variable
+2026-03-12,expense,Utility Bills,67740,관리비,Fixed
+2026-03-12,expense,Transport,23780,,Variable
+2026-03-12,expense,Other,5200,엄마 병원 서류 발급비,Variable
+2026-03-12,expense,Transport,14400,,Variable
+2026-03-12,income,Other,6020,KPass 환급,Variable
+2026-03-12,expense,Food & Drink,11200,,Variable
+2026-03-12,expense,Transport,21600,,Variable
+2026-03-12,expense,Transport,11100,,Variable
+2026-03-12,expense,Transport,15300,,Variable
+2026-03-12,expense,Other,10000,네이버페이카드,Variable
+2026-03-13,expense,Food & Drink,29900,,Variable
+2026-03-13,expense,Transport,10400,,Variable
+2026-03-13,expense,Transport,11700,,Variable
+2026-03-14,expense,Shopping,5700,,Variable
+2026-03-14,expense,Other,4180,인쇄비,Variable
+2026-03-14,expense,Shopping,15124,다이소,Variable
+2026-03-14,expense,Food & Drink,19000,,Variable
+2026-03-14,expense,Shopping,9000,,Variable
+2026-03-16,expense,Transport,15000,,Variable
+2026-03-16,expense,Food & Drink,2500,,Variable
+2026-03-16,expense,Transport,2250,,Fixed
+2026-03-16,expense,Transport,10400,,Variable
+2026-03-16,expense,Utility Bills,19820,,Fixed
+2026-03-17,expense,Food & Drink,24000,,Variable
+2026-03-17,expense,Food & Drink,4500,,Variable
+2026-03-17,expense,Food & Drink,15300,,Variable
+2026-03-18,expense,Food & Drink,16500,,Variable
+2026-03-18,expense,Healthcare,16000,,Variable
+2026-03-18,expense,Shopping,51050,,Variable
+2026-03-19,expense,Subscription,7890,,Fixed
+2026-03-19,expense,Food & Drink,18400,,Variable
+2026-03-19,expense,Food & Drink,24000,,Variable
+2026-03-20,expense,Food & Drink,21700,,Variable
+2026-03-20,expense,Transport,13900,,Variable
+2026-03-20,expense,Food & Drink,7200,,Variable
+2026-03-20,expense,Transport,11400,,Variable
+2026-03-20,expense,Utility Bills,55110,,Fixed
+2026-03-21,expense,Food & Drink,16300,,Variable
+2026-03-21,expense,Food & Drink,26800,,Variable
+2026-03-22,expense,Food & Drink,14800,,Variable
+2026-03-22,income,Other,35700,법인카드정산,Variable
+2026-03-22,expense,Food & Drink,30300,,Variable
+2026-03-22,expense,Food & Drink,12900,,Variable
+2026-03-22,income,Other,1,은행인증,Variable
+2026-03-22,expense,Utility Bills,3030,SK브로드밴드,Fixed
+2026-03-23,expense,Transport,14900,,Variable
+2026-03-23,expense,Credit Card,35700,법인카드,Variable
+2026-03-23,expense,Other,21000,세탁소,Variable
+2026-03-23,expense,Food & Drink,4000,,Variable
+2026-03-24,income,Salary,5336880,,Fixed
+2026-03-24,expense,Transport,19900,,Variable
+2026-03-24,expense,Transport,10500,,Variable
+2026-03-24,expense,Food & Drink,6000,,Variable
+2026-03-24,expense,Food & Drink,28000,,Variable
+2026-03-24,expense,Transport,9700,,Variable
+2026-03-24,expense,Transport,7100,,Variable
+2026-03-24,expense,Beauty,77000,,Variable
+2026-03-24,expense,Transport,2900,,Variable
+2026-03-24,expense,Credit Card,924600,,Variable
+2026-03-25,expense,Food & Drink,17800,,Variable
+2026-03-25,expense,Transport,800,,Variable
+2026-03-25,expense,Transport,4800,,Variable
+2026-03-25,expense,Beauty,30000,병원 상담비,Variable
+2026-03-26,expense,Rent,900000,,Fixed
+2026-03-26,expense,Food & Drink,18400,,Variable
+2026-03-27,expense,Food & Drink,23400,,Variable
+2026-03-29,expense,Other,16000,세탁비,Variable
+2026-03-29,expense,Other,45000,엄마담배,Variable
+2026-03-30,expense,Transport,6800,,Variable
+2026-03-30,expense,Other,7000,엄마 택배비,Variable
+2026-03-31,expense,Subscription,29000,,Fixed
+2026-03-31,expense,Transport,14600,,Variable
+2026-03-31,expense,Healthcare,10000,,Variable
+2026-03-31,income,Other,5000,캐시백,Variable
+2026-04-02,expense,Transport,14700,,Variable
+2026-04-03,expense,Food & Drink,4300,,Variable
+2026-04-03,expense,Transport,18550,,Fixed
+2026-04-03,expense,Transport,8150,,Fixed
+2026-04-04,expense,Subscription,1990,,Variable
+2026-04-04,expense,Loan Interest,328126,,Variable
+2026-04-05,expense,Food & Drink,6000,,Variable
+2026-04-05,expense,Subscription,29000,,Fixed
+2026-04-05,expense,Other,447,집주인 한테 잘못 보낸 돈 500 - 캐시백 53,Variable
+2026-04-06,expense,Healthcare,20000,피부과,Variable
+2026-04-07,expense,Transport,14200,,Variable
+2026-04-07,expense,Transport,15600,,Variable
+2026-04-08,expense,Subscription,19500,,Fixed
+2026-04-08,expense,Transport,15100,,Variable
+2026-04-08,expense,Food & Drink,4500,,Variable
+2026-04-10,expense,Entertainment,25000,여권사진,Variable
+2026-04-10,expense,Healthcare,32000,노스카나+애크논,Variable
+2026-04-10,expense,Entertainment,50960,여권 재발급,Variable
+2026-04-11,expense,Food & Drink,7800,,Variable
+2026-04-12,expense,Subscription,40000,,Fixed
+2026-04-12,expense,Food & Drink,5800,,Variable
+2026-04-12,expense,Food & Drink,600,,Variable
+2026-04-12,expense,Food & Drink,3000,,Variable
+2026-04-13,expense,Utility Bills,66882,,Fixed
+2026-04-13,expense,Transport,18800,,Variable
+2026-04-13,expense,Food & Drink,76000,,Variable
+2026-04-13,expense,Food & Drink,10000,,Variable
+2026-04-13,expense,Other,13700,엄마다이소,Variable
+2026-04-13,income,Other,68,현금캐시백,Variable
+2026-04-13,expense,Transport,11500,,Variable
+2026-04-13,expense,Transport,19700,,Variable
+2026-04-14,expense,Utility Bills,11840,수도,Fixed
+2026-04-14,expense,Travel,180865,일본 마쓰야마 여행 호텔비,Variable
+2026-04-14,income,Other,699708,일본 마쓰야마 여행 - 예지,Variable
+2026-04-14,expense,Food & Drink,4500,,Variable
+2026-04-14,expense,Transport,14400,,Variable
+2026-04-14,expense,Transport,1620,,Variable
+2026-04-14,expense,Other,4140,엄마 법원 우편,Variable
+2026-04-14,expense,Transport,1460,,Variable
+2026-04-14,expense,Food & Drink,1200,,Variable
+2026-04-16,expense,Transport,14500,,Variable
+2026-04-17,expense,Food & Drink,45400,,Variable
+2026-04-17,expense,Transport,12000,,Variable
+2026-04-17,expense,Food & Drink,4500,,Variable
+2026-04-18,expense,Food & Drink,7500,,Variable
+2026-04-20,expense,Transport,17500,,Variable
+2026-04-20,expense,Transport,6600,,Variable
+2026-04-20,expense,Transport,18000,,Variable
+2026-04-20,expense,Utility Bills,48880,,Fixed
+2026-04-21,expense,Food & Drink,4650,,Variable
+2026-04-21,expense,Shopping,128600,이불,Variable
+2026-04-21,expense,Transport,10500,,Variable
+2026-04-21,expense,Transport,10900,,Variable
+2026-04-21,expense,Food & Drink,4500,,Variable
+2026-04-22,income,Other,1,은행인증,Variable
+2026-04-22,expense,Transport,12000,,Variable
+2026-04-22,expense,Food & Drink,1200,,Variable
+2026-04-23,income,Other,146440,법인카드정산,Fixed
+2026-04-23,expense,Transport,12300,,Variable
+2026-04-23,expense,Food & Drink,600,,Variable
+2026-04-23,expense,Food & Drink,68000,진희님 술 (대신비용),Variable
+2026-04-24,income,Salary,4949390,,Fixed
+2026-04-24,expense,Credit Card,287710,,Variable
+2026-04-25,expense,Food & Drink,9200,,Variable
+2026-04-26,expense,Rent,900000,,Fixed
+2026-04-27,expense,Transport,16100,,Variable
+2026-04-27,income,Other,34000,진희님 대신비용,Variable
+2026-04-27,expense,Credit Card,261480,,Variable
+2026-04-27,expense,Food & Drink,9000,,Variable
+2026-04-27,expense,Utility Bills,70,전기요금,Fixed
+2026-04-30,expense,Food & Drink,8500,,Variable
+2026-05-01,expense,Subscription,29000,,Fixed
+2026-05-01,expense,Shopping,64540,Usb 멀티 허브,Variable
+2026-05-02,expense,Food & Drink,2200,,Variable
+2026-05-03,expense,Food & Drink,5300,,Variable
+2026-05-04,expense,Subscription,1990,,Fixed
+2026-05-04,expense,Transport,16900,,Variable
+2026-05-04,expense,Transport,11000,,Variable
+2026-05-04,expense,Food & Drink,5500,,Variable
+2026-05-04,income,Other,3000,캐시백,Variable
+2026-05-04,expense,Food & Drink,30000,,Variable
+2026-05-04,expense,Transport,7200,,Variable
+2026-05-04,expense,Healthcare,20000,상담비,Variable
+2026-05-04,expense,Food & Drink,2000,,Variable
+2026-05-04,expense,Transport,20200,,Variable
+2026-05-05,expense,Entertainment,165766,Codex,Variable
+2026-05-05,expense,Subscription,29000,Gemini,Fixed
+2026-05-05,expense,Entertainment,33184,Codex,Variable
+2026-05-06,expense,Travel,1024600,항공권 (예지+나) 카드값,Variable
+2026-05-06,expense,Beauty,451000,제모(피부과),Variable
+2026-05-06,expense,Transport,5000,,Variable
+2026-05-06,expense,Healthcare,10000,상담비,Variable
+2026-05-06,expense,Food & Drink,13200,,Variable
+2026-05-06,expense,Food & Drink,5300,,Variable
+2026-05-07,expense,Transport,2150,,Variable
+2026-05-07,expense,Beauty,2800000,교정,Variable
+2026-05-07,expense,Transport,13000,,Variable
+2026-05-07,expense,Transport,21050,,Variable
+2026-05-08,expense,Subscription,19500,,Fixed
+2026-05-08,expense,Transport,17060,,Variable
+2026-05-08,expense,Shopping,2100,,Variable
+2026-05-08,expense,Food & Drink,23000,,Variable
+2026-05-09,expense,Loan Interest,396830,,Fixed
+2026-05-09,expense,Food & Drink,23000,,Variable
+2026-05-09,expense,Food & Drink,5500,,Variable
+2026-05-10,expense,Shopping,59306,책장,Variable
+2026-05-12,expense,Subscription,40000,,Fixed
+2026-05-12,expense,Transport,15500,,Variable
+2026-05-14,expense,Transport,15600,,Variable
+2026-05-15,expense,Investment,400000,"8160 만큼 옮기고, 8200만원 상환",Variable
+2026-05-15,income,Other,1000000,엄마 용돈 반환,Variable
+2026-05-15,expense,Utility Bills,66290,관리비,Fixed
+2026-05-15,expense,Utility Bills,11840,수도,Fixed
+2026-05-16,expense,Beauty,62000,두피 스케일링 + 커트,Variable
+2026-05-17,expense,Other,19100,종량제+폐기물스티커,Variable
+2026-05-18,expense,Subscription,138000,Investing Pro 1년,Variable
+2026-05-18,expense,Transport,20600,,Variable
+2026-05-18,expense,Other,10000,커피값+택배선불,Variable
+2026-05-19,expense,Transport,15800,,Variable
+2026-05-19,expense,Transport,15200,,Variable
+2026-05-19,expense,Transport,16700,,Variable
+2026-05-19,expense,Transport,15900,,Variable
+2026-05-19,expense,Beauty,20000,염증주사,Variable
+2026-05-19,expense,Food & Drink,30000,,Variable
+2026-05-19,expense,Food & Drink,10500,,Variable
+2026-05-19,expense,Healthcare,37500,약국: 안약+반창고,Variable
+2026-05-19,expense,Shopping,230000,주방수납장+잠옷+실내화,Variable
+2026-05-20,expense,Food & Drink,36260,편의점 (아이스크림+종량제) / 네이버페이 -40000원,Variable
+2026-05-20,expense,Food & Drink,9000,,Variable
+2026-05-20,expense,Food & Drink,25900,,Variable
+2026-05-20,expense,Utility Bills,19260,가스비,Fixed
+2026-05-21,expense,Food & Drink,5100,회사 음식,Variable
+2026-05-21,expense,Food & Drink,26500,,Variable
+2026-05-22,expense,Transport,101500,택시비 (신갈->공항),Variable
+2026-05-22,income,Salary,5890050,,Fixed
+2026-05-22,income,Other,673340,법인카드 정산,Variable
+2026-05-22,expense,Entertainment,201945,마쓰야마 여행 경비,Variable
+2026-05-23,expense,Shopping,198475,단톤 반팔티 3장,Variable
+2026-05-24,expense,Entertainment,147619,마쓰야마 여행 경비 정산,Variable
+2026-05-24,expense,Food & Drink,15000,,Variable
+2026-05-24,expense,Shopping,8900,지갑,Variable
+2026-05-24,expense,Other,8000,종량제,Variable
+2026-05-24,expense,Transport,13100,공항버스 취소 수수료: 1700,Fixed
+2026-05-25,expense,Food & Drink,26400,,Variable
+2026-05-26,expense,Food & Drink,51100,해운대 달맞이빵,Variable
+2026-05-26,expense,Transport,24500,,Variable
+2026-05-26,expense,Transport,24100,,Variable
+2026-05-26,expense,Transport,17300,,Variable
+2026-05-26,expense,Shopping,18285,보조배터리,Variable
+2026-05-26,expense,Other,4890,필름 벽지,Variable
+2026-05-26,expense,Credit Card,956350,법카,Variable
+2026-05-26,expense,Credit Card,3116450,할부: 모니터+세탁기+책,Variable
+2026-05-26,expense,Rent,900000,,Fixed
+2026-05-27,expense,Food & Drink,15370,,Variable
+2026-05-28,expense,Food & Drink,13600,,Variable
+2026-05-28,expense,Transport,24800,,Variable
+2026-05-29,expense,Food & Drink,15700,,Variable
+2026-05-29,expense,Other,23000,택배비 착불,Variable
+2026-05-29,expense,Shopping,43740,막내이모 마스크,Variable
+2026-05-31,expense,Food & Drink,24500,,Variable
+2026-06-01,expense,Shopping,8830,,Variable
+2026-06-01,income,Other,2000,캐시백,Variable
+2026-06-01,expense,Transport,15100,,Variable
+2026-06-01,expense,Transport,18900,,Variable
+2026-06-02,expense,Food & Drink,23000,,Variable
+2026-06-02,expense,Food & Drink,25000,,Variable
+2026-06-03,expense,Food & Drink,18400,,Variable
+2026-06-04,expense,Food & Drink,17400,,Variable
+2026-06-04,expense,Food & Drink,15900,,Variable
+2026-06-04,expense,Transport,29150,후불교통카드,Fixed
+2026-06-04,expense,Subscription,8800,Spendee 구독,Variable
+2026-06-04,expense,Subscription,1990,,Fixed
+2026-06-05,expense,Food & Drink,16000,,Variable
+2026-06-06,expense,Loan Interest,70788,,Fixed
+2026-06-06,expense,Food & Drink,16400,,Variable
+2026-06-06,expense,Food & Drink,23000,,Variable
+2026-06-07,expense,Food & Drink,15400,,Variable
+2026-06-07,expense,Food & Drink,27000,,Variable
+2026-06-07,expense,Shopping,56450,,Variable
+2026-06-08,expense,Subscription,19500,유튜브 프리미엄,Fixed
+2026-06-08,expense,Food & Drink,12900,,Variable
+2026-06-08,expense,Food & Drink,21800,,Variable
+2026-06-08,expense,Transport,15000,,Variable
