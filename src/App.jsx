@@ -115,6 +115,14 @@ export function summarizeEntries(entries, categories) {
   );
 }
 
+export function formatTransactionMoney(value, lang = DEFAULT_LANGUAGE) {
+  const sign = value < 0 ? "-" : "";
+  const symbol = lang === "ko" ? "￦" : "$";
+  const abs = Math.round(Math.abs(value));
+  const valueStr = abs.toLocaleString(lang === "ko" ? "ko-KR" : "en-US");
+  return `${sign}${symbol}${valueStr}`;
+}
+
 function visibleCountForMode(mode) {
   if (mode === "week") return 6;
   if (mode === "month") return 6;
@@ -496,7 +504,7 @@ function PieChart({ items, type }) {
 }
 
 function EntryList({ items, onEdit }) {
-  const { t, formatMoney } = useI18n();
+  const { t, lang } = useI18n();
   const groups = groupByDate(items);
   if (!groups.length) return <Text c="dimmed" size="sm">{t("chart.noEntries")}</Text>;
   return (
@@ -507,7 +515,7 @@ function EntryList({ items, onEdit }) {
         <Box key={date}>
           <Group justify="space-between" mb={6} wrap="nowrap">
             <Text fw={700} size="sm" className="text-ink">{date}</Text>
-            <Text fw={700} size="sm" className="text-ink">{formatMoney(dailyTotal)}</Text>
+            <Text fw={700} size="sm" className="text-ink">{formatTransactionMoney(dailyTotal, lang)}</Text>
           </Group>
           <Stack gap="xs">
             {rows.map((item) => {
@@ -537,14 +545,14 @@ function EntryList({ items, onEdit }) {
                           </span>
                         ))}
                       </div>
-                      {item.note ? <div className="text-xs text-muted">{item.note}</div> : null}
+                      {item.note ? <div className="text-xs" style={{ color: category.color, fontWeight: 500 }}>{item.note}</div> : null}
                     </div>
                     <div className="text-right">
                       <div
                         className="font-semibold"
                         style={{ color: category.type === "income" ? "#5BB97A" : "#F08A8A" }}
                       >
-                        {formatMoney(signedAmount(item))}
+                        {formatTransactionMoney(signedAmount(item), lang)}
                       </div>
                     </div>
                   </div>
@@ -697,7 +705,7 @@ function SearchFacetMenu({ label, options, selectedIds, onChange }) {
 }
 
 function App({ state, setState }) {
-  const { t, formatMoney } = useI18n();
+  const { t, formatMoney, lang } = useI18n();
   const [activeTab, setActiveTab] = useState("ledger");
   const [ledgerMode, setLedgerMode] = useState("month");
   const [ledgerChartMode, setLedgerChartMode] = useState("flow");
@@ -1576,7 +1584,7 @@ function App({ state, setState }) {
                         <Text fw={700} size="sm">{t("ledger.pending", { count: pendingScheduled.length })}</Text>
                       </Group>
                       <Group gap="xs" wrap="nowrap">
-                        <Text size="sm" c="dimmed">{formatMoney(pendingTotal)}</Text>
+                        <Text size="sm" c="dimmed">{formatTransactionMoney(pendingTotal, lang)}</Text>
                         {pendingExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </Group>
                     </Group>
@@ -1588,7 +1596,7 @@ function App({ state, setState }) {
                             <Box key={date}>
                               <Group justify="space-between" mb={6} wrap="nowrap">
                                 <Text fw={700} size="sm" className="text-muted">{date}</Text>
-                                <Text fw={700} size="sm" className="text-muted">{formatMoney(dailyTotal)}</Text>
+                                <Text fw={700} size="sm" className="text-muted">{formatTransactionMoney(dailyTotal, lang)}</Text>
                               </Group>
                               <Stack gap="xs">
                                 {items.map((item) => {
@@ -1624,14 +1632,14 @@ function App({ state, setState }) {
                                               </span>
                                             ))}
                                           </div>
-                                          {item.note ? <div className="text-xs text-muted">{item.note}</div> : null}
+                                          {item.note ? <div className="text-xs" style={{ color: category.color, fontWeight: 500 }}>{item.note}</div> : null}
                                         </div>
                                         <div className="text-right">
                                           <div
                                             className="font-semibold"
                                             style={{ color: category.type === "income" ? "#5BB97A" : "#F08A8A" }}
                                           >
-                                            {formatMoney(signedAmount(item))}
+                                            {formatTransactionMoney(signedAmount(item), lang)}
                                           </div>
                                         </div>
                                       </div>
@@ -1919,7 +1927,13 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
   return (
     <Stack>
       <SimpleGrid cols={2}>
-        <TextInput label={t("entry.field.date")} type="date" value={date} onChange={(e) => setDate(e.currentTarget.value)} />
+        <TextInput
+          label={t("entry.field.date")}
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.currentTarget.value)}
+          styles={{ input: { textAlign: "center" } }}
+        />
         <NumberInput
           label={t("entry.field.amount")}
           value={amount}
@@ -1930,6 +1944,7 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
           thousandSeparator=","
           hideControls
           inputMode="numeric"
+          styles={{ input: { textAlign: "center" } }}
         />
       </SimpleGrid>
 
