@@ -14,15 +14,21 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     localStorage.clear();
     mockState = createMockState();
 
-    // Get dates relative to today
+    const formatDateLocal = (date) => {
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
     const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = formatDateLocal(today);
     const lastWeek = new Date(today);
     lastWeek.setDate(lastWeek.getDate() - 7);
-    const lastWeekStr = lastWeek.toISOString().split('T')[0];
+    const lastWeekStr = formatDateLocal(lastWeek);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const tomorrowStr = formatDateLocal(tomorrow);
 
     // Add a scheduled entry (started last week)
     mockState.wallets[0].entries.push({
@@ -145,7 +151,10 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     // Verify repeatEndDate is yesterday
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    const yyyy = yesterday.getFullYear();
+    const mm = String(yesterday.getMonth() + 1).padStart(2, '0');
+    const dd = String(yesterday.getDate()).padStart(2, '0');
+    const yesterdayStr = `${yyyy}-${mm}-${dd}`;
     expect(entry.repeatEndDate).toBe(yesterdayStr);
   });
 
