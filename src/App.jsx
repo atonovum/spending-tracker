@@ -492,7 +492,7 @@ function CategoryLabelTotals({ items, categoryId, getLabel, categories }) {
 }
 
 function PieChart({ items, type }) {
-  const t = useT();
+  const { t, formatMoney } = useI18n();
   const width = 400;
   const height = 400;
   const cx = width / 2;
@@ -542,6 +542,25 @@ function PieChart({ items, type }) {
       {/* donut hole */}
       <circle cx={cx} cy={cy} r={radius * 0.58} fill={CHART.surface} />
       <circle cx={cx} cy={cy} r={radius * 0.58} fill="none" stroke={CHART.grid} strokeWidth="1" />
+      <text
+        x={cx}
+        y={cy - 8}
+        textAnchor="middle"
+        dominantBaseline="central"
+        className="fill-muted text-[12px]"
+      >
+        {t(type === "income" ? "stats.totalIncome" : "stats.totalExpense")}
+      </text>
+      <text
+        x={cx}
+        y={cy + 12}
+        textAnchor="middle"
+        dominantBaseline="central"
+        className="text-[19px]"
+        style={{ fill: CHART.ink, fontWeight: 800, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}
+      >
+        {formatMoney(sum)}
+      </text>
       {entries.map((slice) => {
         const Cmp = getCategoryIconComponent(slice.category.icon);
         const cosA = Math.cos(slice.mid);
