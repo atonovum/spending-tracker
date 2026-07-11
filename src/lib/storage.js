@@ -86,6 +86,7 @@ export function normalizeState(parsed) {
     version: 3,
     selectedWalletId: seed.selectedWalletId || wallets[0]?.id || "",
     language: seed.language === "en" ? "en" : "ko",
+    currency: seed.currency === "USD" ? "USD" : "KRW",
     wallets,
     categories,
     labels,

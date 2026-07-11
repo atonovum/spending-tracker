@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useMediaQuery } from "@mantine/hooks";
 import {
   ActionIcon,
   Box,
@@ -115,11 +116,12 @@ export function summarizeEntries(entries, categories) {
   );
 }
 
-export function formatTransactionMoney(value, lang = DEFAULT_LANGUAGE) {
+export function formatTransactionMoney(value, currency = "KRW") {
   const sign = value < 0 ? "-" : "";
-  const symbol = lang === "ko" ? "￦" : "$";
+  const resolvedCurrency = currency === "USD" ? "USD" : "KRW";
+  const symbol = resolvedCurrency === "KRW" ? "￦" : "$";
   const abs = Math.round(Math.abs(value));
-  const valueStr = abs.toLocaleString(lang === "ko" ? "ko-KR" : "en-US");
+  const valueStr = abs.toLocaleString(resolvedCurrency === "KRW" ? "ko-KR" : "en-US");
   return `${sign}${symbol}${valueStr}`;
 }
 
@@ -600,8 +602,144 @@ function PieChart({ items, type }) {
   );
 }
 
+export function StatsCurveChart(props) {
+  const { page, selectedKey, onSelectBucket, activeLegend, setActiveLegend } = props;
+  const t = useT();
+  const width = 640;
+  const height = 210;
+  const padX = 42;
+  const padTop = 20;
+  const padBottom = 10;
+  const labelArea = 25;
+  const baseY = height - padBottom - labelArea;
+  const graphH = baseY - padTop;
+  const graphW = width - padX * 2;
+
+  if (!page.length) {
+    return <Center h={190} c="dimmed">{t("chart.empty")}</Center>;
+  }
+
+  const maxValue = Math.max(1, ...page.map((bucket) => Math.max(bucket.income, bucket.expense)));
+  const maxTick = roundedAxisMax(maxValue);
+  const midTick = Math.round(maxTick / 2);
+  const step = page.length > 1 ? graphW / (page.length - 1) : 0;
+
+  const incomePoints = page.map((bucket, index) => {
+    const x = padX + index * step;
+    const ratio = bucket.income / maxTick;
+    const y = baseY - ratio * graphH;
+    return { ...bucket, x, y };
+  });
+
+  const expensePoints = page.map((bucket, index) => {
+    const x = padX + index * step;
+    const ratio = bucket.expense / maxTick;
+    const y = baseY - ratio * graphH;
+    return { ...bucket, x, y };
+  });
+
+  const getBezierPath = (points) => {
+    if (points.length === 0) return "";
+    if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const cp1x = p0.x + (p1.x - p0.x) / 3;
+      const cp1y = p0.y;
+      const cp2x = p0.x + 2 * (p1.x - p0.x) / 3;
+      const cp2y = p1.y;
+      d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p1.x} ${p1.y}`;
+    }
+    return d;
+  };
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="block w-full select-none" style={{ height: "auto", maxHeight: 260 }}>
+      {[0, midTick, maxTick].map((tick, index) => {
+        const ratio = tick / maxTick;
+        const y = baseY - ratio * graphH;
+        return (
+          <g key={index}>
+            <line x1={padX} x2={width - padX} y1={y} y2={y} stroke={CHART.grid} strokeWidth="1" />
+            <text x="8" y={y + 4} className="fill-muted text-[12px]">
+              {formatAxisTick(tick)}
+            </text>
+          </g>
+        );
+      })}
+
+      {incomePoints.length > 1 && (
+        <path
+          d={getBezierPath(incomePoints)}
+          fill="none"
+          stroke={CHART.income}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+      )}
+      {expensePoints.length > 1 && (
+        <path
+          d={getBezierPath(expensePoints)}
+          fill="none"
+          stroke={CHART.expense}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+      )}
+
+      {incomePoints.map((point) => {
+        const isSelected = selectedKey === point.key;
+        const isActiveMetric = activeLegend === "income";
+        return (
+          <g key={`inc-${point.key}`}>
+            <circle
+              cx={point.x}
+              cy={point.y}
+              r={isSelected && isActiveMetric ? 8 : isSelected ? 6 : 4}
+              fill={isSelected && isActiveMetric ? CHART.income : CHART.surface}
+              stroke={CHART.income}
+              strokeWidth={isSelected ? 3 : 2}
+              onClick={() => {
+                onSelectBucket(point);
+                setActiveLegend("income");
+              }}
+              style={{ cursor: "pointer", transition: "all 150ms ease" }}
+            />
+          </g>
+        );
+      })}
+
+      {expensePoints.map((point) => {
+        const isSelected = selectedKey === point.key;
+        const isActiveMetric = activeLegend === "expense";
+        return (
+          <g key={`exp-${point.key}`}>
+            <circle
+              cx={point.x}
+              cy={point.y}
+              r={isSelected && isActiveMetric ? 8 : isSelected ? 6 : 4}
+              fill={isSelected && isActiveMetric ? CHART.expense : CHART.surface}
+              stroke={CHART.expense}
+              strokeWidth={isSelected ? 3 : 2}
+              onClick={() => {
+                onSelectBucket(point);
+                setActiveLegend("expense");
+              }}
+              style={{ cursor: "pointer", transition: "all 150ms ease" }}
+            />
+            <text x={point.x} y={height - 10} textAnchor="middle" className="fill-muted text-[11px]">
+              {point.label}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 function EntryList({ items, onEdit }) {
-  const { t, lang } = useI18n();
+  const { t, currency } = useI18n();
   const groups = groupByDate(items);
   if (!groups.length) return <Text c="dimmed" size="sm">{t("chart.noEntries")}</Text>;
   return (
@@ -612,7 +750,7 @@ function EntryList({ items, onEdit }) {
         <Box key={date}>
           <Group justify="space-between" mb={6} px={4} wrap="nowrap">
             <Text fw={600} size="xs" className="text-muted">{date}</Text>
-            <Text fw={600} size="xs" className="text-muted">{formatTransactionMoney(dailyTotal, lang)}</Text>
+            <Text fw={600} size="xs" className="text-muted">{formatTransactionMoney(dailyTotal, currency)}</Text>
           </Group>
           <Stack gap={8}>
             {rows.map((item) => {
@@ -648,7 +786,7 @@ function EntryList({ items, onEdit }) {
                         className="font-bold"
                         style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
                       >
-                        {formatTransactionMoney(signedAmount(item), lang)}
+                        {formatTransactionMoney(signedAmount(item), currency)}
                       </div>
                     </div>
                   </div>
@@ -801,7 +939,7 @@ function SearchFacetMenu({ label, options, selectedIds, onChange }) {
 }
 
 function App({ state, setState }) {
-  const { t, formatMoney, lang } = useI18n();
+  const { t, formatMoney, currency } = useI18n();
   const [activeTab, setActiveTab] = useState("ledger");
   const [ledgerMode, setLedgerMode] = useState("month");
   const [ledgerChartMode, setLedgerChartMode] = useState("flow");
@@ -812,6 +950,7 @@ function App({ state, setState }) {
   const [statsPageByMode, setStatsPageByMode] = useState({});
   const [statsLabelFilterId, setStatsLabelFilterId] = useState(null);
   const [statsCategoryType, setStatsCategoryType] = useState("expense");
+  const [activeLegend, setActiveLegend] = useState("income");
   const [searchWalletId, setSearchWalletId] = useState(state.selectedWalletId);
   const [searchPeriod, setSearchPeriod] = useState("90d");
   const [searchText, setSearchText] = useState("");
@@ -876,7 +1015,8 @@ function App({ state, setState }) {
 
   const pendingScheduled = useMemo(() => buildPendingScheduledOccurrences(currentWallet, selectedBucket ? { start: selectedBucket.start, end: selectedBucket.end } : resolveFlowRange(ledgerMode)), [currentWallet, selectedBucket, ledgerMode]);
 
-  const statsVisibleCount = visibleCountForMode(ledgerMode);
+  const isMobile = useMediaQuery("(max-width: 48em)");
+  const statsVisibleCount = isMobile ? 6 : 10;
   const statsPageStart = statsPageByMode[ledgerMode] ?? Math.max(0, buckets.length - statsVisibleCount);
   const statsPage = buckets.slice(statsPageStart, statsPageStart + statsVisibleCount);
 
@@ -1071,6 +1211,102 @@ function App({ state, setState }) {
             <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
           </Card>
         </SimpleGrid>
+
+        <Card withBorder radius="card" shadow="soft" className="overflow-hidden">
+          <Group justify="space-between" align="center" mb="xs">
+            <Group gap="xs">
+              <ActionIcon
+                variant="default"
+                size="sm"
+                onClick={() => {
+                  const maxPageStart = Math.max(0, buckets.length - statsVisibleCount);
+                  const nextStart = Math.max(0, Math.min(maxPageStart, statsPageStart - 1));
+                  setStatsPageByMode((prev) => ({ ...prev, [ledgerMode]: nextStart }));
+                }}
+                disabled={statsPageStart <= 0}
+              >
+                <ArrowLeft size={14} />
+              </ActionIcon>
+              <Text size="xs" fw={700} c="dimmed">
+                {statsPage.length ? `${statsPage[0].label} ~ ${statsPage[statsPage.length - 1].label}` : ""}
+              </Text>
+              <ActionIcon
+                variant="default"
+                size="sm"
+                onClick={() => {
+                  const maxPageStart = Math.max(0, buckets.length - statsVisibleCount);
+                  const nextStart = Math.max(0, Math.min(maxPageStart, statsPageStart + 1));
+                  setStatsPageByMode((prev) => ({ ...prev, [ledgerMode]: nextStart }));
+                }}
+                disabled={statsPageStart >= Math.max(0, buckets.length - statsVisibleCount)}
+              >
+                <ArrowRight size={14} />
+              </ActionIcon>
+            </Group>
+
+            <Group gap="sm" align="center">
+              {statsBucket && (
+                <Text size="sm" fw={700} style={{ color: activeLegend === "income" ? "var(--st-income-mark)" : "var(--st-expense)" }}>
+                  {activeLegend === "income"
+                    ? `${t("chart.income")}: ${formatMoney(statsBucket.income)}`
+                    : `${t("chart.expense")}: ${formatMoney(-statsBucket.expense)}`}
+                </Text>
+              )}
+              <Group gap="xs">
+                <UnstyledButton
+                  onClick={() => setActiveLegend("income")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "2px 8px",
+                    borderRadius: 999,
+                    background: activeLegend === "income" ? "var(--st-income-soft)" : "transparent",
+                    border: activeLegend === "income" ? "1px solid var(--st-income-mark)" : "1px solid transparent"
+                  }}
+                >
+                  <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "var(--st-income-mark)" }} />
+                  <Text size="xs" fw={600} style={{ color: "var(--st-income-mark)" }}>{t("chart.income")}</Text>
+                </UnstyledButton>
+                <UnstyledButton
+                  onClick={() => setActiveLegend("expense")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "2px 8px",
+                    borderRadius: 999,
+                    background: activeLegend === "expense" ? "var(--st-expense-soft)" : "transparent",
+                    border: activeLegend === "expense" ? "1px solid var(--st-expense)" : "1px solid transparent"
+                  }}
+                >
+                  <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "var(--st-expense)" }} />
+                  <Text size="xs" fw={600} style={{ color: "var(--st-expense)" }}>{t("chart.expense")}</Text>
+                </UnstyledButton>
+              </Group>
+            </Group>
+          </Group>
+
+          <StatsCurveChart
+            page={statsPage}
+            selectedKey={statsBucket?.key || null}
+            onSelectBucket={(bucket) => {
+              setStatsSelectedByMode((prev) => ({ ...prev, [ledgerMode]: bucket.key }));
+              setLedgerSelectedByMode((prev) => ({ ...prev, [ledgerMode]: bucket.key }));
+              const maxPageStart = Math.max(0, buckets.length - statsVisibleCount);
+              const idx = buckets.findIndex((b) => b.key === bucket.key);
+              if (idx >= 0) {
+                if (idx === statsPageStart && idx > 0) {
+                  setStatsPageByMode((prev) => ({ ...prev, [ledgerMode]: Math.max(0, statsPageStart - 1) }));
+                } else if (idx === statsPageStart + statsVisibleCount - 1 && idx < buckets.length - 1) {
+                  setStatsPageByMode((prev) => ({ ...prev, [ledgerMode]: Math.min(maxPageStart, statsPageStart + 1) }));
+                }
+              }
+            }}
+            activeLegend={activeLegend}
+            setActiveLegend={setActiveLegend}
+          />
+        </Card>
 
         <Card withBorder radius="card" shadow="soft">
           <BucketScroller
@@ -1304,6 +1540,10 @@ function App({ state, setState }) {
 
   function setLanguage(language) {
     persistState((prev) => ({ ...prev, language: language === "en" ? "en" : "ko" }));
+  }
+
+  function setCurrency(currency) {
+    persistState((prev) => ({ ...prev, currency: currency === "USD" ? "USD" : "KRW" }));
   }
 
   function resetSearchUi() {
@@ -1680,7 +1920,7 @@ function App({ state, setState }) {
                         <Text fw={700} size="sm">{t("ledger.pending", { count: pendingScheduled.length })}</Text>
                       </Group>
                       <Group gap="xs" wrap="nowrap">
-                        <Text size="sm" c="dimmed">{formatTransactionMoney(pendingTotal, lang)}</Text>
+                        <Text size="sm" c="dimmed">{formatTransactionMoney(pendingTotal, currency)}</Text>
                         {pendingExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </Group>
                     </Group>
@@ -1692,7 +1932,7 @@ function App({ state, setState }) {
                             <Box key={date}>
                               <Group justify="space-between" mb={6} wrap="nowrap">
                                 <Text fw={700} size="sm" className="text-muted">{date}</Text>
-                                <Text fw={700} size="sm" className="text-muted">{formatTransactionMoney(dailyTotal, lang)}</Text>
+                                <Text fw={700} size="sm" className="text-muted">{formatTransactionMoney(dailyTotal, currency)}</Text>
                               </Group>
                               <Stack gap="xs">
                                 {items.map((item) => {
@@ -1734,7 +1974,7 @@ function App({ state, setState }) {
                                             className="font-bold"
                                             style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
                                           >
-                                            {formatTransactionMoney(signedAmount(item), lang)}
+                                            {formatTransactionMoney(signedAmount(item), currency)}
                                           </div>
                                         </div>
                                       </div>
@@ -1771,7 +2011,9 @@ function App({ state, setState }) {
               scheduledEntries={scheduledEntriesForSettings}
               walletTotals={walletTotals}
               language={state.language || "ko"}
+              currency={state.currency || "KRW"}
               onLanguageChange={setLanguage}
+              onCurrencyChange={setCurrency}
               onSelectWallet={selectWallet}
               onAddWallet={addWallet}
               onRenameWallet={renameWallet}
@@ -2129,6 +2371,7 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
 function AppRoot() {
   const [state, setState] = useState(() => loadState());
   const lang = state.language || DEFAULT_LANGUAGE;
+  const currency = state.currency || "KRW";
   const skipNextPush = useRef(true);
   // Last server revision the client knows about. Used as `If-Match` on push.
   // null = server has no state yet (no precondition required).
@@ -2196,13 +2439,24 @@ function AppRoot() {
                 : "최신 상태를 다시 불러왔습니다.",
           });
         }
+        return;
+      }
+      if (result.payloadTooLarge && typeof window !== "undefined") {
+        notifications.show({
+          color: "red",
+          title: lang === "en" ? "Sync payload too large" : "동기화 데이터가 너무 큽니다",
+          message:
+            lang === "en"
+              ? "Local changes are saved on this device, but remote sync was skipped."
+              : "이 기기에는 저장됐지만 원격 동기화는 건너뛰었습니다.",
+        });
       }
     }, 1500);
     return () => clearTimeout(handle);
   }, [state, lang]);
 
   return (
-    <I18nProvider lang={lang}>
+    <I18nProvider lang={lang} currency={currency}>
       <App state={state} setState={setState} />
     </I18nProvider>
   );
