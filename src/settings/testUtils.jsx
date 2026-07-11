@@ -38,10 +38,10 @@ if (typeof window !== 'undefined' && !window.HTMLElement.prototype.scrollIntoVie
  * Render a component with Mantine provider, notifications, and i18n context
  */
 export function renderWithMantine(ui, options = {}) {
-  const { language = DEFAULT_LANGUAGE, ...renderOptions } = options;
+  const { language = DEFAULT_LANGUAGE, currency = 'KRW', ...renderOptions } = options;
 
   const Wrapper = ({ children }) => (
-    <I18nProvider lang={language}>
+    <I18nProvider lang={language} currency={currency}>
       <MantineProvider>
         <Notifications />
         {children}
@@ -59,6 +59,7 @@ export function createMockState(overrides = {}) {
   return {
     version: 3,
     language: 'ko',
+    currency: 'KRW',
     wallets: [
       {
         id: 'wallet-1',

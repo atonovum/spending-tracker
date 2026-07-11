@@ -5,7 +5,13 @@ export const LANGUAGES = [
   { value: "en", label: "English" },
 ];
 
+export const CURRENCIES = [
+  { value: "KRW", label: "￦ (KRW)" },
+  { value: "USD", label: "$ (USD)" },
+];
+
 export const DEFAULT_LANGUAGE = "ko";
+export const DEFAULT_CURRENCY = "KRW";
 
 const DICT = {
   ko: {
@@ -98,6 +104,7 @@ const DICT = {
     "type.expense": "지출",
     "settings.preferences": "Preferences",
     "settings.language": "언어",
+    "settings.currency": "통화",
     "settings.wallets": "Wallets",
     "settings.wallets.limit": "최대 {max}개까지 추가할 수 있습니다. ({current}/{max})",
     "settings.wallets.import": "가져오기",
@@ -418,6 +425,7 @@ const DICT = {
     "type.expense": "Expense",
     "settings.preferences": "Preferences",
     "settings.language": "Language",
+    "settings.currency": "Currency",
     "settings.wallets": "Wallets",
     "settings.wallets.limit": "Up to {max} wallets. ({current}/{max})",
     "settings.wallets.import": "Import",
@@ -662,22 +670,34 @@ export function makeT(lang) {
   };
 }
 
-export function formatMoney(value, lang = DEFAULT_LANGUAGE) {
+export function formatMoney(value, lang = DEFAULT_LANGUAGE, currency) {
   const sign = value < 0 ? "-" : "";
   const abs = Math.round(Math.abs(value));
-  const valueStr = abs.toLocaleString(lang === "ko" ? "ko-KR" : "en-US");
-  if (lang === "ko") return `${sign}${valueStr}원`;
+  const resolvedCurrency = currency || (lang === "ko" ? "KRW" : "USD");
+  const valueStr = abs.toLocaleString(resolvedCurrency === "KRW" ? "ko-KR" : "en-US");
+  
+  if (resolvedCurrency === "KRW") {
+    if (lang === "ko") return `${sign}${valueStr}원`;
+    return `${sign}￦${valueStr}`;
+  }
   return `${sign}$${valueStr}`;
 }
 
-const I18nContext = createContext({ lang: DEFAULT_LANGUAGE, t: makeT(DEFAULT_LANGUAGE), formatMoney: (value) => formatMoney(value, DEFAULT_LANGUAGE) });
+const I18nContext = createContext({
+  lang: DEFAULT_LANGUAGE,
+  currency: DEFAULT_CURRENCY,
+  t: makeT(DEFAULT_LANGUAGE),
+  formatMoney: (value) => formatMoney(value, DEFAULT_LANGUAGE, DEFAULT_CURRENCY),
+});
 
-export function I18nProvider({ lang, children }) {
+export function I18nProvider({ lang, currency = DEFAULT_CURRENCY, children }) {
+  const resolvedCurrency = currency === "USD" ? "USD" : "KRW";
   const value = useMemo(() => ({
     lang,
+    currency: resolvedCurrency,
     t: makeT(lang),
-    formatMoney: (value) => formatMoney(value, lang),
-  }), [lang]);
+    formatMoney: (value) => formatMoney(value, lang, resolvedCurrency),
+  }), [lang, resolvedCurrency]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 
