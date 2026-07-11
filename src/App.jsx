@@ -759,38 +759,47 @@ function EntryList({ items, onEdit }) {
               const itemLabels = item.labels || [];
               return (
                 <Paper key={item.id + item.occurrenceDate} withBorder radius="card" p="sm" className="entry-row cursor-pointer" onClick={() => onEdit(item)}>
-                  <div className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
-                    <span
-                      aria-hidden="true"
-                      className="grid h-10 w-10 place-items-center rounded-chip"
-                      style={{ background: `${category.color}1A`, color: category.color }}
-                    >
-                      <CategoryIcon category={category} size={18} />
-                    </span>
-                    <div className="min-w-0 text-left">
-                      <div className="truncate text-sm sm:text-base font-semibold text-ink">
-                        {category.name}
-                        {itemLabels.map((lbl) => (
-                          <span
-                            key={lbl.id}
-                            className="ml-1.5 inline-flex items-center rounded-chip bg-surface-soft px-2 py-0.5 text-xs font-medium text-ink-2"
-                            style={{ boxShadow: "inset 0 0 0 1px var(--st-line)" }}
-                          >
-                            {lbl.name}
-                          </span>
-                        ))}
-                      </div>
-                      {item.note ? <div className="truncate text-xs font-medium text-muted">{item.note}</div> : null}
-                    </div>
-                    <div className="text-right">
-                      <div
-                        className="text-sm sm:text-base font-bold"
-                        style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
+                  <Stack gap={4}>
+                    <div className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
+                      <span
+                        aria-hidden="true"
+                        className="grid h-10 w-10 place-items-center rounded-chip"
+                        style={{ background: `${category.color}1A`, color: category.color }}
                       >
-                        {formatTransactionMoney(signedAmount(item), currency)}
+                        <CategoryIcon category={category} size={18} />
+                      </span>
+                      <div className="min-w-0 text-left">
+                        <Text fw={600} size="sm" className="truncate text-ink">{category.name}</Text>
+                        {itemLabels.length > 0 && (
+                          <Group gap={4} mt={2} wrap="nowrap" className="overflow-x-auto scrollbar-none">
+                            {itemLabels.map((lbl) => (
+                              <span
+                                key={lbl.id}
+                                className="inline-flex items-center rounded-chip bg-surface-soft px-2 py-0.5 text-[10px] font-medium text-ink-2"
+                                style={{ boxShadow: "inset 0 0 0 1px var(--st-line)", whiteSpace: "nowrap" }}
+                              >
+                                {lbl.name}
+                              </span>
+                            ))}
+                          </Group>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <Text
+                          fw={700}
+                          size="sm"
+                          style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
+                        >
+                          {formatTransactionMoney(signedAmount(item), currency)}
+                        </Text>
                       </div>
                     </div>
-                  </div>
+                    {item.note && (
+                      <div className="text-left text-xs font-medium text-muted pl-1">
+                        {item.note}
+                      </div>
+                    )}
+                  </Stack>
                 </Paper>
               );
             })}
@@ -1981,38 +1990,47 @@ function App({ state, setState }) {
                                       p="sm"
                                       style={{ opacity: 0.78, backgroundColor: 'var(--st-surface)' }}
                                     >
-                                      <div className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
-                                        <span
-                                          aria-hidden="true"
-                                          className="grid h-10 w-10 place-items-center rounded-chip"
-                                          style={{ background: `${category.color}1A`, color: category.color }}
-                                        >
-                                          <CategoryIcon category={category} size={18} />
-                                        </span>
-                                        <div className="min-w-0 text-left">
-                                          <div className="truncate text-sm sm:text-base font-semibold text-ink">
-                                            {category.name}
-                                            {itemLabels.map((lbl) => (
-                                              <span
-                                                key={lbl.id}
-                                                className="ml-1.5 inline-flex items-center rounded-chip bg-surface-soft px-2 py-0.5 text-xs font-medium text-muted"
-                                                style={{ boxShadow: "inset 0 0 0 1px var(--st-line)" }}
-                                              >
-                                                {lbl.name}
-                                              </span>
-                                            ))}
-                                          </div>
-                                          {item.note ? <div className="truncate text-xs font-medium text-muted">{item.note}</div> : null}
-                                        </div>
-                                        <div className="text-right">
-                                          <div
-                                            className="text-sm sm:text-base font-bold"
-                                            style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
+                                      <Stack gap={4}>
+                                        <div className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
+                                          <span
+                                            aria-hidden="true"
+                                            className="grid h-10 w-10 place-items-center rounded-chip"
+                                            style={{ background: `${category.color}1A`, color: category.color }}
                                           >
-                                            {formatTransactionMoney(signedAmount(item), currency)}
+                                            <CategoryIcon category={category} size={18} />
+                                          </span>
+                                          <div className="min-w-0 text-left">
+                                            <Text fw={600} size="sm" className="truncate text-ink">{category.name}</Text>
+                                            {itemLabels.length > 0 && (
+                                              <Group gap={4} mt={2} wrap="nowrap" className="overflow-x-auto scrollbar-none">
+                                                {itemLabels.map((lbl) => (
+                                                  <span
+                                                    key={lbl.id}
+                                                    className="inline-flex items-center rounded-chip bg-surface-soft px-2 py-0.5 text-[10px] font-medium text-muted"
+                                                    style={{ boxShadow: "inset 0 0 0 1px var(--st-line)", whiteSpace: "nowrap" }}
+                                                  >
+                                                    {lbl.name}
+                                                  </span>
+                                                ))}
+                                              </Group>
+                                            )}
+                                          </div>
+                                          <div className="text-right">
+                                            <Text
+                                              fw={700}
+                                              size="sm"
+                                              style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
+                                            >
+                                              {formatTransactionMoney(signedAmount(item), currency)}
+                                            </Text>
                                           </div>
                                         </div>
-                                      </div>
+                                        {item.note && (
+                                          <div className="text-left text-xs font-medium text-muted pl-1">
+                                            {item.note}
+                                          </div>
+                                        )}
+                                      </Stack>
                                     </Paper>
                                   );
                                 })}
