@@ -115,11 +115,12 @@ export function summarizeEntries(entries, categories) {
   );
 }
 
-export function formatTransactionMoney(value, lang = DEFAULT_LANGUAGE) {
+export function formatTransactionMoney(value, currency = "KRW") {
   const sign = value < 0 ? "-" : "";
-  const symbol = lang === "ko" ? "￦" : "$";
+  const resolvedCurrency = currency === "USD" ? "USD" : "KRW";
+  const symbol = resolvedCurrency === "KRW" ? "￦" : "$";
   const abs = Math.round(Math.abs(value));
-  const valueStr = abs.toLocaleString(lang === "ko" ? "ko-KR" : "en-US");
+  const valueStr = abs.toLocaleString(resolvedCurrency === "KRW" ? "ko-KR" : "en-US");
   return `${sign}${symbol}${valueStr}`;
 }
 
@@ -504,7 +505,7 @@ function PieChart({ items, type }) {
 }
 
 function EntryList({ items, onEdit }) {
-  const { t, lang } = useI18n();
+  const { t, currency } = useI18n();
   const groups = groupByDate(items);
   if (!groups.length) return <Text c="dimmed" size="sm">{t("chart.noEntries")}</Text>;
   return (
@@ -515,7 +516,7 @@ function EntryList({ items, onEdit }) {
         <Box key={date}>
           <Group justify="space-between" mb={6} wrap="nowrap">
             <Text fw={700} size="sm" className="text-ink">{date}</Text>
-            <Text fw={700} size="sm" className="text-ink">{formatTransactionMoney(dailyTotal, lang)}</Text>
+            <Text fw={700} size="sm" className="text-ink">{formatTransactionMoney(dailyTotal, currency)}</Text>
           </Group>
           <Stack gap="xs">
             {rows.map((item) => {
@@ -552,7 +553,7 @@ function EntryList({ items, onEdit }) {
                         className="font-semibold"
                         style={{ color: category.type === "income" ? "#5BB97A" : "#F08A8A" }}
                       >
-                        {formatTransactionMoney(signedAmount(item), lang)}
+                        {formatTransactionMoney(signedAmount(item), currency)}
                       </div>
                     </div>
                   </div>
@@ -705,7 +706,7 @@ function SearchFacetMenu({ label, options, selectedIds, onChange }) {
 }
 
 function App({ state, setState }) {
-  const { t, formatMoney, lang } = useI18n();
+  const { t, formatMoney, currency } = useI18n();
   const [activeTab, setActiveTab] = useState("ledger");
   const [ledgerMode, setLedgerMode] = useState("month");
   const [ledgerChartMode, setLedgerChartMode] = useState("flow");
@@ -1210,6 +1211,10 @@ function App({ state, setState }) {
     persistState((prev) => ({ ...prev, language: language === "en" ? "en" : "ko" }));
   }
 
+  function setCurrency(currency) {
+    persistState((prev) => ({ ...prev, currency: currency === "USD" ? "USD" : "KRW" }));
+  }
+
   function resetSearchUi() {
     setSearchWalletId(state.selectedWalletId);
     setSearchPeriod("90d");
@@ -1584,7 +1589,7 @@ function App({ state, setState }) {
                         <Text fw={700} size="sm">{t("ledger.pending", { count: pendingScheduled.length })}</Text>
                       </Group>
                       <Group gap="xs" wrap="nowrap">
-                        <Text size="sm" c="dimmed">{formatTransactionMoney(pendingTotal, lang)}</Text>
+                        <Text size="sm" c="dimmed">{formatTransactionMoney(pendingTotal, currency)}</Text>
                         {pendingExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </Group>
                     </Group>
@@ -1596,7 +1601,7 @@ function App({ state, setState }) {
                             <Box key={date}>
                               <Group justify="space-between" mb={6} wrap="nowrap">
                                 <Text fw={700} size="sm" className="text-muted">{date}</Text>
-                                <Text fw={700} size="sm" className="text-muted">{formatTransactionMoney(dailyTotal, lang)}</Text>
+                                <Text fw={700} size="sm" className="text-muted">{formatTransactionMoney(dailyTotal, currency)}</Text>
                               </Group>
                               <Stack gap="xs">
                                 {items.map((item) => {
@@ -1639,7 +1644,7 @@ function App({ state, setState }) {
                                             className="font-semibold"
                                             style={{ color: category.type === "income" ? "#5BB97A" : "#F08A8A" }}
                                           >
-                                            {formatTransactionMoney(signedAmount(item), lang)}
+                                            {formatTransactionMoney(signedAmount(item), currency)}
                                           </div>
                                         </div>
                                       </div>
@@ -1676,7 +1681,9 @@ function App({ state, setState }) {
               scheduledEntries={scheduledEntriesForSettings}
               walletTotals={walletTotals}
               language={state.language || "ko"}
+              currency={state.currency || "KRW"}
               onLanguageChange={setLanguage}
+              onCurrencyChange={setCurrency}
               onSelectWallet={selectWallet}
               onAddWallet={addWallet}
               onRenameWallet={renameWallet}
@@ -2035,6 +2042,7 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
 function AppRoot() {
   const [state, setState] = useState(() => loadState());
   const lang = state.language || DEFAULT_LANGUAGE;
+  const currency = state.currency || "KRW";
   const skipNextPush = useRef(true);
   // Last server revision the client knows about. Used as `If-Match` on push.
   // null = server has no state yet (no precondition required).
@@ -2102,13 +2110,24 @@ function AppRoot() {
                 : "최신 상태를 다시 불러왔습니다.",
           });
         }
+        return;
+      }
+      if (result.payloadTooLarge && typeof window !== "undefined") {
+        notifications.show({
+          color: "red",
+          title: lang === "en" ? "Sync payload too large" : "동기화 데이터가 너무 큽니다",
+          message:
+            lang === "en"
+              ? "Local changes are saved on this device, but remote sync was skipped."
+              : "이 기기에는 저장됐지만 원격 동기화는 건너뛰었습니다.",
+        });
       }
     }, 1500);
     return () => clearTimeout(handle);
   }, [state, lang]);
 
   return (
-    <I18nProvider lang={lang}>
+    <I18nProvider lang={lang} currency={currency}>
       <App state={state} setState={setState} />
     </I18nProvider>
   );
