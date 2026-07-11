@@ -1,5 +1,11 @@
-import { describe, expect, it } from 'vitest';
-import { filterEntriesByFacets, resolveFacetFilter, sortEntriesForDisplay, summarizeEntries } from './App.jsx';
+/**
+ * @vitest-environment jsdom
+ */
+import { describe, expect, it, vi } from 'vitest';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { filterEntriesByFacets, resolveFacetFilter, sortEntriesForDisplay, summarizeEntries, StatsCurveChart } from './App.jsx';
+import { renderWithMantine } from './settings/testUtils.jsx';
 
 describe('sortEntriesForDisplay', () => {
   it('orders imported ascending entries newest-first before pagination', () => {
@@ -107,5 +113,61 @@ describe('summarizeEntries', () => {
     ];
 
     expect(summarizeEntries(entries, categories)).toEqual({ income: 1000, expense: 650 });
+  });
+});
+
+describe('StatsCurveChart', () => {
+  const mockPage = [
+    { key: 'jan', label: '1월', income: 50000, expense: 30000 },
+    { key: 'feb', label: '2월', income: 40000, expense: 45000 },
+  ];
+
+  it('renders empty message when page is empty', () => {
+    renderWithMantine(
+      <StatsCurveChart
+        page={[]}
+        selectedKey={null}
+        onSelectBucket={vi.fn()}
+        activeLegend="income"
+        setActiveLegend={vi.fn()}
+      />
+    );
+    expect(screen.getByText(/데이터가 없습니다/i)).toBeInTheDocument();
+  });
+
+  it('renders curves and points when page has data', () => {
+    renderWithMantine(
+      <StatsCurveChart
+        page={mockPage}
+        selectedKey="jan"
+        onSelectBucket={vi.fn()}
+        activeLegend="income"
+        setActiveLegend={vi.fn()}
+      />
+    );
+    expect(screen.getByText('1월')).toBeInTheDocument();
+    expect(screen.getByText('2월')).toBeInTheDocument();
+  });
+
+  it('handles point selection and sets active legend', async () => {
+    const user = userEvent.setup();
+    const onSelectBucket = vi.fn();
+    const setActiveLegend = vi.fn();
+
+    renderWithMantine(
+      <StatsCurveChart
+        page={mockPage}
+        selectedKey="jan"
+        onSelectBucket={onSelectBucket}
+        activeLegend="income"
+        setActiveLegend={setActiveLegend}
+      />
+    );
+
+    const circles = document.querySelectorAll('circle');
+    expect(circles.length).toBeGreaterThan(0);
+    await user.click(circles[0]);
+
+    expect(onSelectBucket).toHaveBeenCalled();
   });
 });
