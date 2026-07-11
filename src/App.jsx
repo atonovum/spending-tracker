@@ -10,6 +10,7 @@ import {
   Group,
   Menu,
   Modal,
+  MultiSelect,
   NumberInput,
   Paper,
   ScrollArea,
@@ -1915,10 +1916,6 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
     }
   }
 
-  function toggleLabel(id) {
-    setLabelIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  }
-
   return (
     <Stack>
       <SimpleGrid cols={2}>
@@ -1981,33 +1978,22 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
       </Stack>
 
       <Stack gap={6}>
-        <Text size="sm" fw={500}>{t("entry.field.label")}</Text>
+        <Group justify="space-between" wrap="nowrap">
+          <Text size="sm" fw={500}>{t("entry.field.label")}</Text>
+          <Text size="sm" c="dimmed">{t("settings.categories.selected", { count: labelIds.length })}</Text>
+        </Group>
         {labels.length === 0 ? (
           <Text size="xs" c="dimmed">{t("settings.labels.empty")}</Text>
         ) : (
-          <Group gap={6} wrap="wrap">
-            {labels.map((label) => {
-              const active = labelIds.includes(label.id);
-              return (
-                <UnstyledButton
-                  key={label.id}
-                  onClick={() => toggleLabel(label.id)}
-                  style={{
-                    padding: "4px 12px",
-                    borderRadius: 999,
-                    border: `1px solid ${active ? '#FFB454' : '#F0EDE7'}`,
-                    background: active ? "#FFB454" : "#ffffff",
-                    color: active ? "#ffffff" : "#1F2024",
-                    fontSize: 12,
-                    fontWeight: active ? 600 : 400,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {label.name}
-                </UnstyledButton>
-              );
-            })}
-          </Group>
+          <MultiSelect
+            data={labels.map((label) => ({ value: label.id, label: label.name }))}
+            value={labelIds}
+            onChange={setLabelIds}
+            searchable
+            clearable
+            hidePickedOptions
+            placeholder={t("entry.field.label")}
+          />
         )}
       </Stack>
 

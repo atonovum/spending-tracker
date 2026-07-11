@@ -245,4 +245,30 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     const entry = savedState.wallets[0].entries.find(e => e.id === 'regular-1');
     expect(entry).toBeUndefined();
   });
+
+  it('should select multiple labels from the entry label dropdown', async () => {
+    const user = userEvent.setup();
+    renderWithMantine(<App />);
+
+    const entryCard = screen.getByText('One-time expense');
+    await user.click(entryCard);
+    await waitForModal();
+
+    expect(screen.getByText('선택 0개')).toBeInTheDocument();
+
+    const labelInput = screen.getByPlaceholderText('레이블');
+    await user.click(labelInput);
+    await user.click(await screen.findByRole('option', { name: '업무' }));
+    await user.click(labelInput);
+    await user.click(await screen.findByRole('option', { name: '개인' }));
+
+    expect(screen.getByText('선택 2개')).toBeInTheDocument();
+
+    const saveButton = screen.getByRole('button', { name: /저장/i });
+    await user.click(saveButton);
+
+    const savedState = JSON.parse(localStorage.getItem('spending-tracker-v3'));
+    const entry = savedState.wallets[0].entries.find(e => e.id === 'regular-1');
+    expect(entry.labelIds).toEqual(['label-1', 'label-2']);
+  });
 });
