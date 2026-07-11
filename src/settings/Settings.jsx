@@ -14,7 +14,9 @@ function Settings({
   scheduledEntries,
   walletTotals,
   language,
+  currency,
   onLanguageChange,
+  onCurrencyChange,
   onSelectWallet,
   onAddWallet,
   onRenameWallet,
@@ -90,7 +92,12 @@ function Settings({
         onEditEntry={onEditEntry}
       />
 
-      <PreferencesCard language={language} onLanguageChange={onLanguageChange} />
+      <PreferencesCard
+        language={language}
+        currency={currency}
+        onLanguageChange={onLanguageChange}
+        onCurrencyChange={onCurrencyChange}
+      />
 
       <ConfirmModal
         opened={confirm.open}
