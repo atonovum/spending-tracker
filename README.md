@@ -42,7 +42,7 @@
 ### 디렉토리 구조
 ```
 src/
-├── App.jsx              # 메인 컴포넌트 (≈1700 줄, AppRoot/App/EntryEditor/차트 컴포넌트 통합)
+├── App.jsx              # 메인 컴포넌트 (≈2000 줄, AppRoot/App/EntryEditor/차트 컴포넌트 통합)
 ├── main.jsx             # MantineProvider, SW 등록
 ├── worker.js            # Cloudflare Worker 엔트리 (/api/state KV 동기화)
 ├── index.css            # Tailwind + 글로벌 스타일
@@ -85,10 +85,11 @@ Ledger·Stats 탭에는 공통 sticky 헤더 — 지갑 선택 + 기간(`week`/`
 - 다른 탭으로 이동하면 라벨 필터 자동 해제
 
 ### Search
-- 키워드 + 지갑 + 기간(`all` / `7d` / `30d` / `90d` / `custom`) 필터
+- 노트 키워드(`Filter by note`) + 카테고리/라벨 체크박스 + 지갑 + 기간(`7d` / `30d` / `90d` / `custom`) 필터
+- 카테고리/라벨은 기본 0개 선택이며, `All categories` / `All labels` 선택 시 전체 조회
+- 필터된 결과 기준 수입/지출 요약 카드는 항상 표시하며, 결과가 없으면 0으로 표시
 - Custom 기간은 시작·종료 둘 다 입력해야 결과 노출
-- `searchActive` 플래그 — 사용자가 입력해야만 결과 표시, 탭 이탈 시 초기화
-- sticky 필터, 결과는 20개 단위 페이지네이션
+- Search 탭 이탈 시 검색어·필터·기간·날짜 상태 초기화, 결과는 20개 단위 페이지네이션
 
 ### Settings
 - **Preferences** — 언어 ko/en 즉시 전환 + 영구 저장
