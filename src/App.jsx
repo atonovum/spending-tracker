@@ -1201,6 +1201,17 @@ function App({ state, setState }) {
     persistState((prev) => ({ ...prev, language: language === "en" ? "en" : "ko" }));
   }
 
+  function resetSearchUi() {
+    setSearchWalletId(state.selectedWalletId);
+    setSearchPeriod("90d");
+    setSearchText("");
+    setSearchStartDate("");
+    setSearchEndDate("");
+    setSearchCategoryIds([]);
+    setSearchLabelIds([]);
+    setSearchActive(false);
+  }
+
   function addWallet() {
     persistState((prev) => {
       if (prev.wallets.length >= MAX_WALLETS) return prev;
@@ -1445,8 +1456,7 @@ function App({ state, setState }) {
             setActiveTab(value);
             if (value !== "stats") setStatsLabelFilterId(null);
             if (value !== "search") {
-              setSearchActive(false);
-              setSearchText("");
+              resetSearchUi();
             }
             if (value === "ledger") {
               const visibleCount = visibleCountForMode(ledgerMode);
