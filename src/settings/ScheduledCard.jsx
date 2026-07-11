@@ -63,11 +63,15 @@ function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEdi
                       <div className="min-w-0">
                         <Group gap="xs">
                           <Text fw={600} className="truncate">{category?.name || t("settings.scheduled.noCategory")}</Text>
-                          {entryLabels.map((lbl) => (
-                            <Badge key={lbl.id} variant="light" size="xs" color="gray">{lbl.name}</Badge>
-                          ))}
                           <Badge variant="filled" size="xs" style={{ backgroundColor: 'var(--st-primary)', color: '#FFFFFF' }}>{t(`repeat.${entry.repeat}`)}</Badge>
                         </Group>
+                        {entryLabels.length > 0 && (
+                          <Group gap={4} mt={2} mb={2}>
+                            {entryLabels.map((lbl) => (
+                              <Badge key={lbl.id} variant="light" size="xs" color="gray">{lbl.name}</Badge>
+                            ))}
+                          </Group>
+                        )}
                         <Text size="xs" c="dimmed">
                           {t("settings.scheduled.start", { date: entry.date })}
                           {entry.repeatEndDate
