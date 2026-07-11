@@ -795,8 +795,12 @@ function EntryList({ items, onEdit }) {
                       </div>
                     </div>
                     {item.note && (
-                      <div className="text-left text-xs font-medium text-muted pl-1">
-                        {item.note}
+                      <div className="grid grid-cols-[auto,1fr,auto] gap-3">
+                        <span aria-hidden="true" className="w-10" />
+                        <div className="text-left text-xs font-medium text-muted">
+                          {item.note}
+                        </div>
+                        <span aria-hidden="true" />
                       </div>
                     )}
                   </Stack>
@@ -1536,9 +1540,10 @@ function App({ state, setState }) {
 
   const scheduledEntriesForSettings = useMemo(() => {
     const today = startOfDay(new Date());
+    const todayStr = toDateInput(today);
     const horizon = addDays(today, 365 * 5);
     return currentWallet.entries
-      .filter((entry) => entry.repeat && entry.repeat !== "none")
+      .filter((entry) => (entry.repeat && entry.repeat !== "none") || (entry.repeat === "none" && entry.date > todayStr))
       .map((entry) => {
         const next = nextOccurrenceOnOrAfter(entry, today, horizon);
         return { ...entry, nextDate: next ? toDateInput(next) : null };

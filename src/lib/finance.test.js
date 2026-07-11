@@ -981,10 +981,23 @@ describe('Time-dependent functions with fake timers', () => {
       expect(result[0].note).toContain('메모 없음');
     });
 
-    it('skips non-repeating entries', () => {
+    it('includes future one-time entries', () => {
       const wallet = {
         entries: [
-          { id: '1', date: '2026-05-30', repeat: 'none', amount: 100 },
+          { id: '1', date: '2026-05-30', repeat: 'none', amount: 100, note: 'One-time' },
+          { id: '2', date: '2026-05-20', repeat: 'daily', amount: 200 },
+        ],
+      };
+      const selectedRange = { end: new Date('2026-06-05') };
+      const result = buildPendingScheduledOccurrences(wallet, selectedRange);
+
+      expect(result.some((occ) => occ.id === '1' && occ.occurrenceDate === '2026-05-30')).toBe(true);
+    });
+
+    it('skips past one-time entries', () => {
+      const wallet = {
+        entries: [
+          { id: '1', date: '2026-05-29', repeat: 'none', amount: 100 },
           { id: '2', date: '2026-05-20', repeat: 'daily', amount: 200 },
         ],
       };
