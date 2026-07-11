@@ -61,22 +61,39 @@ function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEdi
                         </span>
                       ) : null}
                       <div className="min-w-0">
-                        <Group gap="xs">
-                          <Text fw={600} className="truncate">{category?.name || t("settings.scheduled.noCategory")}</Text>
-                          {entryLabels.map((lbl) => (
-                            <Badge key={lbl.id} variant="light" size="xs" color="gray">{lbl.name}</Badge>
-                          ))}
-                          <Badge variant="filled" size="xs" style={{ backgroundColor: 'var(--st-primary)', color: '#FFFFFF' }}>{t(`repeat.${entry.repeat}`)}</Badge>
-                        </Group>
-                        <Text size="xs" c="dimmed">
-                          {t("settings.scheduled.start", { date: entry.date })}
-                          {entry.repeatEndDate
-                            ? t("settings.scheduled.end", { date: entry.repeatEndDate })
-                            : t("settings.scheduled.endless")}
-                          {entry.nextDate ? t("settings.scheduled.next", { date: entry.nextDate }) : ""}
-                        </Text>
+                        <Text fw={600} className="truncate">{category?.name || t("settings.scheduled.noCategory")}</Text>
+                        {entryLabels.length > 0 && (
+                          <Group gap={4} mt={2} mb={2}>
+                            {entryLabels.map((lbl) => (
+                              <Badge key={lbl.id} variant="light" size="xs" color="gray">{lbl.name}</Badge>
+                            ))}
+                          </Group>
+                        )}
+                        {(() => {
+                          const formatWithDots = (dateStr) => dateStr ? dateStr.replace(/-/g, ".") : "";
+                          const isRecurring = entry.repeat && entry.repeat !== "none";
+                          const dateRangeText = isRecurring
+                            ? `${formatWithDots(entry.date)} ~ ${entry.repeatEndDate ? formatWithDots(entry.repeatEndDate) : ""}`
+                            : formatWithDots(entry.date);
+                          const repeatText = isRecurring
+                            ? t(`repeat.${entry.repeat}`)
+                            : t("settings.scheduled.oneTime");
+                          const nextText = entry.nextDate
+                            ? t("settings.scheduled.next", { date: formatWithDots(entry.nextDate) }).replace(/^(\s*·\s*|\s*)/, "")
+                            : "";
+                          return (
+                            <>
+                              <Text size="xs" c="dimmed" mt={2}>
+                                {dateRangeText}
+                              </Text>
+                              <Text size="xs" c="dimmed">
+                                {nextText ? `${repeatText} · ${nextText}` : repeatText}
+                              </Text>
+                            </>
+                          );
+                        })()}
                         {entry.note ? (
-                          <Text size="xs" c="dimmed" className="truncate">{entry.note}</Text>
+                          <Text size="xs" c="dimmed" className="truncate" mt={2}>{entry.note}</Text>
                         ) : null}
                       </div>
                     </Group>

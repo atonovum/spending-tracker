@@ -149,7 +149,7 @@ describe('ScheduledCard', () => {
       await waitForModal();
 
       // Both entries are monthly — repeat.monthly === "한달" in default ko locale.
-      const monthlyBadges = screen.getAllByText('한달');
+      const monthlyBadges = screen.getAllByText(/한달/i);
       expect(monthlyBadges).toHaveLength(2);
     });
 
@@ -167,8 +167,8 @@ describe('ScheduledCard', () => {
 
       await waitForModal();
 
-      expect(screen.getByText(/2026-01-01/)).toBeInTheDocument();
-      expect(screen.getByText(/2026-12-31/)).toBeInTheDocument();
+      expect(screen.getByText(/2026\.01\.01/)).toBeInTheDocument();
+      expect(screen.getByText(/2026\.12\.31/)).toBeInTheDocument();
     });
 
     it('shows endless when no end date', async () => {
@@ -185,7 +185,7 @@ describe('ScheduledCard', () => {
 
       await waitForModal();
 
-      expect(screen.getByText(/무기한/i)).toBeInTheDocument();
+      expect(screen.getByText(/2026\.01\.15\s*~/i)).toBeInTheDocument();
     });
 
     it('displays next occurrence date', async () => {
@@ -202,8 +202,8 @@ describe('ScheduledCard', () => {
 
       await waitForModal();
 
-      expect(screen.getByText(/2026-02-01/)).toBeInTheDocument();
-      expect(screen.getByText(/2026-02-15/)).toBeInTheDocument();
+      expect(screen.getByText(/2026\.02\.01/)).toBeInTheDocument();
+      expect(screen.getByText(/2026\.02\.15/)).toBeInTheDocument();
     });
 
     it('displays entry note when present', async () => {
