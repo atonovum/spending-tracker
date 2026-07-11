@@ -39,7 +39,7 @@ describe('WalletsCard', () => {
         />
       );
 
-      expect(screen.getByText(/1.*5/i)).toBeInTheDocument();
+      expect(screen.getByText(/5개|5 wallets/i)).toBeInTheDocument();
     });
 
     it('displays all wallets with their totals', () => {
