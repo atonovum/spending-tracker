@@ -36,6 +36,7 @@ export async function fetchRemoteState() {
  * @returns {Promise<
  *   | { ok: true, newUpdatedAt: number | null }
  *   | { ok: false, conflict: true, current: number | null }
+ *   | { ok: false, payloadTooLarge: true }
  *   | { ok: false }
  * >}
  */
@@ -61,6 +62,7 @@ export async function pushRemoteState(state, options) {
       }
       return { ok: false, conflict: true, current };
     }
+    if (response.status === 413) return { ok: false, payloadTooLarge: true };
     if (!response.ok) return { ok: false };
     const etag = response.headers.get("etag");
     const newUpdatedAt = etag !== null && etag !== "" ? Number(etag) : null;

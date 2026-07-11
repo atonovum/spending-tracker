@@ -105,6 +105,13 @@ describe("cloudSync (Tier 2 contract, EUN-4)", () => {
       expect(result).toEqual({ ok: false });
     });
 
+    it("returns payloadTooLarge signal on 413", async () => {
+      mockFetch(jsonResponse({ status: 413, body: { error: "payload too large" } }));
+
+      const result = await pushRemoteState({ foo: 1 });
+      expect(result).toEqual({ ok: false, payloadTooLarge: true });
+    });
+
     it("returns { ok: false } on network error", async () => {
       globalThis.fetch = vi.fn(() => Promise.reject(new Error("offline")));
 

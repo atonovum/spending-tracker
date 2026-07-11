@@ -3,7 +3,7 @@ const JSON_HEADERS = {
   "content-type": "application/json",
   "cache-control": "no-store",
 };
-const MAX_BODY_SIZE = 1024 * 1024; // 1 MiB - typical spending tracker state is < 100 KiB
+const MAX_BODY_SIZE = 10 * 1024 * 1024;
 
 function jsonResponse(body, status = 200, extraHeaders) {
   return new Response(typeof body === "string" ? body : JSON.stringify(body), {

@@ -228,9 +228,8 @@ describe("Worker /api/state contract tests", () => {
       expect(typeof retrieved.updatedAt).toBe("number");
     });
 
-    it("rejects body > 1 MiB with 413", async () => {
-      // 1.1 MiB body
-      const largeBody = "x".repeat(1.1 * 1024 * 1024);
+    it("rejects body > 10 MiB with 413", async () => {
+      const largeBody = "x".repeat(11 * 1024 * 1024);
 
       const request = new Request("http://localhost/api/state", {
         method: "PUT",
