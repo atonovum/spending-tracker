@@ -5,8 +5,10 @@ import {
   Button,
   Card,
   Center,
+  Checkbox,
   Divider,
   Group,
+  Menu,
   Modal,
   NumberInput,
   Paper,
@@ -84,6 +86,32 @@ export function sortEntriesForDisplay(items) {
     if (aDate !== bDate) return aDate < bDate ? 1 : -1;
     return 0;
   });
+}
+
+export function filterEntriesByFacets(entries, filters) {
+  const categoryIds = filters.categoryIds;
+  const labelIds = filters.labelIds;
+  return entries.filter((entry) => {
+    const categoryMatch = !categoryIds || categoryIds.has(entry.categoryId);
+    const labelMatch = !labelIds || normalizeLabelIds(entry).some((id) => labelIds.has(id));
+    return categoryMatch && labelMatch;
+  });
+}
+
+export function resolveFacetFilter(selectedIds, options) {
+  if (selectedIds.length === options.length) return null;
+  return new Set(selectedIds);
+}
+
+export function summarizeEntries(entries, categories) {
+  return entries.reduce(
+    (summary, entry) => {
+      const signed = signedAmount(entry, categories);
+      if (signed >= 0) return { ...summary, income: summary.income + signed };
+      return { ...summary, expense: summary.expense + Math.abs(signed) };
+    },
+    { income: 0, expense: 0 }
+  );
 }
 
 function visibleCountForMode(mode) {
@@ -502,7 +530,7 @@ function EntryList({ items, onEdit }) {
                           <span
                             key={lbl.id}
                             className="ml-1 inline-flex items-center rounded-chip px-2 py-0.5 text-xs"
-                            style={{ background: 'rgba(138, 143, 154, 0.08)', color: '#8A8F9A' }}
+                            style={{ background: 'rgba(100, 116, 139, 0.12)', color: '#475569' }}
                           >
                             {lbl.name}
                           </span>
@@ -626,6 +654,47 @@ function PaginatedEntryList({ items, onEdit, resetKey }) {
   );
 }
 
+function SearchFacetMenu({ label, options, selectedIds, onChange }) {
+  const t = useT();
+  const allIds = options.map((option) => option.id);
+  const activeIds = selectedIds;
+  const activeSet = new Set(activeIds);
+  const allSelected = activeIds.length === allIds.length;
+  const buttonPrefix = allSelected ? t("search.all") : activeIds.length;
+
+  function toggleAll() {
+    onChange(allSelected ? [] : allIds);
+  }
+
+  function toggleOne(id) {
+    const next = new Set(activeIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    onChange([...next]);
+  }
+
+  return (
+    <Menu closeOnItemClick={false} withinPortal position="bottom-start" shadow="md">
+      <Menu.Target>
+        <Button variant="default" color="gray" rightSection={<ChevronDown size={14} />} fullWidth>
+          {buttonPrefix} {label}
+        </Button>
+      </Menu.Target>
+      <Menu.Dropdown miw={220} mah={320} style={{ overflowY: "auto" }}>
+        <Menu.Item onClick={toggleAll}>
+          <Checkbox checked={allSelected} readOnly label={t("search.all")} />
+        </Menu.Item>
+        <Menu.Divider />
+        {options.map((option) => (
+          <Menu.Item key={option.id} onClick={() => toggleOne(option.id)}>
+            <Checkbox checked={activeSet.has(option.id)} readOnly label={option.name} />
+          </Menu.Item>
+        ))}
+      </Menu.Dropdown>
+    </Menu>
+  );
+}
+
 function App({ state, setState }) {
   const { t, formatMoney } = useI18n();
   const [activeTab, setActiveTab] = useState("ledger");
@@ -643,6 +712,8 @@ function App({ state, setState }) {
   const [searchText, setSearchText] = useState("");
   const [searchStartDate, setSearchStartDate] = useState("");
   const [searchEndDate, setSearchEndDate] = useState("");
+  const [searchCategoryIds, setSearchCategoryIds] = useState([]);
+  const [searchLabelIds, setSearchLabelIds] = useState([]);
   const [searchActive, setSearchActive] = useState(false);
   const [entryModalOpen, setEntryModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
@@ -723,15 +794,20 @@ function App({ state, setState }) {
     if (!searchRange) return [];
     const base = buildOccurrences(searchWallet.entries, searchRange);
     const q = searchText.trim().toLowerCase();
-    if (!q) return [];
-    const categoryNameById = new Map(state.categories.map((c) => [c.id, (c.name || "").toLowerCase()]));
-    const labelNameById = new Map(state.labels.map((l) => [l.id, (l.name || "").toLowerCase()]));
-    return base.filter((item) => {
-      const category = categoryNameById.get(item.categoryId) || "";
-      const labelText = normalizeLabelIds(item).map((id) => labelNameById.get(id) || "").join(" ");
-      return category.includes(q) || labelText.includes(q) || (item.note || "").toLowerCase().includes(q);
+    const categoryFilter = resolveFacetFilter(searchCategoryIds, state.categories);
+    const labelFilter = resolveFacetFilter(searchLabelIds, state.labels);
+    const hasFacetFilter = categoryFilter !== null || labelFilter !== null;
+    if (!q && !hasFacetFilter) return [];
+    const keywordMatches = q
+      ? base.filter((item) => {
+          return (item.note || "").toLowerCase().includes(q);
+        })
+      : base;
+    return filterEntriesByFacets(keywordMatches, {
+      categoryIds: categoryFilter,
+      labelIds: labelFilter,
     });
-  }, [searchWallet, searchRange, searchText, state.categories, state.labels]);
+  }, [searchWallet, searchRange, searchText, searchCategoryIds, searchLabelIds, state.categories, state.labels]);
 
   function persistState(next) {
     setState((prev) => {
@@ -1015,11 +1091,26 @@ function App({ state, setState }) {
 
   function renderSearchPage() {
     const items = searchResults.map((item) => ({ ...item, ...resolveEntryData(item) }));
-    const resetKey = `${searchWalletId}|${searchPeriod}|${searchStartDate}|${searchEndDate}|${searchText}`;
+    const searchSummary = summarizeEntries(searchResults, state.categories);
+    const resetKey = `${searchWalletId}|${searchPeriod}|${searchStartDate}|${searchEndDate}|${searchText}|${searchCategoryIds.join(";")}|${searchLabelIds.join(";")}`;
     return (
       <Stack gap="sm">
         <div className="sticky top-0 z-20 -mx-4 border-b border-line bg-white/95 px-4 py-3 backdrop-blur">
           <Stack gap="sm">
+            <SimpleGrid cols={2}>
+              <SearchFacetMenu
+                label={t("search.categoryFilter")}
+                options={state.categories}
+                selectedIds={searchCategoryIds}
+                onChange={(ids) => { setSearchCategoryIds(ids); setSearchActive(true); }}
+              />
+              <SearchFacetMenu
+                label={t("search.labelFilter")}
+                options={state.labels}
+                selectedIds={searchLabelIds}
+                onChange={(ids) => { setSearchLabelIds(ids); setSearchActive(true); }}
+              />
+            </SimpleGrid>
             <TextInput
               value={searchText}
               onChange={(e) => { setSearchText(e.currentTarget.value); setSearchActive(true); }}
@@ -1053,9 +1144,17 @@ function App({ state, setState }) {
             )}
           </Stack>
         </div>
-        {searchActive ? (
-          <PaginatedEntryList items={items} onEdit={(item) => openEditEntry(item)} resetKey={resetKey} />
-        ) : null}
+        <SimpleGrid cols={2}>
+          <Card withBorder radius="card" shadow="soft">
+            <Text fw={700} size="xs" c="dimmed" ta="center">{t("search.resultIncome")}</Text>
+            <Text fw={700} size="lg" lh={1.2} ta="center" style={{ color: "#5BB97A" }}>{formatMoney(searchSummary.income)}</Text>
+          </Card>
+          <Card withBorder radius="card" shadow="soft">
+            <Text fw={700} size="xs" c="dimmed" ta="center">{t("search.resultExpense")}</Text>
+            <Text fw={700} size="lg" lh={1.2} ta="center" style={{ color: "#F08A8A" }}>{formatMoney(-searchSummary.expense)}</Text>
+          </Card>
+        </SimpleGrid>
+        {searchActive ? <PaginatedEntryList items={items} onEdit={(item) => openEditEntry(item)} resetKey={resetKey} /> : null}
       </Stack>
     );
   }
@@ -1100,6 +1199,17 @@ function App({ state, setState }) {
 
   function setLanguage(language) {
     persistState((prev) => ({ ...prev, language: language === "en" ? "en" : "ko" }));
+  }
+
+  function resetSearchUi() {
+    setSearchWalletId(state.selectedWalletId);
+    setSearchPeriod("90d");
+    setSearchText("");
+    setSearchStartDate("");
+    setSearchEndDate("");
+    setSearchCategoryIds([]);
+    setSearchLabelIds([]);
+    setSearchActive(false);
   }
 
   function addWallet() {
@@ -1346,8 +1456,7 @@ function App({ state, setState }) {
             setActiveTab(value);
             if (value !== "stats") setStatsLabelFilterId(null);
             if (value !== "search") {
-              setSearchActive(false);
-              setSearchText("");
+              resetSearchUi();
             }
             if (value === "ledger") {
               const visibleCount = visibleCountForMode(ledgerMode);

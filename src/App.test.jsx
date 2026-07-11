@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { sortEntriesForDisplay } from './App.jsx';
+import { filterEntriesByFacets, resolveFacetFilter, sortEntriesForDisplay, summarizeEntries } from './App.jsx';
 
 describe('sortEntriesForDisplay', () => {
   it('orders imported ascending entries newest-first before pagination', () => {
@@ -32,5 +32,80 @@ describe('sortEntriesForDisplay', () => {
     const sorted = sortEntriesForDisplay(entries);
 
     expect(sorted.map((entry) => entry.id)).toEqual(['first', 'second', 'third']);
+  });
+});
+
+describe('filterEntriesByFacets', () => {
+  it('keeps entries matching selected categories and labels', () => {
+    const entries = [
+      { id: 'salary', categoryId: 'income', labelIds: ['fixed'] },
+      { id: 'lunch', categoryId: 'food', labelIds: ['variable'] },
+      { id: 'rent', categoryId: 'rent', labelIds: ['fixed'] },
+      { id: 'unlabeled', categoryId: 'food', labelIds: [] },
+    ];
+
+    const result = filterEntriesByFacets(entries, {
+      categoryIds: new Set(['food', 'rent']),
+      labelIds: new Set(['variable']),
+    });
+
+    expect(result.map((entry) => entry.id)).toEqual(['lunch']);
+  });
+
+  it('treats null facets as all selected', () => {
+    const entries = [
+      { id: 'salary', categoryId: 'income', labelIds: ['fixed'] },
+      { id: 'lunch', categoryId: 'food', labelIds: ['variable'] },
+    ];
+
+    const result = filterEntriesByFacets(entries, { categoryIds: null, labelIds: null });
+
+    expect(result).toEqual(entries);
+  });
+
+  it('returns no entries when a facet is explicitly empty', () => {
+    const entries = [
+      { id: 'salary', categoryId: 'income', labelIds: ['fixed'] },
+      { id: 'lunch', categoryId: 'food', labelIds: ['variable'] },
+    ];
+
+    const result = filterEntriesByFacets(entries, { categoryIds: new Set(), labelIds: null });
+
+    expect(result).toEqual([]);
+  });
+});
+
+describe('resolveFacetFilter', () => {
+  it('keeps the default unchecked state as an empty filter', () => {
+    const options = [{ id: 'food' }, { id: 'rent' }];
+
+    const result = resolveFacetFilter([], options);
+
+    expect(result).toEqual(new Set());
+  });
+
+  it('treats selecting every option as All', () => {
+    const options = [{ id: 'food' }, { id: 'rent' }];
+
+    const result = resolveFacetFilter(['food', 'rent'], options);
+
+    expect(result).toBeNull();
+  });
+});
+
+describe('summarizeEntries', () => {
+  it('returns income and expense totals for the supplied entries only', () => {
+    const categories = [
+      { id: 'income', type: 'income' },
+      { id: 'food', type: 'expense' },
+      { id: 'rent', type: 'expense' },
+    ];
+    const entries = [
+      { categoryId: 'income', amount: 1000 },
+      { categoryId: 'food', amount: 150 },
+      { categoryId: 'rent', amount: 500 },
+    ];
+
+    expect(summarizeEntries(entries, categories)).toEqual({ income: 1000, expense: 650 });
   });
 });
