@@ -4,6 +4,48 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------
+   Design tokens — modern fintech (Toss/Revolut-inspired)
+   Single source of truth: consumed by Tailwind (tailwind.config.js),
+   the Mantine theme (main.jsx) and inline SVG chart styles.
+   ------------------------------------------------------------------ */
+:root {
+  /* surfaces */
+  --st-bg: #F2F4F6;
+  --st-surface: #FFFFFF;
+  --st-surface-soft: #F8F9FB;
+
+  /* ink */
+  --st-ink: #191F28;
+  --st-ink-2: #4E5968;
+  --st-muted: #8B95A1;
+
+  /* hairlines */
+  --st-line: #E5E8EB;
+  --st-grid: #EEF1F4;
+
+  /* brand */
+  --st-primary: #3182F6;
+  --st-primary-strong: #1B64DA;
+  --st-primary-soft: #E8F3FF;
+
+  /* semantics (income/expense hues are part of the product identity) */
+  --st-income: #5BB97A;
+  --st-income-mark: #249C63; /* chart marks: deeper for CVD separation vs expense */
+  --st-income-soft: rgba(91, 185, 122, 0.12);
+  --st-expense: #F08A8A;
+  --st-expense-soft: rgba(240, 138, 138, 0.12);
+
+  /* elevation */
+  --st-shadow-soft: 0 1px 2px rgba(23, 32, 52, 0.04), 0 8px 24px rgba(23, 32, 52, 0.06);
+  --st-shadow-card: 0 2px 8px rgba(23, 32, 52, 0.04), 0 12px 32px rgba(23, 32, 52, 0.08);
+  --st-shadow-float: 0 6px 16px rgba(49, 130, 246, 0.34), 0 2px 6px rgba(23, 32, 52, 0.10);
+
+  /* shape */
+  --st-radius-card: 20px;
+  --st-radius-control: 12px;
+}
+
 @layer base {
   html, body, #root {
     height: 100%;
@@ -11,12 +53,14 @@
   body {
     @apply bg-paper text-ink antialiased;
     font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-    font-weight: 300;
+    font-weight: 400;
     font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 
   /* Prevent iOS Safari from auto-zooming on input focus.
@@ -47,40 +91,56 @@
     display: none;
   }
 
+  /* transaction rows */
+  .entry-row {
+    transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+  }
+  .entry-row:hover {
+    background-color: var(--st-surface-soft);
+    border-color: var(--st-line);
+  }
+  .entry-row:active {
+    transform: scale(0.99);
+  }
+
+  /* bottom navigation */
   .bottom-nav-tabs [role="tablist"] {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    padding: 8px 0;
     border-top: 0;
     border-bottom: 0;
   }
   .bottom-nav-tabs [role="tab"] {
     width: 100%;
-    height: 64px;
+    height: 48px;
     margin: 0;
     padding: 0;
     border: 0;
-    border-radius: 0;
+    border-radius: var(--st-radius-control);
     font-size: 0.875rem;
-    font-weight: 400;
+    font-weight: 500;
     box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background-color: transparent;
-    color: #8A8F9A;
+    color: var(--st-muted);
     box-shadow: none;
-    transition: background-color 200ms ease, color 200ms ease;
+    cursor: pointer;
+    transition: background-color 180ms ease, color 180ms ease;
   }
   .bottom-nav-tabs [role="tab"]:hover:not([data-active="true"]) {
-    background-color: rgba(138, 143, 154, 0.04);
+    background-color: var(--st-surface-soft);
+    color: var(--st-ink-2);
   }
   .bottom-nav-tabs [role="tab"][data-active="true"] {
-    background-color: #FFB454;
-    color: #FFFFFF;
-    border-radius: 999px;
-    font-weight: 400;
+    background-color: var(--st-primary-soft);
+    color: var(--st-primary-strong);
+    font-weight: 700;
   }
   .bottom-nav-tabs [role="tab"][data-active="true"]:hover {
-    background-color: #FFA020;
+    background-color: var(--st-primary-soft);
   }
 }

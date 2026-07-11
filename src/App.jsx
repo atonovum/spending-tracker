@@ -129,6 +129,34 @@ function visibleCountForMode(mode) {
   return 4;
 }
 
+// Chart tokens — mirror the CSS variables in index.css (SVG attributes cannot
+// resolve var(), so the values live here as the single JS-side mirror).
+const CHART = {
+  primary: "#3182F6",
+  primarySoft: "#E8F3FF",
+  income: "#249C63",
+  expense: "#F08A8A",
+  grid: "#EEF1F4",
+  baseline: "#E5E8EB",
+  muted: "#8B95A1",
+  ink: "#191F28",
+  surface: "#FFFFFF",
+};
+
+// Bar with a rounded data-end (top) and a square baseline.
+function roundedTopBarPath(x, y, w, h, r) {
+  const rr = Math.max(0, Math.min(r, w / 2, h));
+  return [
+    `M ${x} ${y + h}`,
+    `L ${x} ${y + rr}`,
+    `Q ${x} ${y} ${x + rr} ${y}`,
+    `L ${x + w - rr} ${y}`,
+    `Q ${x + w} ${y} ${x + w} ${y + rr}`,
+    `L ${x + w} ${y + h}`,
+    "Z",
+  ].join(" ");
+}
+
 function donutSlicePath(cx, cy, r, startAngle, endAngle) {
   const x1 = cx + r * Math.cos(startAngle);
   const y1 = cy + r * Math.sin(startAngle);
@@ -170,14 +198,22 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
       return { ...bucket, x, y };
     });
 
+    const zeroRatio = (0 - minTick) / tickRange;
+    const zeroY = baseY - zeroRatio * graphH;
     return (
       <svg viewBox={`0 0 ${width} ${height}`} className="block w-full select-none" style={{ height: "auto", maxHeight: 260 }}>
+        <defs>
+          <linearGradient id="balanceAreaFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={CHART.primary} stopOpacity="0.18" />
+            <stop offset="100%" stopColor={CHART.primary} stopOpacity="0.01" />
+          </linearGradient>
+        </defs>
         {[minTick, (minTick + maxTick) / 2, maxTick].map((tick, index) => {
           const ratio = (tick - minTick) / tickRange;
           const y = baseY - ratio * graphH;
           return (
             <g key={index}>
-              <line x1={padX} x2={width - padX} y1={y} y2={y} stroke="#F0EDE7" strokeWidth="1" />
+              <line x1={padX} x2={width - padX} y1={y} y2={y} stroke={CHART.grid} strokeWidth="1" />
               <text x="8" y={y + 4} className="fill-muted text-[12px]">
                 {formatAxisTick(tick)}
               </text>
@@ -185,22 +221,47 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
           );
         })}
         {points.length > 1 && (
+          <polygon
+            points={[
+              `${points[0].x},${Math.min(zeroY, baseY)}`,
+              ...points.map((p) => `${p.x},${p.y}`),
+              `${points[points.length - 1].x},${Math.min(zeroY, baseY)}`,
+            ].join(" ")}
+            fill="url(#balanceAreaFill)"
+            pointerEvents="none"
+          />
+        )}
+        {points.length > 1 && (
           <polyline
             points={points.map((p) => `${p.x},${p.y}`).join(" ")}
             fill="none"
-            stroke="#5C8DEF"
+            stroke={CHART.primary}
             strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         )}
         {points.map((point) => (
           <g key={point.key}>
+            {selectedKey === point.key && (
+              <circle cx={point.x} cy={point.y} r={11} fill={CHART.primary} opacity={0.14} pointerEvents="none" />
+            )}
             <circle
               cx={point.x}
               cy={point.y}
-              r={selectedKey === point.key ? 7 : 4}
-              fill={selectedKey === point.key ? "#F08A8A" : "#fff"}
-              stroke="#5C8DEF"
-              strokeWidth="2"
+              r={selectedKey === point.key ? 6 : 4.5}
+              fill={selectedKey === point.key ? CHART.primary : CHART.surface}
+              stroke={selectedKey === point.key ? CHART.surface : CHART.primary}
+              strokeWidth={selectedKey === point.key ? 2.5 : 2}
+              onClick={() => onSelectBucket(point)}
+              style={{ cursor: "pointer" }}
+            />
+            {/* enlarged hit target */}
+            <circle
+              cx={point.x}
+              cy={point.y}
+              r={14}
+              fill="transparent"
               onClick={() => onSelectBucket(point)}
               style={{ cursor: "pointer" }}
             />
@@ -229,7 +290,8 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
   const maxTick = roundedAxisMax(maxValue);
   const midTick = Math.round(maxTick / 2);
   const slotW = graphW / page.length;
-  const barW = Math.max(7, slotW * 0.34);
+  const barW = Math.max(7, Math.min(22, slotW * 0.3));
+  const barGap = 3;
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="block w-full select-none" style={{ height: "auto", maxHeight: 260 }}>
@@ -238,8 +300,15 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
         const y = baseY - ratio * graphH;
         return (
           <g key={index}>
-            <line x1={padX} x2={width - padX} y1={y} y2={y} stroke="#e2e8f0" strokeWidth="1" />
-            <text x="8" y={y + 4} className="fill-slate-500 text-[12px]">
+            <line
+              x1={padX}
+              x2={width - padX}
+              y1={y}
+              y2={y}
+              stroke={tick === 0 ? CHART.baseline : CHART.grid}
+              strokeWidth="1"
+            />
+            <text x="8" y={y + 4} className="fill-muted text-[12px]">
               {formatAxisTick(tick)}
             </text>
           </g>
@@ -248,38 +317,34 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
       {page.map((bucket, index) => {
         const slotX = padX + index * slotW;
         const centerX = slotX + slotW / 2;
-        const incomeX = centerX - barW;
-        const expenseX = centerX;
-        const incH = (Math.abs(bucket.income) / maxTick) * graphH;
-        const expH = (Math.abs(bucket.expense) / maxTick) * graphH;
+        const incomeX = centerX - barW - barGap / 2;
+        const expenseX = centerX + barGap / 2;
+        const incH = Math.max((Math.abs(bucket.income) / maxTick) * graphH, 4);
+        const expH = Math.max((Math.abs(bucket.expense) / maxTick) * graphH, 4);
         const dimmed = !!selectedKey && bucket.key !== selectedKey;
         return (
           <g key={bucket.key}>
             <rect
-              x={slotX + 1}
+              x={slotX + 2}
               y={padTop}
-              width={slotW - 2}
+              width={slotW - 4}
               height={graphH}
-              fill={selectedKey === bucket.key ? "rgba(21,101,192,0.08)" : "transparent"}
+              rx={10}
+              fill={selectedKey === bucket.key ? CHART.primary : "transparent"}
+              opacity={selectedKey === bucket.key ? 0.07 : 1}
               onClick={() => onSelectBucket(bucket)}
               style={{ cursor: "pointer" }}
             />
-            <rect
-              x={incomeX}
-              y={baseY - incH}
-              width={barW}
-              height={Math.max(incH, 4)}
-              fill="#5BB97A"
+            <path
+              d={roundedTopBarPath(incomeX, baseY - incH, barW, incH, 4)}
+              fill={CHART.income}
               opacity={dimmed ? 0.35 : 1}
               onClick={() => onSelectBar(bucket, "income")}
               style={{ cursor: "pointer" }}
             />
-            <rect
-              x={expenseX}
-              y={baseY - expH}
-              width={barW}
-              height={Math.max(expH, 4)}
-              fill="#F08A8A"
+            <path
+              d={roundedTopBarPath(expenseX, baseY - expH, barW, expH, 4)}
+              fill={CHART.expense}
               opacity={dimmed ? 0.35 : 1}
               onClick={() => onSelectBar(bucket, "expense")}
               style={{ cursor: "pointer" }}
@@ -322,7 +387,7 @@ function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categor
   const maxTick = roundedAxisMax(maxValue);
   const midTick = Math.round(maxTick / 2);
   const slotW = graphW / Math.max(series.length, 1);
-  const barW = Math.max(6, slotW * 0.5);
+  const barW = Math.max(6, Math.min(24, slotW * 0.5));
 
   const active = activeIndex != null && series[activeIndex] ? series[activeIndex] : null;
   const activeCenterX = active != null ? padX + activeIndex * slotW + slotW / 2 : 0;
@@ -345,7 +410,14 @@ function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categor
         const y = baseY - ratio * graphH;
         return (
           <g key={index}>
-            <line x1={padX} x2={width - padX} y1={y} y2={y} stroke="#F0EDE7" strokeWidth="1" />
+            <line
+              x1={padX}
+              x2={width - padX}
+              y1={y}
+              y2={y}
+              stroke={tick === 0 ? CHART.baseline : CHART.grid}
+              strokeWidth="1"
+            />
             <text x="6" y={y + 4} className="fill-muted text-[11px]">{formatAxisTick(tick)}</text>
           </g>
         );
@@ -358,14 +430,10 @@ function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categor
         const isActive = index === activeIndex;
         return (
           <g key={bucket.key || index}>
-            <rect
-              x={barX}
-              y={baseY - Math.max(h, 1)}
-              width={barW}
-              height={Math.max(h, 1)}
+            <path
+              d={roundedTopBarPath(barX, baseY - Math.max(h, 1), barW, Math.max(h, 1), 4)}
               fill={color}
-              opacity={activeIndex == null || isActive ? 1 : 0.5}
-              rx={3}
+              opacity={activeIndex == null || isActive ? 1 : 0.4}
             />
             <rect
               x={slotX}
@@ -387,8 +455,8 @@ function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categor
       })}
       {active ? (
         <g pointerEvents="none">
-          <rect x={tipX} y={tipY - tipH} width={tipW} height={tipH} rx={9} fill="#1F2937" opacity={0.92} />
-          <text x={tipX + tipW / 2} y={tipY - 5} textAnchor="middle" fill="#FFFFFF" className="text-[11px]">
+          <rect x={tipX} y={tipY - tipH} width={tipW} height={tipH} rx={9} fill={CHART.ink} opacity={0.92} />
+          <text x={tipX + tipW / 2} y={tipY - 5} textAnchor="middle" fill={CHART.surface} fontWeight="600" className="text-[11px]">
             {tipText}
           </text>
         </g>
@@ -462,8 +530,18 @@ function PieChart({ items, type }) {
       style={{ width: "100%", height: "auto", maxWidth: 520 }}
     >
       {entries.map((slice) => (
-        <path key={slice.category.id} d={donutSlicePath(cx, cy, radius, slice.start, slice.end)} fill={slice.category.color} stroke="#fff" strokeWidth="1" />
+        <path
+          key={slice.category.id}
+          d={donutSlicePath(cx, cy, radius, slice.start, slice.end)}
+          fill={slice.category.color}
+          stroke={CHART.surface}
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
       ))}
+      {/* donut hole */}
+      <circle cx={cx} cy={cy} r={radius * 0.58} fill={CHART.surface} />
+      <circle cx={cx} cy={cy} r={radius * 0.58} fill="none" stroke={CHART.grid} strokeWidth="1" />
       {entries.map((slice) => {
         const Cmp = getCategoryIconComponent(slice.category.icon);
         const cosA = Math.cos(slice.mid);
@@ -492,7 +570,7 @@ function PieChart({ items, type }) {
               textAnchor="middle"
               dominantBaseline="central"
               className="text-[11px]"
-              style={{ fill: slice.category.color, fontWeight: 700 }}
+              style={{ fill: CHART.ink, fontWeight: 600 }}
             >
               {percentText}
             </text>
@@ -513,44 +591,43 @@ function EntryList({ items, onEdit }) {
         const dailyTotal = rows.reduce((sum, item) => sum + signedAmount(item), 0);
         return (
         <Box key={date}>
-          <Group justify="space-between" mb={6} wrap="nowrap">
-            <Text fw={700} size="sm" className="text-ink">{date}</Text>
-            <Text fw={700} size="sm" className="text-ink">{formatTransactionMoney(dailyTotal, lang)}</Text>
+          <Group justify="space-between" mb={6} px={4} wrap="nowrap">
+            <Text fw={600} size="xs" className="text-muted">{date}</Text>
+            <Text fw={600} size="xs" className="text-muted">{formatTransactionMoney(dailyTotal, lang)}</Text>
           </Group>
-          <Stack gap="xs">
+          <Stack gap={8}>
             {rows.map((item) => {
               const category = item.category;
               const itemLabels = item.labels || [];
               return (
-                <Paper key={item.id + item.occurrenceDate} withBorder radius="card" p="sm" className="cursor-pointer" onClick={() => onEdit(item)}>
-                  <div className="grid grid-cols-[auto,auto,1fr,auto] items-center gap-3">
-                    <span className="h-10 w-1.5 rounded-chip" style={{ background: category.color }} />
+                <Paper key={item.id + item.occurrenceDate} withBorder radius="card" p="sm" className="entry-row cursor-pointer" onClick={() => onEdit(item)}>
+                  <div className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
                     <span
                       aria-hidden="true"
-                      className="grid h-9 w-9 place-items-center rounded-xl"
-                      style={{ background: `${category.color}14`, color: category.color }}
+                      className="grid h-10 w-10 place-items-center rounded-chip"
+                      style={{ background: `${category.color}1A`, color: category.color }}
                     >
                       <CategoryIcon category={category} size={18} />
                     </span>
                     <div className="min-w-0 text-left">
-                      <div className="truncate font-medium text-ink">
+                      <div className="truncate font-semibold text-ink">
                         {category.name}
                         {itemLabels.map((lbl) => (
                           <span
                             key={lbl.id}
-                            className="ml-1 inline-flex items-center rounded-chip px-2 py-0.5 text-xs"
-                            style={{ background: 'rgba(100, 116, 139, 0.12)', color: '#475569' }}
+                            className="ml-1.5 inline-flex items-center rounded-chip bg-surface-soft px-2 py-0.5 text-xs font-medium text-ink-2"
+                            style={{ boxShadow: "inset 0 0 0 1px var(--st-line)" }}
                           >
                             {lbl.name}
                           </span>
                         ))}
                       </div>
-                      {item.note ? <div className="text-xs" style={{ color: category.color, fontWeight: 500 }}>{item.note}</div> : null}
+                      {item.note ? <div className="truncate text-xs font-medium text-muted">{item.note}</div> : null}
                     </div>
                     <div className="text-right">
                       <div
-                        className="font-semibold"
-                        style={{ color: category.type === "income" ? "#5BB97A" : "#F08A8A" }}
+                        className="font-bold"
+                        style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
                       >
                         {formatTransactionMoney(signedAmount(item), lang)}
                       </div>
@@ -964,14 +1041,14 @@ function App({ state, setState }) {
     return (
       <Stack gap="md">
         <SimpleGrid cols={2}>
-          <Card withBorder radius="card" shadow="soft">
-            <Text fw={700} size="xs" c="dimmed" ta="center">{t("card.total")}</Text>
-            <Text fw={700} size="lg" lh={1.2} ta="center">{formatMoney(statsTotalBalance)}</Text>
+          <Card withBorder radius="card" shadow="soft" padding="md">
+            <Text fw={600} size="xs" c="dimmed" ta="center">{t("card.total")}</Text>
+            <Text fw={800} fz={21} lh={1.3} ta="center" style={{ letterSpacing: "-0.02em" }}>{formatMoney(statsTotalBalance)}</Text>
             <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
           </Card>
-          <Card withBorder radius="card" shadow="soft">
-            <Text fw={700} size="xs" c="dimmed" ta="center">{ledgerPeriodLabel}</Text>
-            <Text fw={700} size="lg" lh={1.2} ta="center">{formatMoney(statsFlow)}</Text>
+          <Card withBorder radius="card" shadow="soft" padding="md">
+            <Text fw={600} size="xs" c="dimmed" ta="center">{ledgerPeriodLabel}</Text>
+            <Text fw={800} fz={21} lh={1.3} ta="center" style={{ letterSpacing: "-0.02em" }}>{formatMoney(statsFlow)}</Text>
             <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
           </Card>
         </SimpleGrid>
@@ -1154,13 +1231,13 @@ function App({ state, setState }) {
           </Stack>
         </div>
         <SimpleGrid cols={2}>
-          <Card withBorder radius="card" shadow="soft">
-            <Text fw={700} size="xs" c="dimmed" ta="center">{t("search.resultIncome")}</Text>
-            <Text fw={700} size="lg" lh={1.2} ta="center" style={{ color: "#5BB97A" }}>{formatMoney(searchSummary.income)}</Text>
+          <Card withBorder radius="card" shadow="soft" padding="md">
+            <Text fw={600} size="xs" c="dimmed" ta="center">{t("search.resultIncome")}</Text>
+            <Text fw={800} fz={21} lh={1.3} ta="center" style={{ color: "var(--st-income)", letterSpacing: "-0.02em" }}>{formatMoney(searchSummary.income)}</Text>
           </Card>
-          <Card withBorder radius="card" shadow="soft">
-            <Text fw={700} size="xs" c="dimmed" ta="center">{t("search.resultExpense")}</Text>
-            <Text fw={700} size="lg" lh={1.2} ta="center" style={{ color: "#F08A8A" }}>{formatMoney(-searchSummary.expense)}</Text>
+          <Card withBorder radius="card" shadow="soft" padding="md">
+            <Text fw={600} size="xs" c="dimmed" ta="center">{t("search.resultExpense")}</Text>
+            <Text fw={800} fz={21} lh={1.3} ta="center" style={{ color: "var(--st-expense)", letterSpacing: "-0.02em" }}>{formatMoney(-searchSummary.expense)}</Text>
           </Card>
         </SimpleGrid>
         {searchActive ? <PaginatedEntryList items={items} onEdit={(item) => openEditEntry(item)} resetKey={resetKey} /> : null}
@@ -1492,8 +1569,8 @@ function App({ state, setState }) {
                   onClick={() => setLedgerChartMode("balance")}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLedgerChartMode("balance"); } }}
                 >
-                  <Text fw={700} size="xs" c="dimmed" ta="center">{t("card.total")}</Text>
-                  <Text fw={700} size="lg" lh={1.2} ta="center">{formatMoney(totalBalance)}</Text>
+                  <Text fw={600} size="xs" c="dimmed" ta="center">{t("card.total")}</Text>
+                  <Text fw={800} fz={21} lh={1.3} ta="center" style={{ letterSpacing: "-0.02em" }}>{formatMoney(totalBalance)}</Text>
                   <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
                 </Card>
                 <Card
@@ -1507,8 +1584,8 @@ function App({ state, setState }) {
                   onClick={() => setLedgerChartMode("flow")}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLedgerChartMode("flow"); } }}
                 >
-                  <Text fw={700} size="xs" c="dimmed" ta="center">{ledgerPeriodLabel}</Text>
-                  <Text fw={700} size="lg" lh={1.2} ta="center">{formatMoney(periodFlow)}</Text>
+                  <Text fw={600} size="xs" c="dimmed" ta="center">{ledgerPeriodLabel}</Text>
+                  <Text fw={800} fz={21} lh={1.3} ta="center" style={{ letterSpacing: "-0.02em" }}>{formatMoney(periodFlow)}</Text>
                   <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
                 </Card>
               </SimpleGrid>
@@ -1519,18 +1596,18 @@ function App({ state, setState }) {
                     {ledgerChartMode === "flow" ? (
                       <>
                         <Group gap={6} wrap="nowrap">
-                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#5BB97A" }} />
-                          <Text size="sm">{t("chart.income")}</Text>
+                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "var(--st-income-mark)" }} />
+                          <Text size="sm" fw={500} c="var(--st-ink-2)">{t("chart.income")}</Text>
                         </Group>
                         <Group gap={6} wrap="nowrap">
-                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#F08A8A" }} />
-                          <Text size="sm">{t("chart.expense")}</Text>
+                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "var(--st-expense)" }} />
+                          <Text size="sm" fw={500} c="var(--st-ink-2)">{t("chart.expense")}</Text>
                         </Group>
                       </>
                     ) : (
                       <Group gap={6} wrap="nowrap">
-                        <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#5C8DEF" }} />
-                        <Text size="sm">{t("chart.cashFlow")}</Text>
+                        <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "var(--st-primary)" }} />
+                        <Text size="sm" fw={500} c="var(--st-ink-2)">{t("chart.cashFlow")}</Text>
                       </Group>
                     )}
                   </Group>
@@ -1567,7 +1644,7 @@ function App({ state, setState }) {
                     radius="card"
                     p="sm"
                     className="cursor-pointer"
-                    style={{ backgroundColor: 'rgba(138, 143, 154, 0.04)' }}
+                    style={{ backgroundColor: 'var(--st-surface-soft)' }}
                     onClick={() => setPendingExpanded((value) => !value)}
                     role="button"
                     tabIndex={0}
@@ -1608,36 +1685,35 @@ function App({ state, setState }) {
                                       withBorder
                                       radius="card"
                                       p="sm"
-                                      style={{ opacity: 0.78, backgroundColor: 'rgba(138, 143, 154, 0.02)' }}
+                                      style={{ opacity: 0.78, backgroundColor: 'var(--st-surface)' }}
                                     >
-                                      <div className="grid grid-cols-[auto,auto,1fr,auto] items-center gap-3">
-                                        <span className="h-10 w-1.5 rounded-chip" style={{ background: category.color }} />
+                                      <div className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
                                         <span
                                           aria-hidden="true"
-                                          className="grid h-9 w-9 place-items-center rounded-xl"
-                                          style={{ background: `${category.color}14`, color: category.color }}
+                                          className="grid h-10 w-10 place-items-center rounded-chip"
+                                          style={{ background: `${category.color}1A`, color: category.color }}
                                         >
                                           <CategoryIcon category={category} size={18} />
                                         </span>
                                         <div className="min-w-0 text-left">
-                                          <div className="truncate font-medium text-ink">
+                                          <div className="truncate font-semibold text-ink">
                                             {category.name}
                                             {itemLabels.map((lbl) => (
                                               <span
                                                 key={lbl.id}
-                                                className="ml-1 inline-flex items-center rounded-chip px-2 py-0.5 text-xs"
-                                                style={{ background: 'rgba(138, 143, 154, 0.12)', color: '#8A8F9A' }}
+                                                className="ml-1.5 inline-flex items-center rounded-chip bg-surface-soft px-2 py-0.5 text-xs font-medium text-muted"
+                                                style={{ boxShadow: "inset 0 0 0 1px var(--st-line)" }}
                                               >
                                                 {lbl.name}
                                               </span>
                                             ))}
                                           </div>
-                                          {item.note ? <div className="text-xs" style={{ color: category.color, fontWeight: 500 }}>{item.note}</div> : null}
+                                          {item.note ? <div className="truncate text-xs font-medium text-muted">{item.note}</div> : null}
                                         </div>
                                         <div className="text-right">
                                           <div
-                                            className="font-semibold"
-                                            style={{ color: category.type === "income" ? "#5BB97A" : "#F08A8A" }}
+                                            className="font-bold"
+                                            style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
                                           >
                                             {formatTransactionMoney(signedAmount(item), lang)}
                                           </div>
@@ -1711,10 +1787,10 @@ function App({ state, setState }) {
 
       {activeTab === "ledger" && (
         <ActionIcon
-          size="xl"
+          size={56}
           radius="xl"
-          style={{ backgroundColor: '#FFB454', color: '#FFFFFF' }}
-          className="fixed bottom-20 right-4 z-30 shadow-soft"
+          style={{ backgroundColor: 'var(--st-primary)', color: '#FFFFFF' }}
+          className="fixed bottom-24 right-4 z-30 shadow-float transition hover:brightness-110"
           onClick={openNewEntry}
           aria-label={t("ledger.fab.add")}
         >
@@ -1771,7 +1847,6 @@ function App({ state, setState }) {
                 {hasPastOccurrences && (
                   <Button
                     variant="light"
-                    color="blue"
                     fullWidth
                     onClick={() => {
                       stopRepeat(deleteConfirmEntry.id);
@@ -1864,7 +1939,7 @@ function App({ state, setState }) {
                 periodStart={statsBucket.start}
                 periodEnd={statsBucket.end}
                 categoryId={statsCategoryModalId}
-                color={cat?.color || "#5C8DEF"}
+                color={cat?.color || CHART.primary}
                 categories={state.categories}
               />
               <Text size="xs" fw={700} c="dimmed" tt="uppercase" mt="xs">{t("stats.labelTotals")}</Text>
