@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filterEntriesByFacets, sortEntriesForDisplay, summarizeEntries } from './App.jsx';
+import { filterEntriesByFacets, resolveFacetFilter, sortEntriesForDisplay, summarizeEntries } from './App.jsx';
 
 describe('sortEntriesForDisplay', () => {
   it('orders imported ascending entries newest-first before pagination', () => {
@@ -61,6 +61,35 @@ describe('filterEntriesByFacets', () => {
     const result = filterEntriesByFacets(entries, { categoryIds: null, labelIds: null });
 
     expect(result).toEqual(entries);
+  });
+
+  it('returns no entries when a facet is explicitly empty', () => {
+    const entries = [
+      { id: 'salary', categoryId: 'income', labelIds: ['fixed'] },
+      { id: 'lunch', categoryId: 'food', labelIds: ['variable'] },
+    ];
+
+    const result = filterEntriesByFacets(entries, { categoryIds: new Set(), labelIds: null });
+
+    expect(result).toEqual([]);
+  });
+});
+
+describe('resolveFacetFilter', () => {
+  it('keeps the default unchecked state as an empty filter', () => {
+    const options = [{ id: 'food' }, { id: 'rent' }];
+
+    const result = resolveFacetFilter([], options);
+
+    expect(result).toEqual(new Set());
+  });
+
+  it('treats selecting every option as All', () => {
+    const options = [{ id: 'food' }, { id: 'rent' }];
+
+    const result = resolveFacetFilter(['food', 'rent'], options);
+
+    expect(result).toBeNull();
   });
 });
 
