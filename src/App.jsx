@@ -1774,6 +1774,19 @@ function App({ state, setState }) {
               leftSection={<Wallet size={16} />}
               data={state.wallets.map((wallet) => ({ value: wallet.id, label: wallet.name }))}
               value={state.selectedWalletId}
+              withCheckIcon={false}
+              styles={{
+                option: {
+                  "&[data-checked]": {
+                    backgroundColor: "var(--mantine-color-gray-1)",
+                    color: "var(--mantine-color-black)",
+                    fontWeight: 500
+                  },
+                  "&[data-checked][data-hovered]": {
+                    backgroundColor: "var(--mantine-color-gray-2)"
+                  }
+                }
+              }}
               onChange={(value) => {
                 if (!value) return;
                 setState((prev) => ({ ...prev, selectedWalletId: value }));
@@ -1788,6 +1801,19 @@ function App({ state, setState }) {
                 { value: "year", label: t("mode.year") },
               ]}
               value={ledgerMode}
+              withCheckIcon={false}
+              styles={{
+                option: {
+                  "&[data-checked]": {
+                    backgroundColor: "var(--mantine-color-gray-1)",
+                    color: "var(--mantine-color-black)",
+                    fontWeight: 500
+                  },
+                  "&[data-checked][data-hovered]": {
+                    backgroundColor: "var(--mantine-color-gray-2)"
+                  }
+                }
+              }}
               onChange={(value) => setLedgerMode(value || "month")}
             />
           </div>

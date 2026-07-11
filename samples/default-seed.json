@@ -13,7 +13,7 @@
     { "id": "income_other",  "name": "Other",         "type": "income",  "color": "#0288d1", "icon": "wallet" },
     { "id": "food_drink",    "name": "Food & Drink",  "type": "expense", "color": "#c62828", "icon": "food" },
     { "id": "groceries",     "name": "Groceries",     "type": "expense", "color": "#ef6c00", "icon": "cart" },
-    { "id": "shopping",      "name": "Shopping",      "type": "expense", "color": "#6a1b9a", "icon": "cart" },
+    { "id": "shopping",      "name": "Shopping",      "type": "expense", "color": "#6a1b9a", "icon": "shopping-bag" },
     { "id": "transport",     "name": "Transport",     "type": "expense", "color": "#0277bd", "icon": "bus" },
     { "id": "rent",          "name": "Rent",          "type": "expense", "color": "#37474f", "icon": "house" },
     { "id": "utility",       "name": "Utility Bills", "type": "expense", "color": "#00897b", "icon": "utility" },
