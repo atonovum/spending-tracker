@@ -66,7 +66,7 @@ function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEdi
                           {entryLabels.map((lbl) => (
                             <Badge key={lbl.id} variant="light" size="xs" color="gray">{lbl.name}</Badge>
                           ))}
-                          <Badge variant="filled" size="xs" style={{ backgroundColor: '#FFB454', color: '#FFFFFF' }}>{t(`repeat.${entry.repeat}`)}</Badge>
+                          <Badge variant="filled" size="xs" style={{ backgroundColor: 'var(--st-primary)', color: '#FFFFFF' }}>{t(`repeat.${entry.repeat}`)}</Badge>
                         </Group>
                         <Text size="xs" c="dimmed">
                           {t("settings.scheduled.start", { date: entry.date })}

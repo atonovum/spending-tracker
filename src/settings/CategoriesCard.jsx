@@ -66,7 +66,7 @@ function InlineCategoryForm({ initial, defaultType, onCancel, onSubmit }) {
   }
 
   return (
-    <Paper withBorder radius="card" p="sm" className="bg-slate-50">
+    <Paper withBorder radius="card" p="sm" className="bg-surface-soft">
       <Stack gap="xs">
         <Text size="sm" fw={700}>{isEdit ? t("settings.categories.editTitle") : t("settings.categories.newTitle")}</Text>
         <TextInput label={t("settings.categories.field.name")} value={name} onChange={(event) => setName(event.currentTarget.value)} required size="sm" />
@@ -123,7 +123,7 @@ function MergeModal({ opened, sources, candidates, onClose, onConfirm }) {
           allowDeselect={false}
         />
         <Group justify="flex-end" pt="sm">
-          <Button color="indigo" leftSection={<Check size={16} />} onClick={() => onConfirm(target)} disabled={!target}>
+          <Button leftSection={<Check size={16} />} onClick={() => onConfirm(target)} disabled={!target}>
             {t("settings.categories.mergeBtn")}
           </Button>
         </Group>
@@ -318,7 +318,6 @@ function CategoriesManager({
                 <Button
                   size="xs"
                   variant="light"
-                  color="indigo"
                   leftSection={<Merge size={14} />}
                   onClick={startMerge}
                   disabled={!canMerge}

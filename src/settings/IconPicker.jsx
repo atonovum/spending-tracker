@@ -79,14 +79,14 @@ export function IconPicker({ value, onChange, label }) {
                     style={{
                       padding: "10px 6px",
                       borderRadius: 12,
-                      background: active ? "#FFB45414" : "transparent",
-                      boxShadow: active ? "inset 0 0 0 1.5px #FFB454" : "inset 0 0 0 1px #F0EDE7",
+                      background: active ? "var(--st-primary-soft)" : "transparent",
+                      boxShadow: active ? "inset 0 0 0 1.5px var(--st-primary)" : "inset 0 0 0 1px var(--st-line)",
                       transition: "all 150ms ease",
                     }}
-                    className="hover:bg-slate-50"
+                    className="hover:bg-surface-soft"
                   >
                     <Stack gap={6} align="center">
-                      <Box style={{ color: active ? "#FFB454" : "#8A8F9A" }}>
+                      <Box style={{ color: active ? "var(--st-primary)" : "var(--st-muted)" }}>
                         <IconCmp size={20} strokeWidth={active ? 2 : 1.8} />
                       </Box>
                       <Text
@@ -94,7 +94,7 @@ export function IconPicker({ value, onChange, label }) {
                         ta="center"
                         lh={1.2}
                         style={{
-                          color: active ? "#FFB454" : "#8A8F9A",
+                          color: active ? "var(--st-primary)" : "var(--st-muted)",
                           fontWeight: active ? 600 : 400,
                         }}
                       >
