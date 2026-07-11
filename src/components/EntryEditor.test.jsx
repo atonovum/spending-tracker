@@ -29,6 +29,9 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = formatDateLocal(tomorrow);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = formatDateLocal(yesterday);
 
     // Add a scheduled entry (started last week)
     mockState.wallets[0].entries.push({
@@ -62,6 +65,28 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
       categoryId: 'cat-expense-1',
       labelIds: [],
       note: 'One-time expense',
+      repeat: 'none',
+      repeatEndDate: '',
+    });
+
+    mockState.wallets[0].entries.push({
+      id: 'one-time-future',
+      date: tomorrowStr,
+      amount: 42000,
+      categoryId: 'cat-expense-1',
+      labelIds: [],
+      note: 'Future one-time',
+      repeat: 'none',
+      repeatEndDate: '',
+    });
+
+    mockState.wallets[0].entries.push({
+      id: 'one-time-past',
+      date: yesterdayStr,
+      amount: 12000,
+      categoryId: 'cat-expense-1',
+      labelIds: [],
+      note: 'Past one-time',
       repeat: 'none',
       repeatEndDate: '',
     });
@@ -230,6 +255,23 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
 
     // But "Delete All" should still be available
     expect(screen.getByText('모든 기록 삭제')).toBeInTheDocument();
+  });
+
+  it('should list future one-time transactions in Settings scheduled list only', async () => {
+    const user = userEvent.setup();
+    renderWithMantine(<App />);
+
+    const settingsTab = screen.getByRole('tab', { name: /settings/i });
+    await user.click(settingsTab);
+
+    const scheduledHeading = screen.getByRole('heading', { name: /Scheduled/i });
+    const scheduledCard = scheduledHeading.closest('div[class*="Card"]') || scheduledHeading.parentElement;
+    await user.click(scheduledCard);
+    await waitForModal();
+
+    const modal = screen.getByRole('dialog');
+    expect(within(modal).getByText('Future one-time')).toBeInTheDocument();
+    expect(within(modal).queryByText('Past one-time')).not.toBeInTheDocument();
   });
 
   it('should NOT show confirmation modal for regular entries', async () => {

@@ -1517,9 +1517,10 @@ function App({ state, setState }) {
 
   const scheduledEntriesForSettings = useMemo(() => {
     const today = startOfDay(new Date());
+    const todayStr = toDateInput(today);
     const horizon = addDays(today, 365 * 5);
     return currentWallet.entries
-      .filter((entry) => entry.repeat && entry.repeat !== "none")
+      .filter((entry) => (entry.repeat && entry.repeat !== "none") || (entry.repeat === "none" && entry.date > todayStr))
       .map((entry) => {
         const next = nextOccurrenceOnOrAfter(entry, today, horizon);
         return { ...entry, nextDate: next ? toDateInput(next) : null };
