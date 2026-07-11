@@ -517,10 +517,12 @@ function PieChart({ items, type }) {
   if (!sum) return <Center h={260} c="dimmed">{t("chart.noData")}</Center>;
 
   let start = -Math.PI / 2;
-  const entries = slices.map((slice) => {
+  const entries = slices.map((slice, index) => {
     const angle = (slice.value / sum) * Math.PI * 2;
     const mid = start + angle / 2;
-    const result = { ...slice, start, end: start + angle, mid };
+    const currentIconRadius = iconRadius + (index % 2 === 0 ? 12 : -10);
+    const currentPercentRadius = percentRadius + (index % 2 === 0 ? 14 : -12);
+    const result = { ...slice, start, end: start + angle, mid, currentIconRadius, currentPercentRadius };
     start += angle;
     return result;
   });
@@ -569,18 +571,18 @@ function PieChart({ items, type }) {
         const sinA = Math.sin(slice.mid);
         const sx = cx + cosA * radius;
         const sy = cy + sinA * radius;
-        const lineEndR = iconRadius - iconSize / 2 - 2;
+        const lineEndR = slice.currentIconRadius - iconSize / 2 - 2;
         const lx = cx + cosA * lineEndR;
         const ly = cy + sinA * lineEndR;
-        const ix = cx + cosA * iconRadius;
-        const iy = cy + sinA * iconRadius;
-        const px = cx + cosA * percentRadius;
-        const py = cy + sinA * percentRadius;
+        const ix = cx + cosA * slice.currentIconRadius;
+        const iy = cy + sinA * slice.currentIconRadius;
+        const px = cx + cosA * slice.currentPercentRadius;
+        const py = cy + sinA * slice.currentPercentRadius;
         const percent = (slice.value / sum) * 100;
         const percentText = percent >= 10 ? `${Math.round(percent)}%` : `${percent.toFixed(1)}%`;
         return (
           <g key={`${slice.category.id}-callout`}>
-            <line x1={sx} y1={sy} x2={lx} y2={ly} stroke={slice.category.color} strokeWidth="1.2" />
+            <line x1={sx} y1={sy} x2={lx} y2={ly} stroke={slice.category.color} strokeWidth="1.2" strokeDasharray="2,2" />
             <circle cx={sx} cy={sy} r="2.5" fill={slice.category.color} />
             <g transform={`translate(${ix - iconSize / 2}, ${iy - iconSize / 2})`} style={{ color: slice.category.color }}>
               <Cmp size={iconSize} stroke={2} />
@@ -757,38 +759,47 @@ function EntryList({ items, onEdit }) {
               const itemLabels = item.labels || [];
               return (
                 <Paper key={item.id + item.occurrenceDate} withBorder radius="card" p="sm" className="entry-row cursor-pointer" onClick={() => onEdit(item)}>
-                  <div className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
-                    <span
-                      aria-hidden="true"
-                      className="grid h-10 w-10 place-items-center rounded-chip"
-                      style={{ background: `${category.color}1A`, color: category.color }}
-                    >
-                      <CategoryIcon category={category} size={18} />
-                    </span>
-                    <div className="min-w-0 text-left">
-                      <div className="truncate text-sm sm:text-base font-semibold text-ink">
-                        {category.name}
-                        {itemLabels.map((lbl) => (
-                          <span
-                            key={lbl.id}
-                            className="ml-1.5 inline-flex items-center rounded-chip bg-surface-soft px-2 py-0.5 text-xs font-medium text-ink-2"
-                            style={{ boxShadow: "inset 0 0 0 1px var(--st-line)" }}
-                          >
-                            {lbl.name}
-                          </span>
-                        ))}
-                      </div>
-                      {item.note ? <div className="truncate text-xs font-medium text-muted">{item.note}</div> : null}
-                    </div>
-                    <div className="text-right">
-                      <div
-                        className="text-sm sm:text-base font-bold"
-                        style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
+                  <Stack gap={4}>
+                    <div className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
+                      <span
+                        aria-hidden="true"
+                        className="grid h-10 w-10 place-items-center rounded-chip"
+                        style={{ background: `${category.color}1A`, color: category.color }}
                       >
-                        {formatTransactionMoney(signedAmount(item), currency)}
+                        <CategoryIcon category={category} size={18} />
+                      </span>
+                      <div className="min-w-0 text-left">
+                        <Text fw={600} size="sm" className="truncate text-ink">{category.name}</Text>
+                        {itemLabels.length > 0 && (
+                          <Group gap={4} mt={2} wrap="nowrap" className="overflow-x-auto scrollbar-none">
+                            {itemLabels.map((lbl) => (
+                              <span
+                                key={lbl.id}
+                                className="inline-flex items-center rounded-chip bg-surface-soft px-2 py-0.5 text-[10px] font-medium text-ink-2"
+                                style={{ boxShadow: "inset 0 0 0 1px var(--st-line)", whiteSpace: "nowrap" }}
+                              >
+                                {lbl.name}
+                              </span>
+                            ))}
+                          </Group>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <Text
+                          fw={700}
+                          size="sm"
+                          style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
+                        >
+                          {formatTransactionMoney(signedAmount(item), currency)}
+                        </Text>
                       </div>
                     </div>
-                  </div>
+                    {item.note && (
+                      <div className="text-left text-xs font-medium text-muted pl-1">
+                        {item.note}
+                      </div>
+                    )}
+                  </Stack>
                 </Paper>
               );
             })}
@@ -1005,7 +1016,7 @@ function App({ state, setState }) {
     && ledgerSelection.mode === ledgerMode
     && ledgerSelection.chartMode === "flow"
     && ledgerChartMode === "flow"
-      ? `${ledgerSelection.label} · ${
+      ? `${
           ledgerSelection.metric === "income"
             ? t("chart.income")
             : t("chart.expense")
@@ -1201,12 +1212,12 @@ function App({ state, setState }) {
         <SimpleGrid cols={2}>
           <Card withBorder radius="card" shadow="soft" padding="md">
             <Text fw={600} size="xs" c="dimmed" ta="center">{t("card.total")}</Text>
-            <Text fw={800} fz={21} lh={1.3} ta="center" style={{ letterSpacing: "-0.02em" }}>{formatMoney(statsTotalBalance)}</Text>
+            <Text fw={800} fz={isMobile ? 17 : 21} lh={1.3} ta="center" style={{ letterSpacing: "-0.02em" }}>{formatMoney(statsTotalBalance)}</Text>
             <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
           </Card>
           <Card withBorder radius="card" shadow="soft" padding="md">
             <Text fw={600} size="xs" c="dimmed" ta="center">{ledgerPeriodLabel}</Text>
-            <Text fw={800} fz={21} lh={1.3} ta="center" style={{ letterSpacing: "-0.02em" }}>{formatMoney(statsFlow)}</Text>
+            <Text fw={800} fz={isMobile ? 17 : 21} lh={1.3} ta="center" style={{ letterSpacing: "-0.02em" }}>{formatMoney(statsFlow)}</Text>
             <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
           </Card>
         </SimpleGrid>
@@ -1247,8 +1258,8 @@ function App({ state, setState }) {
               {statsBucket && (
                 <Text size="sm" fw={700} style={{ color: activeLegend === "income" ? "var(--st-income-mark)" : "var(--st-expense)" }}>
                   {activeLegend === "income"
-                    ? `${t("chart.income")}: ${formatMoney(statsBucket.income)}`
-                    : `${t("chart.expense")}: ${formatMoney(-statsBucket.expense)}`}
+                    ? formatMoney(statsBucket.income)
+                    : formatMoney(-statsBucket.expense)}
                 </Text>
               )}
               <Group gap="xs">
@@ -1398,30 +1409,38 @@ function App({ state, setState }) {
           <Table striped highlightOnHover verticalSpacing="xs" className="text-center">
             <Table.Thead>
               <Table.Tr>
+                <Table.Th className="text-center">{t("stats.column.share")}</Table.Th>
                 <Table.Th className="text-center">{t("stats.column.category")}</Table.Th>
                 <Table.Th className="text-center">{t("stats.column.count")}</Table.Th>
                 <Table.Th className="text-center">{t("stats.column.amount")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {[...categoryMap.values()].sort((a, b) => b.amount - a.amount).map(({ category, count, amount }) => (
-                <Table.Tr
-                  key={category.id}
-                  className="cursor-pointer"
-                  onClick={() => { setStatsCategoryModalId(category.id); setStatsCategoryModalOpen(true); }}
-                >
-                  <Table.Td className="text-center">
-                    <Group gap={6} justify="center" wrap="nowrap">
-                      <span style={{ color: category.color }} className="inline-flex items-center">
-                        <CategoryIcon category={category} size={16} />
-                      </span>
-                      <span style={{ color: category.color, fontWeight: 600 }}>{category.name}</span>
-                    </Group>
-                  </Table.Td>
-                  <Table.Td className="text-center">{count}</Table.Td>
-                  <Table.Td className="text-center">{formatMoney(amount)}</Table.Td>
-                </Table.Tr>
-              ))}
+              {(() => {
+                const totalCategoryAmount = [...categoryMap.values()].reduce((sum, item) => sum + item.amount, 0);
+                return [...categoryMap.values()].sort((a, b) => b.amount - a.amount).map(({ category, count, amount }) => {
+                  const percent = totalCategoryAmount > 0 ? Math.round((amount / totalCategoryAmount) * 100) : 0;
+                  return (
+                    <Table.Tr
+                      key={category.id}
+                      className="cursor-pointer"
+                      onClick={() => { setStatsCategoryModalId(category.id); setStatsCategoryModalOpen(true); }}
+                    >
+                      <Table.Td className="text-center font-semibold text-muted text-xs">{percent}%</Table.Td>
+                      <Table.Td className="text-center">
+                        <Group gap={6} justify="center" wrap="nowrap">
+                          <span style={{ color: category.color }} className="inline-flex items-center">
+                            <CategoryIcon category={category} size={16} />
+                          </span>
+                          <span style={{ color: category.color, fontWeight: 600 }}>{category.name}</span>
+                        </Group>
+                      </Table.Td>
+                      <Table.Td className="text-center">{count}</Table.Td>
+                      <Table.Td className="text-center">{formatMoney(amount)}</Table.Td>
+                    </Table.Tr>
+                  );
+                });
+              })()}
             </Table.Tbody>
           </Table>
         </Card>
@@ -1482,18 +1501,18 @@ function App({ state, setState }) {
                 <TextInput label={t("search.endDate")} type="date" value={searchEndDate} onChange={(e) => { setSearchEndDate(e.currentTarget.value); setSearchActive(true); }} />
               </SimpleGrid>
             )}
+            <SimpleGrid cols={2} mt="xs">
+              <Card withBorder radius="card" shadow="soft" padding="xs">
+                <Text fw={600} size="xs" c="dimmed" ta="center">{t("search.resultIncome")}</Text>
+                <Text fw={800} fz={16} lh={1.3} ta="center" style={{ color: "var(--st-income)", letterSpacing: "-0.02em" }}>{formatMoney(searchSummary.income)}</Text>
+              </Card>
+              <Card withBorder radius="card" shadow="soft" padding="xs">
+                <Text fw={600} size="xs" c="dimmed" ta="center">{t("search.resultExpense")}</Text>
+                <Text fw={800} fz={16} lh={1.3} ta="center" style={{ color: "var(--st-expense)", letterSpacing: "-0.02em" }}>{formatMoney(-searchSummary.expense)}</Text>
+              </Card>
+            </SimpleGrid>
           </Stack>
         </div>
-        <SimpleGrid cols={2}>
-          <Card withBorder radius="card" shadow="soft" padding="md">
-            <Text fw={600} size="xs" c="dimmed" ta="center">{t("search.resultIncome")}</Text>
-            <Text fw={800} fz={21} lh={1.3} ta="center" style={{ color: "var(--st-income)", letterSpacing: "-0.02em" }}>{formatMoney(searchSummary.income)}</Text>
-          </Card>
-          <Card withBorder radius="card" shadow="soft" padding="md">
-            <Text fw={600} size="xs" c="dimmed" ta="center">{t("search.resultExpense")}</Text>
-            <Text fw={800} fz={21} lh={1.3} ta="center" style={{ color: "var(--st-expense)", letterSpacing: "-0.02em" }}>{formatMoney(-searchSummary.expense)}</Text>
-          </Card>
-        </SimpleGrid>
         {searchActive ? <PaginatedEntryList items={items} onEdit={(item) => openEditEntry(item)} resetKey={resetKey} /> : null}
       </Stack>
     );
@@ -1855,7 +1874,7 @@ function App({ state, setState }) {
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLedgerChartMode("balance"); } }}
                 >
                   <Text fw={600} size="xs" c="dimmed" ta="center">{t("card.total")}</Text>
-                  <Text fw={800} fz={21} lh={1.3} ta="center" style={{ letterSpacing: "-0.02em" }}>{formatMoney(totalBalance)}</Text>
+                  <Text fw={800} fz={isMobile ? 17 : 21} lh={1.3} ta="center" style={{ letterSpacing: "-0.02em" }}>{formatMoney(totalBalance)}</Text>
                   <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
                 </Card>
                 <Card
@@ -1870,7 +1889,7 @@ function App({ state, setState }) {
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLedgerChartMode("flow"); } }}
                 >
                   <Text fw={600} size="xs" c="dimmed" ta="center">{ledgerPeriodLabel}</Text>
-                  <Text fw={800} fz={21} lh={1.3} ta="center" style={{ letterSpacing: "-0.02em" }}>{formatMoney(periodFlow)}</Text>
+                  <Text fw={800} fz={isMobile ? 17 : 21} lh={1.3} ta="center" style={{ letterSpacing: "-0.02em" }}>{formatMoney(periodFlow)}</Text>
                   <Text size="xs" c="dimmed" ta="center">{t("card.cashFlow")}</Text>
                 </Card>
               </SimpleGrid>
@@ -1897,9 +1916,9 @@ function App({ state, setState }) {
                     )}
                   </Group>
                 </Group>
-                <Group justify="space-between" align="center" className="min-h-5">
-                  <Text size="sm" c="dimmed">{ledgerPage.length ? `${ledgerPage[0].label} ~ ${ledgerPage[ledgerPage.length - 1].label}` : t("chart.empty")}</Text>
-                  <Text size="sm" c="dimmed">{ledgerValueText}</Text>
+                <Group justify="space-between" align="center" wrap="nowrap" className="min-h-5">
+                  <Text size="sm" c="dimmed" className="truncate">{ledgerPage.length ? `${ledgerPage[0].label} ~ ${ledgerPage[ledgerPage.length - 1].label}` : t("chart.empty")}</Text>
+                  <Text size="sm" c="dimmed" style={{ flexShrink: 0 }}>{ledgerValueText}</Text>
                 </Group>
                 <LedgerChart
                   mode={ledgerMode}
@@ -1972,38 +1991,47 @@ function App({ state, setState }) {
                                       p="sm"
                                       style={{ opacity: 0.78, backgroundColor: 'var(--st-surface)' }}
                                     >
-                                      <div className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
-                                        <span
-                                          aria-hidden="true"
-                                          className="grid h-10 w-10 place-items-center rounded-chip"
-                                          style={{ background: `${category.color}1A`, color: category.color }}
-                                        >
-                                          <CategoryIcon category={category} size={18} />
-                                        </span>
-                                        <div className="min-w-0 text-left">
-                                          <div className="truncate text-sm sm:text-base font-semibold text-ink">
-                                            {category.name}
-                                            {itemLabels.map((lbl) => (
-                                              <span
-                                                key={lbl.id}
-                                                className="ml-1.5 inline-flex items-center rounded-chip bg-surface-soft px-2 py-0.5 text-xs font-medium text-muted"
-                                                style={{ boxShadow: "inset 0 0 0 1px var(--st-line)" }}
-                                              >
-                                                {lbl.name}
-                                              </span>
-                                            ))}
-                                          </div>
-                                          {item.note ? <div className="truncate text-xs font-medium text-muted">{item.note}</div> : null}
-                                        </div>
-                                        <div className="text-right">
-                                          <div
-                                            className="text-sm sm:text-base font-bold"
-                                            style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
+                                      <Stack gap={4}>
+                                        <div className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
+                                          <span
+                                            aria-hidden="true"
+                                            className="grid h-10 w-10 place-items-center rounded-chip"
+                                            style={{ background: `${category.color}1A`, color: category.color }}
                                           >
-                                            {formatTransactionMoney(signedAmount(item), currency)}
+                                            <CategoryIcon category={category} size={18} />
+                                          </span>
+                                          <div className="min-w-0 text-left">
+                                            <Text fw={600} size="sm" className="truncate text-ink">{category.name}</Text>
+                                            {itemLabels.length > 0 && (
+                                              <Group gap={4} mt={2} wrap="nowrap" className="overflow-x-auto scrollbar-none">
+                                                {itemLabels.map((lbl) => (
+                                                  <span
+                                                    key={lbl.id}
+                                                    className="inline-flex items-center rounded-chip bg-surface-soft px-2 py-0.5 text-[10px] font-medium text-muted"
+                                                    style={{ boxShadow: "inset 0 0 0 1px var(--st-line)", whiteSpace: "nowrap" }}
+                                                  >
+                                                    {lbl.name}
+                                                  </span>
+                                                ))}
+                                              </Group>
+                                            )}
+                                          </div>
+                                          <div className="text-right">
+                                            <Text
+                                              fw={700}
+                                              size="sm"
+                                              style={{ color: category.type === "income" ? "var(--st-income)" : "var(--st-expense)" }}
+                                            >
+                                              {formatTransactionMoney(signedAmount(item), currency)}
+                                            </Text>
                                           </div>
                                         </div>
-                                      </div>
+                                        {item.note && (
+                                          <div className="text-left text-xs font-medium text-muted pl-1">
+                                            {item.note}
+                                          </div>
+                                        )}
+                                      </Stack>
                                     </Paper>
                                   );
                                 })}
@@ -2251,6 +2279,7 @@ function App({ state, setState }) {
 
 function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }) {
   const t = useT();
+  const { currency } = useI18n();
   const isMobile = useMediaQuery("(max-width: 48em)");
   const initialCategory = categories.find((c) => c.id === entry?.categoryId);
   const initialLabelIds = normalizeLabelIds(entry);
@@ -2298,7 +2327,7 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
           styles={{ input: { textAlign: "center" } }}
         />
         <NumberInput
-          label={t("entry.field.amount")}
+          label={`${t("entry.field.amount")} (${currency})`}
           value={amount}
           onChange={(value) => setAmount(Number(value || 0))}
           min={0}

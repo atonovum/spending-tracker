@@ -11,6 +11,9 @@ export const REPEAT_OPTIONS = [
   { value: "biweekly", label: "격주" },
   { value: "fourweekly", label: "4주" },
   { value: "monthly", label: "한달" },
+  { value: "3months", label: "3개월" },
+  { value: "6months", label: "6개월" },
+  { value: "yearly", label: "1년" },
 ];
 
 export function uid() {
@@ -206,6 +209,9 @@ export function nextRepeatDate(date, repeat) {
     while (next.getDay() !== 0 && next.getDay() !== 6) next.setDate(next.getDate() + 1);
   } else if (repeat === "biweekly") next.setDate(next.getDate() + 14);
   else if (repeat === "fourweekly") next.setDate(next.getDate() + 28);
+  else if (repeat === "3months") next.setMonth(next.getMonth() + 3);
+  else if (repeat === "6months") next.setMonth(next.getMonth() + 6);
+  else if (repeat === "yearly") next.setMonth(next.getMonth() + 12);
   else next.setMonth(next.getMonth() + 1);
   return startOfDay(next);
 }

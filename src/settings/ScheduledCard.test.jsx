@@ -39,6 +39,17 @@ describe('ScheduledCard', () => {
         repeatEndDate: '',
         nextDate: '2026-02-15',
       },
+      {
+        id: 'sched-3',
+        date: '2026-03-01',
+        amount: 7000,
+        categoryId: 'cat-expense-2',
+        labelIds: ['label-2'],
+        note: '예정된 일회성 지출',
+        repeat: 'none',
+        repeatEndDate: '',
+        nextDate: '2026-03-01',
+      },
     ];
 
     mockHandlers = {
@@ -74,7 +85,7 @@ describe('ScheduledCard', () => {
         />
       );
 
-      expect(screen.getByText('2')).toBeInTheDocument();
+      expect(screen.getByText('3')).toBeInTheDocument();
     });
   });
 
@@ -96,6 +107,29 @@ describe('ScheduledCard', () => {
       // Both entries should be visible
       expect(screen.getByText('식비')).toBeInTheDocument();
       expect(screen.getByText('급여')).toBeInTheDocument();
+      expect(screen.getByText('교통')).toBeInTheDocument();
+    });
+
+    it('separates recurring and one-time transactions by section', async () => {
+      const user = userEvent.setup();
+      renderWithMantine(
+        <ScheduledCard
+          scheduledEntries={mockScheduledEntries}
+          {...mockHandlers}
+        />
+      );
+
+      const card = screen.getByRole('heading', { name: /Scheduled/i }).closest('div[class*="Card"]');
+      await user.click(card);
+
+      await waitForModal();
+
+      const recurringSection = screen.getByText('Recurring Transactions').closest('[class*="Stack"]');
+      const oneTimeSection = screen.getByText('One-Time Transactions').closest('[class*="Stack"]');
+
+      expect(within(recurringSection).getByText('식비')).toBeInTheDocument();
+      expect(within(recurringSection).getByText('급여')).toBeInTheDocument();
+      expect(within(oneTimeSection).getByText('교통')).toBeInTheDocument();
     });
 
     it('displays entry category icon and name', async () => {
@@ -148,7 +182,6 @@ describe('ScheduledCard', () => {
 
       await waitForModal();
 
-      // Both entries are monthly — repeat.monthly === "한달" in default ko locale.
       const monthlyBadges = screen.getAllByText(/한달/i);
       expect(monthlyBadges).toHaveLength(2);
     });
@@ -185,7 +218,7 @@ describe('ScheduledCard', () => {
 
       await waitForModal();
 
-      expect(screen.getByText(/2026\.01\.15\s*~/i)).toBeInTheDocument();
+      expect(screen.getByText(/2026\.01\.15\s*~\s*∞/i)).toBeInTheDocument();
     });
 
     it('displays next occurrence date', async () => {
