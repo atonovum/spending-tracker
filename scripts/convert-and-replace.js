@@ -5,7 +5,7 @@ import { parseWalletCsv } from "../src/lib/csv.js";
 const defaultSeed = JSON.parse(fs.readFileSync("samples/default-seed.json", "utf8"));
 
 // 1. Read Spendee CSV
-const inputCsvText = fs.readFileSync("samples/transactions_export_2026-06-09_cash-wallet.csv", "utf8");
+const inputCsvText = fs.readFileSync("samples/spendee/transactions_export_2026-06-09_cash-wallet.csv", "utf8");
 const parsedSpendee = Papa.parse(inputCsvText, { header: true, skipEmptyLines: true });
 
 // 2. Convert to project's custom CSV format: Date,Type,Category,Amount,Note,Labels
@@ -21,8 +21,8 @@ const convertedRows = parsedSpendee.data.map(row => {
 });
 
 const convertedCsvText = Papa.unparse(convertedRows, { newline: "\n" });
-fs.writeFileSync("samples/transactions_export_converted.csv", convertedCsvText, "utf8");
-console.log("Converted CSV saved to samples/transactions_export_converted.csv");
+fs.writeFileSync("samples/spendee/transactions_export_converted.csv", convertedCsvText, "utf8");
+console.log("Converted CSV saved to samples/spendee/transactions_export_converted.csv");
 
 // 3. Parse custom CSV using our actual app parser to resolve/auto-create categories & labels
 const parseResult = parseWalletCsv(convertedCsvText, defaultSeed.categories, defaultSeed.labels);
@@ -43,5 +43,5 @@ const statePayload = {
   language: "ko",
 };
 
-fs.writeFileSync("samples/converted-seed.json", JSON.stringify(statePayload, null, 2), "utf8");
-console.log("State payload saved to samples/converted-seed.json");
+fs.writeFileSync("samples/spendee/converted-seed.json", JSON.stringify(statePayload, null, 2), "utf8");
+console.log("State payload saved to samples/spendee/converted-seed.json");

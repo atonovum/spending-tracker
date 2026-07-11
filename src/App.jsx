@@ -77,6 +77,15 @@ function groupByDate(occurrences) {
   return [...map.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
 }
 
+export function sortEntriesForDisplay(items) {
+  return [...items].sort((a, b) => {
+    const aDate = a.occurrenceDate || a.date || "";
+    const bDate = b.occurrenceDate || b.date || "";
+    if (aDate !== bDate) return aDate < bDate ? 1 : -1;
+    return 0;
+  });
+}
+
 function visibleCountForMode(mode) {
   if (mode === "week") return 6;
   if (mode === "month") return 6;
@@ -585,6 +594,7 @@ const PAGE_SIZE = 20;
 function PaginatedEntryList({ items, onEdit, resetKey }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const sentinelRef = useRef(null);
+  const sortedItems = useMemo(() => sortEntriesForDisplay(items), [items]);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
@@ -592,21 +602,21 @@ function PaginatedEntryList({ items, onEdit, resetKey }) {
 
   useEffect(() => {
     if (!sentinelRef.current) return;
-    if (visibleCount >= items.length) return;
+    if (visibleCount >= sortedItems.length) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          setVisibleCount((count) => Math.min(count + PAGE_SIZE, items.length));
+          setVisibleCount((count) => Math.min(count + PAGE_SIZE, sortedItems.length));
         }
       },
       { rootMargin: "120px" }
     );
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
-  }, [visibleCount, items.length]);
+  }, [visibleCount, sortedItems.length]);
 
-  const visible = items.slice(0, visibleCount);
-  const hasMore = items.length > visibleCount;
+  const visible = sortedItems.slice(0, visibleCount);
+  const hasMore = sortedItems.length > visibleCount;
 
   return (
     <>

@@ -2,14 +2,13 @@ import sample2y from "../../samples/2y-sample-wallet.json";
 import sample3y from "../../samples/3y-sample-wallet.json";
 import sample5y from "../../samples/5y-sample-wallet.json";
 import defaultSeed from "../../samples/default-seed.json";
-import convertedSeed from "../../samples/converted-seed.json";
 import { ACTIVE_STORAGE_KEY, normalizeLabelIds, STORAGE_KEYS, safeJsonParse, uid } from "./finance.js";
 
 const INCLUDE_SAMPLE = import.meta.env.VITE_INCLUDE_SAMPLE === "true";
 
-const SAMPLE_SEED = convertedSeed;
-
-const DEFAULT_SEED = convertedSeed;
+const DEFAULT_SEED = INCLUDE_SAMPLE
+  ? { ...defaultSeed, wallets: [...defaultSeed.wallets, sample2y, sample3y, sample5y] }
+  : defaultSeed;
 
 export function inferCategoryIcon(category) {
   const id = (category.id || "").toLowerCase();
