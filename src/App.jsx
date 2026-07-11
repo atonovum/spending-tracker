@@ -525,7 +525,7 @@ function EntryList({ items, onEdit }) {
                           <span
                             key={lbl.id}
                             className="ml-1 inline-flex items-center rounded-chip px-2 py-0.5 text-xs"
-                            style={{ background: 'rgba(138, 143, 154, 0.08)', color: '#8A8F9A' }}
+                            style={{ background: 'rgba(100, 116, 139, 0.12)', color: '#475569' }}
                           >
                             {lbl.name}
                           </span>
