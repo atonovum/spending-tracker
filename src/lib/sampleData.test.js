@@ -4,6 +4,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   SAMPLE_WALLETS,
+  buildSampleSchedules,
   buildSampleWallets,
   dayOffset,
   latestEntryDate,
@@ -13,6 +14,14 @@ import {
   withSampleData,
 } from './sampleData.js';
 import { fromDateInput, validDate } from './finance.js';
+import { materializeWallet, upcomingDate } from './schedules.js';
+import { normalizeState } from './storage.js';
+import defaultSeed from '../../samples/default-seed.json';
+
+const defaultSeedIds = {
+  categories: defaultSeed.categories.map((category) => category.id),
+  labels: defaultSeed.labels.map((label) => label.id),
+};
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -333,5 +342,72 @@ describe('withSampleData', () => {
     expect(result.language).toBe('en');
     expect(result.currency).toBe('USD');
     expect(result.updatedAt).toBe(42);
+  });
+});
+
+describe('buildSampleSchedules', () => {
+  const TARGET = '2026-08-13';
+
+  it('seeds one repeating and one one-time 예약 거래', () => {
+    const schedules = buildSampleSchedules('wallet_x', TARGET);
+
+    expect(schedules).toHaveLength(2);
+    expect(schedules[0].repeat).toBe('monthly');
+    expect(schedules[1].repeat).toBe('none');
+  });
+
+  it('namespaces ids by wallet, so materialised entry ids stay distinct', () => {
+    const a = buildSampleSchedules('wallet_a', TARGET);
+    const b = buildSampleSchedules('wallet_b', TARGET);
+
+    expect(a.map((schedule) => schedule.id)).not.toEqual(b.map((schedule) => schedule.id));
+  });
+
+  it('dates the schedules relative to the target, never from the frozen fixture', () => {
+    expect(buildSampleSchedules('w', TARGET)[0].startDate).toBe('2026-06-14');
+    expect(buildSampleSchedules('w', TARGET)[1].startDate).toBe('2026-08-23');
+  });
+
+  it('returns nothing for an unusable target date', () => {
+    expect(buildSampleSchedules('w', 'nonsense')).toEqual([]);
+  });
+
+  it('leaves both a created transaction and an upcoming one visible today', () => {
+    const wallet = materializeWallet({ id: 'w', entries: [], scheduled: buildSampleSchedules('w', TARGET) }, TARGET);
+
+    // The monthly one has already produced real transactions...
+    expect(wallet.entries.length).toBeGreaterThan(0);
+    expect(wallet.entries.every((entry) => entry.date <= TARGET)).toBe(true);
+    // ...and both schedules still have somewhere to go.
+    expect(wallet.scheduled).toHaveLength(2);
+    expect(wallet.scheduled.every((schedule) => upcomingDate(schedule, fromDateInput('2031-01-01')))).toBe(true);
+  });
+});
+
+describe('sample wallets carry schedules', () => {
+  it('attaches them to every sample wallet', () => {
+    for (const wallet of buildSampleWallets('2026-08-13')) {
+      expect(wallet.scheduled).toHaveLength(2);
+    }
+  });
+
+  it('survives normalisation, so the dev app really sees them', () => {
+    const state = normalizeState(withSampleData(defaultSeed, '2026-08-13'));
+    const sampleWallet = state.wallets.find((wallet) => wallet.id === SAMPLE_WALLETS[0].id);
+
+    expect(sampleWallet.scheduled).toHaveLength(2);
+    expect(sampleWallet.scheduled[0].repeat).toBe('monthly');
+    // Normalisation must not fire them — that is materialisation's job.
+    expect(sampleWallet.scheduled[0].lastRunDate).toBe('');
+  });
+
+  it('references categories and labels the seed actually defines', () => {
+    const [wallet] = buildSampleWallets('2026-08-13');
+    for (const schedule of wallet.scheduled) {
+      expect(defaultSeedIds.categories).toContain(schedule.categoryId);
+      for (const labelId of schedule.labelIds) {
+        expect(defaultSeedIds.labels).toContain(labelId);
+      }
+    }
   });
 });

@@ -68,12 +68,59 @@ export function latestEntryDate(entries) {
   }, "");
 }
 
+/**
+ * 예약 거래 for a sample wallet, dated relative to `targetDate` rather than
+ * shifted like the entries: they are generated here, not read from the frozen
+ * fixtures, so they are already correct for today.
+ *
+ * Positioned so both halves of the feature are on screen during development:
+ * the monthly one starts two months back, so it has already created real
+ * transactions in the ledger *and* still has an upcoming occurrence; the
+ * one-time one is ten days out, so it sits in 예정된 거래 waiting to fire.
+ *
+ * Ids are prefixed with the wallet id because materialised entries derive
+ * theirs from the schedule id, and the same schedule appears in every sample
+ * wallet.
+ */
+export function buildSampleSchedules(walletId, targetDate) {
+  const today = fromDateInput(targetDate);
+  if (!today) return [];
+  return [
+    {
+      id: `${walletId}_sched_subscription`,
+      startDate: toDateInput(addDays(today, -60)),
+      amount: 13900,
+      categoryId: "subscription",
+      labelIds: ["fixed"],
+      note: "음악 스트리밍 구독",
+      repeat: "monthly",
+      repeatEndDate: "",
+      lastRunDate: "",
+    },
+    {
+      id: `${walletId}_sched_insurance`,
+      startDate: toDateInput(addDays(today, 10)),
+      amount: 240000,
+      categoryId: "healthcare",
+      labelIds: ["events"],
+      note: "연간 건강검진 예약",
+      repeat: "none",
+      repeatEndDate: "",
+      lastRunDate: "",
+    },
+  ];
+}
+
 /** Shift every entry so the wallet's latest entry falls on `targetDate`. */
 export function shiftWalletToDate(wallet, targetDate) {
   const entries = Array.isArray(wallet?.entries) ? wallet.entries : [];
   const latest = latestEntryDate(entries);
   const days = latest ? dayOffset(latest, targetDate) : 0;
-  return { ...wallet, entries: entries.map((entry) => shiftEntry(entry, days)) };
+  return {
+    ...wallet,
+    entries: entries.map((entry) => shiftEntry(entry, days)),
+    scheduled: buildSampleSchedules(wallet?.id, targetDate),
+  };
 }
 
 /** The three sample wallets, each ending on `targetDate` (default: today). */
