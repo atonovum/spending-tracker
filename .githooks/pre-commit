@@ -1,0 +1,29 @@
+#!/bin/sh
+# pre-commit — fills the gap the other verification layers leave open.
+#
+# The Stop hook in .claude/hooks/ already runs the test suite after src/ edits,
+# and CI re-runs everything in a clean room. Neither covers `npm run build` on
+# the path this repo actually uses: commits land straight on main, so CI only
+# reports after the fact. Build is ~2s, so it belongs here.
+#
+# Staged files are linted too, because edits made outside a Claude Code session
+# never reach the PostToolUse lint hook.
+#
+# Both checks inspect the working tree, not the staged snapshot. Bypass with
+# `git commit --no-verify`.
+
+set -e
+
+eslint_bin="./node_modules/.bin/eslint"
+
+if [ -x "$eslint_bin" ]; then
+  staged=$(git diff --cached --name-only --diff-filter=ACMR -- '*.js' '*.jsx' '*.mjs')
+  if [ -n "$staged" ]; then
+    echo "pre-commit: linting staged files"
+    git diff --cached --name-only -z --diff-filter=ACMR -- '*.js' '*.jsx' '*.mjs' \
+      | xargs -0 -r "$eslint_bin" --no-warn-ignored
+  fi
+fi
+
+echo "pre-commit: building"
+npm run build --silent >/dev/null

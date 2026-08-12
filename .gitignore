@@ -15,8 +15,13 @@ yarn-error.log*
 
 # Claude Code / oh-my-claudecode local state
 .omc/
-.claude/
 .omo/
+
+# .claude holds local state (worktrees, run markers) plus the verification
+# hooks, which are part of the project and must survive a fresh clone.
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
 
 # Editor
 .idea/

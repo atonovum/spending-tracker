@@ -2,6 +2,11 @@ name: CI
 
 on:
   pull_request:
+  # Commits also land directly on main in this repo. Without this trigger the
+  # clean-room `npm ci` run — the only check local hooks cannot reproduce —
+  # would never execute on that path.
+  push:
+    branches: [main]
 
 permissions:
   contents: read
