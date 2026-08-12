@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { screen, waitFor, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WalletsCard } from './WalletsCard.jsx';
 import { renderWithMantine, createMockState, waitForModal } from './testUtils.jsx';

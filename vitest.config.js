@@ -26,6 +26,14 @@ export default defineConfig({
         '**/*.config.{js,jsx}',
       ],
       thresholds: {
+        // Ratchet, not aspiration: these sit a few points under the measured
+        // baseline (2026-08 — statements 90.78 / branches 83.35 /
+        // functions 88.70 / lines 92.54) so that untested new code fails CI
+        // while normal noise does not. Raise them as coverage improves.
+        statements: 87,
+        branches: 79,
+        functions: 85,
+        lines: 89,
         'src/worker.js': {
           lines: 90,
         },

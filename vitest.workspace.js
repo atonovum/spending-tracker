@@ -1,5 +1,4 @@
 import { defineWorkspace } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 
 export default defineWorkspace([
   // Frontend tests

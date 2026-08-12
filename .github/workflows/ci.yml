@@ -22,9 +22,18 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        id: install
         run: npm ci
 
+      # Lint, test and build are independent gates: each one runs as long as
+      # dependencies installed, so a failure in one never hides the others'
+      # results. The job still fails if any of them fails.
+      - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run lint
+
       - name: Run tests with coverage
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run test:coverage -- --coverage.reporter=json-summary --coverage.reporter=json --coverage.reporter=text
         env:
           NODE_OPTIONS: --max-old-space-size=4096
@@ -36,3 +45,7 @@ jobs:
           json-summary-path: ./coverage/coverage-summary.json
           json-final-path: ./coverage/coverage-final.json
           name: Coverage Summary
+
+      - name: Build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run build

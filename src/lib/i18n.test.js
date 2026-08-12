@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { format, makeT, formatMoney, DEFAULT_LANGUAGE } from './i18n.jsx';
+import { format, makeT, formatMoney } from './i18n.jsx';
 
 describe('format', () => {
   it('returns template as-is when vars is not provided', () => {
