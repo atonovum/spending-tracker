@@ -362,8 +362,8 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
   );
 }
 
-function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categoryId, color, categories }) {
-  const t = useT();
+export function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categoryId, color, categories }) {
+  const { t, formatMoney } = useI18n();
   const [activeIndex, setActiveIndex] = useState(null);
   const series = useMemo(
     () => aggregateCategoryBySubBucket(items, ledgerMode, periodStart, periodEnd, categoryId, categories),
@@ -395,7 +395,11 @@ function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categor
   const active = activeIndex != null && series[activeIndex] ? series[activeIndex] : null;
   const activeCenterX = active != null ? padX + activeIndex * slotW + slotW / 2 : 0;
   const activeBarTop = active != null ? baseY - (active.total / maxTick) * graphH : 0;
-  const tipText = active ? t("stats.subBucket.count", { count: active.count }) : "";
+  // Selecting a bar is a question about money first — the amount leads, the
+  // entry count stays as secondary context.
+  const tipText = active
+    ? `${formatMoney(active.total)} · ${t("stats.subBucket.count", { count: active.count })}`
+    : "";
   const tipW = Math.max(44, tipText.length * 7 + 14);
   const tipH = 18;
   const tipY = Math.max(padTop + tipH, activeBarTop - 6);
@@ -473,24 +477,28 @@ function CategoryLabelTotals({ items, categoryId, getLabel, categories }) {
   const rows = useMemo(() => aggregateCategoryByLabel(items, categoryId, categories), [items, categoryId, categories]);
   if (!rows.length) return null;
   return (
-    <Table withTableBorder={false} withColumnBorders={false} verticalSpacing={4}>
-      <Table.Thead>
-        <Table.Tr>
-          <Table.Th>{t("stats.column.label")}</Table.Th>
-          <Table.Th className="text-center">{t("stats.column.count")}</Table.Th>
-          <Table.Th className="text-right">{t("stats.column.amount")}</Table.Th>
-        </Table.Tr>
-      </Table.Thead>
-      <Table.Tbody>
-        {rows.map((row) => (
-          <Table.Tr key={row.labelId ?? "no-label"}>
-            <Table.Td>{row.labelId ? getLabel(row.labelId)?.name || row.labelId : t("stats.label.none")}</Table.Td>
-            <Table.Td className="text-center">{row.count}</Table.Td>
-            <Table.Td className="text-right">{formatMoney(row.amount)}</Table.Td>
+    // Narrow viewports: the table scrolls inside its own box rather than
+    // pushing the page body sideways.
+    <Table.ScrollContainer minWidth={320} type="native">
+      <Table withTableBorder={false} withColumnBorders={false} verticalSpacing={4}>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>{t("stats.column.label")}</Table.Th>
+            <Table.Th className="text-center">{t("stats.column.count")}</Table.Th>
+            <Table.Th className="text-right">{t("stats.column.amount")}</Table.Th>
           </Table.Tr>
-        ))}
-      </Table.Tbody>
-    </Table>
+        </Table.Thead>
+        <Table.Tbody>
+          {rows.map((row) => (
+            <Table.Tr key={row.labelId ?? "no-label"}>
+              <Table.Td>{row.labelId ? getLabel(row.labelId)?.name || row.labelId : t("stats.label.none")}</Table.Td>
+              <Table.Td className="text-center">{row.count}</Table.Td>
+              <Table.Td className="text-right">{formatMoney(row.amount)}</Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
   );
 }
 
@@ -1343,48 +1351,52 @@ function App({ state, setState }) {
 
           <Divider my="sm" />
           <Title order={4} mb="xs">{t("settings.labels")}</Title>
-          <Table striped highlightOnHover verticalSpacing="xs" className="text-center">
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th className="text-center">{t("stats.column.label")}</Table.Th>
-                <Table.Th className="text-center">{t("stats.column.income")}</Table.Th>
-                <Table.Th className="text-center">{t("stats.column.expense")}</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {[...labelMap.values()].sort((a, b) => (a.label.name > b.label.name ? 1 : -1)).map(({ label, income, expense }) => {
-                const incomeActive = statsLabelFilterId === label.id && statsCategoryType === "income";
-                const expenseActive = statsLabelFilterId === label.id && statsCategoryType === "expense";
-                return (
-                  <Table.Tr key={label.id}>
-                    <Table.Td className="text-center">{label.name}</Table.Td>
-                    <Table.Td className="text-center">
-                      <Button
-                        size="xs"
-                        variant="transparent"
-                        color="dark"
-                        styles={{ label: { fontWeight: incomeActive ? 700 : 400, textDecoration: incomeActive ? "underline" : "none" } }}
-                        onClick={() => { setStatsLabelFilterId(label.id); setStatsCategoryType("income"); }}
-                      >
-                        {formatMoney(income)}
-                      </Button>
-                    </Table.Td>
-                    <Table.Td className="text-center">
-                      <Button
-                        size="xs"
-                        variant="transparent"
-                        color="dark"
-                        styles={{ label: { fontWeight: expenseActive ? 700 : 400, textDecoration: expenseActive ? "underline" : "none" } }}
-                        onClick={() => { setStatsLabelFilterId(label.id); setStatsCategoryType("expense"); }}
-                      >
-                        {formatMoney(expense)}
-                      </Button>
-                    </Table.Td>
-                  </Table.Tr>
-                );
-              })}
-            </Table.Tbody>
-          </Table>
+          {/* Narrow viewports: the table scrolls inside its own box rather
+              than pushing the page body sideways. */}
+          <Table.ScrollContainer minWidth={340} type="native">
+            <Table striped highlightOnHover verticalSpacing="xs" className="text-center">
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th className="text-center">{t("stats.column.label")}</Table.Th>
+                  <Table.Th className="text-center">{t("stats.column.income")}</Table.Th>
+                  <Table.Th className="text-center">{t("stats.column.expense")}</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {[...labelMap.values()].sort((a, b) => (a.label.name > b.label.name ? 1 : -1)).map(({ label, income, expense }) => {
+                  const incomeActive = statsLabelFilterId === label.id && statsCategoryType === "income";
+                  const expenseActive = statsLabelFilterId === label.id && statsCategoryType === "expense";
+                  return (
+                    <Table.Tr key={label.id}>
+                      <Table.Td className="text-center">{label.name}</Table.Td>
+                      <Table.Td className="text-center">
+                        <Button
+                          size="xs"
+                          variant="transparent"
+                          color="dark"
+                          styles={{ label: { fontWeight: incomeActive ? 700 : 400, textDecoration: incomeActive ? "underline" : "none" } }}
+                          onClick={() => { setStatsLabelFilterId(label.id); setStatsCategoryType("income"); }}
+                        >
+                          {formatMoney(income)}
+                        </Button>
+                      </Table.Td>
+                      <Table.Td className="text-center">
+                        <Button
+                          size="xs"
+                          variant="transparent"
+                          color="dark"
+                          styles={{ label: { fontWeight: expenseActive ? 700 : 400, textDecoration: expenseActive ? "underline" : "none" } }}
+                          onClick={() => { setStatsLabelFilterId(label.id); setStatsCategoryType("expense"); }}
+                        >
+                          {formatMoney(expense)}
+                        </Button>
+                      </Table.Td>
+                    </Table.Tr>
+                  );
+                })}
+              </Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
 
           <Divider my="sm" />
           <Group justify="space-between" className="mb-2">
@@ -1416,43 +1428,47 @@ function App({ state, setState }) {
             <PieChart items={typedItems} type={statsCategoryType} />
           </Center>
 
-          <Table striped highlightOnHover verticalSpacing="xs" className="text-center">
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th className="text-center">{t("stats.column.share")}</Table.Th>
-                <Table.Th className="text-center">{t("stats.column.category")}</Table.Th>
-                <Table.Th className="text-center">{t("stats.column.count")}</Table.Th>
-                <Table.Th className="text-center">{t("stats.column.amount")}</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {(() => {
-                const totalCategoryAmount = [...categoryMap.values()].reduce((sum, item) => sum + item.amount, 0);
-                return [...categoryMap.values()].sort((a, b) => b.amount - a.amount).map(({ category, count, amount }) => {
-                  const percent = totalCategoryAmount > 0 ? Math.round((amount / totalCategoryAmount) * 100) : 0;
-                  return (
-                    <Table.Tr
-                      key={category.id}
-                      className="cursor-pointer"
-                      onClick={() => { setStatsCategoryModalId(category.id); setStatsCategoryModalOpen(true); }}
-                    >
-                      <Table.Td className="text-center font-semibold text-muted text-xs">{percent}%</Table.Td>
-                      <Table.Td className="text-center">
-                        <Group gap={6} justify="center" wrap="nowrap">
-                          <span style={{ color: category.color }} className="inline-flex items-center">
-                            <CategoryIcon category={category} size={16} />
-                          </span>
-                          <span style={{ color: category.color, fontWeight: 600 }}>{category.name}</span>
-                        </Group>
-                      </Table.Td>
-                      <Table.Td className="text-center">{count}</Table.Td>
-                      <Table.Td className="text-center">{formatMoney(amount)}</Table.Td>
-                    </Table.Tr>
-                  );
-                });
-              })()}
-            </Table.Tbody>
-          </Table>
+          {/* Narrow viewports: the table scrolls inside its own box rather
+              than pushing the page body sideways. */}
+          <Table.ScrollContainer minWidth={420} type="native">
+            <Table striped highlightOnHover verticalSpacing="xs" className="text-center">
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th className="text-center">{t("stats.column.share")}</Table.Th>
+                  <Table.Th className="text-center">{t("stats.column.category")}</Table.Th>
+                  <Table.Th className="text-center">{t("stats.column.count")}</Table.Th>
+                  <Table.Th className="text-center">{t("stats.column.amount")}</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {(() => {
+                  const totalCategoryAmount = [...categoryMap.values()].reduce((sum, item) => sum + item.amount, 0);
+                  return [...categoryMap.values()].sort((a, b) => b.amount - a.amount).map(({ category, count, amount }) => {
+                    const percent = totalCategoryAmount > 0 ? Math.round((amount / totalCategoryAmount) * 100) : 0;
+                    return (
+                      <Table.Tr
+                        key={category.id}
+                        className="cursor-pointer"
+                        onClick={() => { setStatsCategoryModalId(category.id); setStatsCategoryModalOpen(true); }}
+                      >
+                        <Table.Td className="text-center font-semibold text-muted text-xs">{percent}%</Table.Td>
+                        <Table.Td className="text-center">
+                          <Group gap={6} justify="center" wrap="nowrap">
+                            <span style={{ color: category.color }} className="inline-flex items-center">
+                              <CategoryIcon category={category} size={16} />
+                            </span>
+                            <span style={{ color: category.color, fontWeight: 600 }}>{category.name}</span>
+                          </Group>
+                        </Table.Td>
+                        <Table.Td className="text-center">{count}</Table.Td>
+                        <Table.Td className="text-center">{formatMoney(amount)}</Table.Td>
+                      </Table.Tr>
+                    );
+                  });
+                })()}
+              </Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
         </Card>
       </Stack>
     );

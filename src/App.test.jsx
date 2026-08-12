@@ -4,8 +4,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { filterEntriesByFacets, resolveFacetFilter, sortEntriesForDisplay, summarizeEntries, StatsCurveChart } from './App.jsx';
-import { renderWithMantine } from './settings/testUtils.jsx';
+import App, { filterEntriesByFacets, resolveFacetFilter, sortEntriesForDisplay, summarizeEntries, CategoryStatsChart, StatsCurveChart } from './App.jsx';
+import { createMockState, renderWithMantine } from './settings/testUtils.jsx';
 
 describe('sortEntriesForDisplay', () => {
   it('orders imported ascending entries newest-first before pagination', () => {
@@ -169,5 +169,120 @@ describe('StatsCurveChart', () => {
     await user.click(circles[0]);
 
     expect(onSelectBucket).toHaveBeenCalled();
+  });
+});
+
+describe('CategoryStatsChart', () => {
+  const categories = [{ id: 'food', name: '식비', type: 'expense', color: '#F08A8A', icon: 'food' }];
+  const periodStart = new Date(2026, 2, 2); // Mon 2026-03-02
+  const periodEnd = new Date(2026, 2, 8);
+  const items = [
+    { id: 'a', categoryId: 'food', amount: 12000, occurrenceDate: '2026-03-02' },
+    { id: 'b', categoryId: 'food', amount: 8000, occurrenceDate: '2026-03-02' },
+    { id: 'c', categoryId: 'food', amount: 5000, occurrenceDate: '2026-03-04' },
+  ];
+
+  function renderChart() {
+    return renderWithMantine(
+      <CategoryStatsChart
+        items={items}
+        ledgerMode="week"
+        periodStart={periodStart}
+        periodEnd={periodEnd}
+        categoryId="food"
+        color="#F08A8A"
+        categories={categories}
+      />
+    );
+  }
+
+  it('shows the selected bar amount, not only the entry count', async () => {
+    const user = userEvent.setup();
+    renderChart();
+
+    // The transparent hit target per sub-bucket; index 0 is 2026-03-02.
+    const hitTargets = document.querySelectorAll('rect[fill="transparent"]');
+    expect(hitTargets.length).toBeGreaterThan(0);
+    await user.click(hitTargets[0]);
+
+    const tip = screen.getByText(/20,000원/);
+    expect(tip).toBeInTheDocument();
+    // The count stays as secondary context.
+    expect(tip.textContent).toContain('2건');
+  });
+
+  it('clears the selection when the same bar is clicked again', async () => {
+    const user = userEvent.setup();
+    renderChart();
+
+    const hitTargets = document.querySelectorAll('rect[fill="transparent"]');
+    await user.click(hitTargets[0]);
+    expect(screen.getByText(/20,000원/)).toBeInTheDocument();
+
+    await user.click(hitTargets[0]);
+    expect(screen.queryByText(/20,000원/)).not.toBeInTheDocument();
+  });
+});
+
+// Mobile regression: the stats tables used to run past the viewport edge and
+// cut their right-hand columns off. They must scroll inside their own box so
+// the page body never scrolls horizontally.
+describe('stats tables horizontal overflow', () => {
+  const formatDateLocal = (date) => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  beforeEach(() => {
+    localStorage.clear();
+    const state = createMockState();
+    state.wallets[0].entries = [
+      {
+        id: 'stats-1',
+        date: formatDateLocal(new Date()),
+        amount: 12000,
+        categoryId: 'cat-expense-1',
+        labelIds: ['label-1'],
+        note: '',
+        repeat: 'none',
+        repeatEndDate: '',
+      },
+    ];
+    localStorage.setItem('spending-tracker-v3', JSON.stringify(state));
+  });
+
+  async function openStatsTab(user) {
+    renderWithMantine(<App />);
+    await user.click(screen.getByRole('tab', { name: /stats/i }));
+  }
+
+  function scrollContainerOf(headerText) {
+    const table = screen.getByText(headerText).closest('table');
+    expect(table).not.toBeNull();
+    return table.closest('.mantine-TableScrollContainer-scrollContainer');
+  }
+
+  it('wraps the 카테고리별 통계 table in a horizontal scroll container', async () => {
+    const user = userEvent.setup();
+    await openStatsTab(user);
+
+    const container = scrollContainerOf('비중');
+    expect(container).not.toBeNull();
+    expect(container.getAttribute('style')).toContain('--table-overflow: auto');
+  });
+
+  it('wraps the 레이블 stats table in a horizontal scroll container', async () => {
+    const user = userEvent.setup();
+    await openStatsTab(user);
+
+    // The label table is the one with income/expense columns.
+    const container = screen.getAllByText('레이블')
+      .map((node) => node.closest('table'))
+      .filter(Boolean)[0]
+      .closest('.mantine-TableScrollContainer-scrollContainer');
+    expect(container).not.toBeNull();
+    expect(container.getAttribute('style')).toContain('--table-overflow: auto');
   });
 });
