@@ -318,6 +318,24 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     expect(entry).toBeUndefined();
   });
 
+  it('should keep the stored entry free of derived occurrence fields after saving', async () => {
+    const user = userEvent.setup();
+    renderWithMantine(<App />);
+
+    const entryCard = screen.getByText('One-time expense');
+    await user.click(entryCard);
+    await waitForModal();
+
+    const saveButton = screen.getByRole('button', { name: /저장/i });
+    await user.click(saveButton);
+
+    const savedState = JSON.parse(localStorage.getItem('spending-tracker-v3'));
+    const entry = savedState.wallets[0].entries.find(e => e.id === 'regular-1');
+    expect(entry.occurrenceDate).toBeUndefined();
+    expect(entry.category).toBeUndefined();
+    expect(entry.labels).toBeUndefined();
+  });
+
   it('should select multiple labels from the entry label dropdown', async () => {
     const user = userEvent.setup();
     renderWithMantine(<App />);
@@ -342,5 +360,107 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     const savedState = JSON.parse(localStorage.getItem('spending-tracker-v3'));
     const entry = savedState.wallets[0].entries.find(e => e.id === 'regular-1');
     expect(entry.labelIds).toEqual(['label-1', 'label-2']);
+  });
+});
+
+// Regression: a ledger row for a repeating entry is an *occurrence*, not the
+// stored entry. Opening it used to show the series seed date (the Aug 5 start)
+// instead of the occurrence the user clicked (Sep 5), and saving from there
+// would have rewritten the seed and shifted every future occurrence.
+describe('EntryEditor - repeating occurrence date', () => {
+  const formatDateLocal = (date) => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  // Day 1 is the only day-of-month that exists in every month, so the seed and
+  // the current-month occurrence stay well-defined whatever today's date is.
+  const firstOfMonth = (monthOffset) => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+  };
+
+  const seedDateStr = formatDateLocal(firstOfMonth(-2));
+  const occurrenceDateStr = formatDateLocal(firstOfMonth(0));
+
+  beforeEach(() => {
+    localStorage.clear();
+    const mockState = createMockState();
+    mockState.wallets[0].entries = [
+      {
+        id: 'rent-1',
+        date: seedDateStr,
+        amount: 500000,
+        categoryId: 'cat-expense-1',
+        labelIds: [],
+        note: '월세 반복',
+        repeat: 'monthly',
+        repeatEndDate: '',
+      },
+    ];
+    localStorage.setItem('spending-tracker-v3', JSON.stringify(mockState));
+  });
+
+  async function openCurrentMonthOccurrence(user) {
+    renderWithMantine(<App />);
+    await user.click(screen.getByText('월세 반복'));
+    await waitForModal();
+    return screen.getByRole('dialog');
+  }
+
+  async function openSeedFromSettings(user) {
+    renderWithMantine(<App />);
+    await user.click(screen.getByRole('tab', { name: /settings/i }));
+
+    const scheduledHeading = screen.getByRole('heading', { name: /Scheduled/i });
+    const scheduledCard = scheduledHeading.closest('div[class*="Card"]') || scheduledHeading.parentElement;
+    await user.click(scheduledCard);
+    await waitForModal();
+
+    const scheduledModal = screen.getByRole('dialog');
+    await user.click(within(scheduledModal).getByText('월세 반복').closest('div[class*="Paper"]'));
+    await waitForModal();
+
+    return screen.getByText('거래 수정').closest('[role="dialog"]');
+  }
+
+  it('shows the clicked occurrence date, not the series seed date', async () => {
+    const user = userEvent.setup();
+    const dialog = await openCurrentMonthOccurrence(user);
+
+    expect(within(dialog).getByLabelText('날짜')).toHaveValue(occurrenceDateStr);
+    expect(occurrenceDateStr).not.toBe(seedDateStr);
+  });
+
+  it('locks the date field on an occurrence and explains where the start date lives', async () => {
+    const user = userEvent.setup();
+    const dialog = await openCurrentMonthOccurrence(user);
+
+    expect(within(dialog).getByLabelText('날짜')).toBeDisabled();
+    expect(within(dialog).getByText(new RegExp(seedDateStr))).toBeInTheDocument();
+  });
+
+  it('does not move the series when an occurrence is saved', async () => {
+    const user = userEvent.setup();
+    const dialog = await openCurrentMonthOccurrence(user);
+
+    await user.click(within(dialog).getByRole('button', { name: /저장/i }));
+
+    const savedState = JSON.parse(localStorage.getItem('spending-tracker-v3'));
+    const entry = savedState.wallets[0].entries.find(e => e.id === 'rent-1');
+    expect(entry.date).toBe(seedDateStr);
+    expect(entry.repeat).toBe('monthly');
+    expect(entry.occurrenceDate).toBeUndefined();
+  });
+
+  it('keeps the series start date editable from the Settings scheduled list', async () => {
+    const user = userEvent.setup();
+    const dialog = await openSeedFromSettings(user);
+
+    const dateInput = within(dialog).getByLabelText('날짜');
+    expect(dateInput).toHaveValue(seedDateStr);
+    expect(dateInput).not.toBeDisabled();
   });
 });

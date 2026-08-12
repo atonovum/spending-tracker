@@ -89,3 +89,9 @@ label    { id, name }
 - UI에 기존과 같은 문구의 버튼을 추가하면 기존 테스트의 전역 `getByText` /
   `getByRole` 쿼리가 모호해져 깨질 수 있다. 쿼리는 dialog 등 컨테이너
   범위로 한정할 것.
+- **원장의 거래 행은 저장된 entry가 아니라 occurrence다** (`occurrenceDate`,
+  해석된 `category`/`labels`가 붙어 있다). occurrence를 그대로 저장 경로에
+  펼쳐 넣지 말 것 — 반복 시리즈의 시드 `date`가 밀리고, 낡은 `category`
+  스냅샷이 `signedAmount`의 부호를 뒤집는다. 저장은 `id` + 에디터 payload로만
+  재구성한다. 반복 회차의 날짜는 에디터에서 잠겨 있고, 시리즈 시작일은
+  설정 > 예약 거래(시드 entry)에서만 바꾼다.

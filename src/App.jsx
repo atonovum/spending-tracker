@@ -1105,8 +1105,16 @@ function App({ state, setState }) {
     updateWallets((wallets) =>
       wallets.map((wallet) => {
         if (wallet.id !== state.selectedWalletId) return wallet;
+        // `editingEntry` can be an *occurrence* view (see resolveEntryData /
+        // withOccurrence): it carries derived fields — `occurrenceDate`, a
+        // resolved `category` object, a resolved `labels` array. Spreading it
+        // into the stored entry would persist a stale category snapshot, and
+        // `signedAmount` prefers that object over `categoryId`, so a later
+        // expense→income edit would keep the old sign. Rebuild the entry from
+        // the id plus the editor payload only — payload already covers every
+        // field of the entry schema.
         const entries = editingEntry
-          ? wallet.entries.map((entry) => (entry.id === editingEntry.id ? { ...editingEntry, ...payload } : entry))
+          ? wallet.entries.map((entry) => (entry.id === editingEntry.id ? { id: entry.id, ...payload } : entry))
           : [{ id: uid(), ...payload }, ...wallet.entries];
         return { ...wallet, entries };
       })
@@ -2127,7 +2135,10 @@ function App({ state, setState }) {
           } : null}
           onSubmit={(payload) => {
             upsertEntry(payload);
-            const entryDate = fromDateInput(payload.date);
+            // Jump to the bucket the user was looking at. For an occurrence of a
+            // repeating series `payload.date` is the seed, which can be months
+            // away from the row that was clicked.
+            const entryDate = fromDateInput(editingEntry?.occurrenceDate || payload.date);
             if (entryDate) {
               const key = bucketKeyForDate(ledgerMode, entryDate);
               setLedgerSelectedByMode((prev) => ({ ...prev, [ledgerMode]: key }));
@@ -2282,7 +2293,19 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
   const initialCategory = categories.find((c) => c.id === entry?.categoryId);
   const initialLabelIds = normalizeLabelIds(entry);
 
-  const [date, setDate] = useState(entry?.date || toDateInput(startOfDay(new Date())));
+  // A ledger row is an *occurrence*, not the stored entry: for a repeating
+  // series `entry.date` is the seed (series start) while `entry.occurrenceDate`
+  // is the row the user actually clicked. Show the occurrence.
+  //
+  // Saving is the ambiguous part. There is no per-occurrence override in the
+  // schema, so writing the occurrence date back into `date` would silently move
+  // the whole series. The date is therefore locked while editing an occurrence
+  // of a repeating series; the series start stays editable from
+  // 설정 > 예약 거래, which opens the seed entry (no `occurrenceDate`).
+  const isSeriesOccurrence = !!entry?.occurrenceDate && !!entry?.repeat && entry.repeat !== "none";
+  const seedDate = entry?.date || "";
+
+  const [date, setDate] = useState(entry?.occurrenceDate || entry?.date || toDateInput(startOfDay(new Date())));
   const [amount, setAmount] = useState(entry?.amount || 0);
   const [categoryType, setCategoryType] = useState(initialCategory?.type || "expense");
   const [categoryId, setCategoryId] = useState(
@@ -2321,6 +2344,7 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
           label={t("entry.field.date")}
           type="date"
           value={date}
+          disabled={isSeriesOccurrence}
           onChange={(e) => setDate(e.currentTarget.value)}
           styles={{ input: { textAlign: "center" } }}
         />
@@ -2337,6 +2361,12 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
           styles={{ input: { textAlign: "center" } }}
         />
       </SimpleGrid>
+
+      {isSeriesOccurrence && (
+        <Text size="xs" c="dimmed" mt={-8}>
+          {t("entry.field.date.seriesLocked", { date: seedDate })}
+        </Text>
+      )}
 
       <Stack gap={6}>
         <Text size="sm" fw={500}>{t("entry.field.category")}</Text>
@@ -2417,7 +2447,18 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
           )}
           <Button
             leftSection={<Check size={16} />}
-            onClick={() => onSubmit({ date, amount: Number(amount), categoryId, labelIds, note, repeat, repeatEndDate: repeat === "none" ? "" : repeatEndDate })}
+            onClick={() =>
+              onSubmit({
+                // Never write an occurrence date back into the series seed.
+                date: isSeriesOccurrence ? seedDate : date,
+                amount: Number(amount),
+                categoryId,
+                labelIds,
+                note,
+                repeat,
+                repeatEndDate: repeat === "none" ? "" : repeatEndDate,
+              })
+            }
           >
             {t("entry.action.save")}
           </Button>
