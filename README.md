@@ -24,7 +24,7 @@
 - **Cloudflare Workers** (`@cloudflare/vite-plugin` + `wrangler 4.87`)
   - `wrangler.jsonc`: SPA assets binding(`ASSETS`) + KV namespace `STATE_KV` (id `ce5e71147026485b9b8d5c2978184368`)
   - `src/worker.js`가 워커 엔트리 — `/api/state` GET/PUT/DELETE 라우팅, 그 외는 SPA 정적 파일로 폴백
-- **Docker** (`Dockerfile`): `node:20-alpine` 위에서 `npm run dev` 실행 — **개발 모드 컨테이너**(5173 포트). `VITE_INCLUDE_SAMPLE=true`가 강제 설정되어 2y/3y/5y 샘플 지갑이 자동 시드됨. `nginx.conf`도 저장소에 있지만 현재 Dockerfile에서는 사용하지 않음
+- **Docker** (`Dockerfile`): `node:20-alpine` 위에서 `npm run dev` 실행 — **개발 모드 컨테이너**(5173 포트). 개발 모드에서는 2y/3y/5y 샘플 지갑이 항상 자동 시드된다(아래 "샘플 시드" 참고). `nginx.conf`도 저장소에 있지만 현재 Dockerfile에서는 사용하지 않음
 
 ### 스크립트
 | 명령 | 동작 |
@@ -35,9 +35,18 @@
 | `npm run deploy` | 빌드 후 `wrangler deploy` — Cloudflare로 배포 |
 
 ### 환경 변수
-| 변수 | 효과 |
-|---|---|
-| `VITE_INCLUDE_SAMPLE=true` | 초기 시드에 2y/3y/5y 샘플 지갑 포함 (Dockerfile 기본값) |
+샘플 시드용 환경 변수는 없다. 아래 "샘플 시드" 참고.
+
+### 샘플 시드 (개발 전용)
+- 조건은 `src/lib/storage.js`의 `SAMPLE_SEED_ENABLED` = `import.meta.env.DEV && MODE !== "test"`.
+  Vite가 빌드 시점에 상수로 치환하므로 `npm run dev`(및 Docker 개발 컨테이너)에서는 항상 켜지고,
+  `vite build`를 거치는 `npm run build` / `preview` / `deploy`에서는 항상 꺼진다.
+  환경 변수로 켤 수 없어 배포 번들에는 샘플이 들어갈 수 없다(트리 셰이킹으로 JSON까지 제거됨).
+- `samples/*.json`의 날짜는 생성 시점에 고정돼 있어 그대로 두면 화면 밖으로 밀려난다.
+  파일을 다시 쓰는 대신 **로드 시점에 지갑별로 하루 단위 오프셋 하나만큼 전체를 이동**시켜
+  각 샘플 지갑의 최신 거래가 오늘이 되게 한다 (`src/lib/sampleData.js`). 항목 간 간격은 그대로다.
+- 이미 localStorage에 상태가 있어도 샘플은 다시 심긴다. 단 **개발자가 만든 지갑은 건드리지 않고**,
+  샘플 지갑 id와 같은 지갑만 교체한다. 샘플이 참조하는 카테고리/레이블이 없으면 그것만 되살린다.
 
 ### 디렉토리 구조
 ```
@@ -48,7 +57,8 @@ src/
 ├── index.css            # Tailwind + 글로벌 스타일
 ├── lib/
 │   ├── finance.js       # 반복 거래 전개, 버킷 그룹핑, 통화 포맷 등
-│   ├── storage.js       # localStorage I/O, state 정규화, 샘플 시드
+│   ├── storage.js       # localStorage I/O, state 정규화, 샘플 시드 게이트
+│   ├── sampleData.js    # 개발용 샘플 지갑 날짜 이동(오늘 기준 재정렬)
 │   ├── i18n.jsx         # ko/en 사전, formatMoney, I18nProvider/useT/useI18n
 │   ├── cloudSync.js     # /api/state fetch/PUT 래퍼
 │   └── categoryIcons.jsx# 카테고리 아이콘 매핑

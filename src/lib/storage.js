@@ -1,14 +1,33 @@
-import sample2y from "../../samples/2y-sample-wallet.json";
-import sample3y from "../../samples/3y-sample-wallet.json";
-import sample5y from "../../samples/5y-sample-wallet.json";
 import defaultSeed from "../../samples/default-seed.json";
 import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, normalizeLabelIds, STORAGE_KEYS, safeJsonParse, uid, validDate } from "./finance.js";
+import { withSampleData } from "./sampleData.js";
 
-const INCLUDE_SAMPLE = import.meta.env.VITE_INCLUDE_SAMPLE === "true";
+/**
+ * Whether the dev sample wallets are seeded. Not an opt-in flag any more: local
+ * development must come up with data without anyone remembering an env var.
+ *
+ * `import.meta.env.DEV` is substituted by Vite at transform time and is decided
+ * by the command, not by the environment — `vite` (npm run dev, and the dev
+ * container's CMD) bakes in `true`, `vite build` (the only path `npm run build`,
+ * `npm run preview` and `npm run deploy` take) always bakes in `false`. No env
+ * var can flip it, so sample data cannot reach a deployed bundle; the branch
+ * folds to a constant and `sampleData.js` — JSON fixtures included — is
+ * tree-shaken out of the production build entirely.
+ *
+ * Vitest also reports `DEV === true`, hence the `MODE` guard: the suite asserts
+ * on the plain seed and must not be handed 6500 sample entries.
+ */
+export const SAMPLE_SEED_ENABLED = import.meta.env.DEV && import.meta.env.MODE !== "test";
 
-const DEFAULT_SEED = INCLUDE_SAMPLE
-  ? { ...defaultSeed, wallets: [...defaultSeed.wallets, sample2y, sample3y, sample5y] }
-  : defaultSeed;
+/**
+ * In dev, merge freshly-dated sample wallets into whatever state came in
+ * (fresh seed, localStorage, or KV). Identity everywhere else.
+ */
+export function applySampleSeed(state) {
+  return SAMPLE_SEED_ENABLED ? withSampleData(state) : state;
+}
+
+const DEFAULT_SEED = applySampleSeed(defaultSeed);
 
 export function inferCategoryIcon(category) {
   const id = (category.id || "").toLowerCase();
@@ -104,7 +123,10 @@ export function loadState() {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
     const parsed = safeJsonParse(raw);
-    if (parsed) return normalizeState(parsed);
+    // Stored state normally wins outright. In dev the samples are re-seeded on
+    // top of it instead, so a browser that already has state still shows a
+    // populated current month — without discarding the developer's own wallets.
+    if (parsed) return normalizeState(applySampleSeed(parsed));
   }
   return normalizeState(DEFAULT_SEED);
 }

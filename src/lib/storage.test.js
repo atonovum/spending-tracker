@@ -12,8 +12,11 @@ import {
   saveState,
   loadLastEntryDate,
   saveLastEntryDate,
+  applySampleSeed,
+  SAMPLE_SEED_ENABLED,
 } from './storage.js';
 import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, STORAGE_KEYS } from './finance.js';
+import { SAMPLE_WALLETS } from './sampleData.js';
 
 describe('inferCategoryIcon', () => {
   describe('income patterns', () => {
@@ -609,6 +612,27 @@ describe('saveState', () => {
     expect(result.error).toBeTruthy();
 
     mockSetItem.mockRestore();
+  });
+});
+
+describe('dev sample seed', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('is off outside the dev server, so the suite and any build see the plain seed', () => {
+    // The flag is a build-time constant (`import.meta.env.DEV`), not an env
+    // var: nothing a caller does at runtime can switch sample data on.
+    expect(SAMPLE_SEED_ENABLED).toBe(false);
+
+    const sampleIds = SAMPLE_WALLETS.map((wallet) => wallet.id);
+    const seeded = loadState().wallets.map((wallet) => wallet.id);
+    expect(seeded.some((id) => sampleIds.includes(id))).toBe(false);
+  });
+
+  it('passes state straight through when seeding is off', () => {
+    const state = { wallets: [{ id: 'wallet-1', entries: [] }] };
+    expect(applySampleSeed(state)).toBe(state);
   });
 });
 

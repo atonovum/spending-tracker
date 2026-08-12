@@ -59,6 +59,11 @@ label    { id, name }
 - **커버리지 임계값은 래칫**이다. 현재 수준을 잠근 값이지 목표치가 아니다.
   미달하면 임계값을 낮추는 게 아니라 테스트를 쓴다.
   `src/App.jsx`, `src/lib/categoryIcons.jsx`, `src/lib/cloudSync.js`는 제외 상태.
+- **샘플 지갑은 개발 모드에서만, 로드 시점에 날짜를 옮겨서 심는다.**
+  게이트는 `storage.js`의 `SAMPLE_SEED_ENABLED`(`import.meta.env.DEV`, 빌드 상수 —
+  환경 변수로 못 켠다). `sampleData.js`가 지갑별 오프셋 하나로 전체를 밀어
+  최신 거래를 오늘로 맞춘다. `samples/*.json`은 절대 다시 쓰지 말 것 —
+  트래킹되는 파일이라 워킹 트리가 6500줄짜리 디프로 더러워진다.
 - 커밋 메시지는 한국어, `feat:` / `fix:` / `chore:` 접두어.
 
 ## 검증 계층

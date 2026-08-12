@@ -38,7 +38,7 @@ import {
   Trash2,
   Wallet,
 } from "lucide-react";
-import { loadLastEntryDate, loadState, normalizeState, saveLastEntryDate, saveState } from "./lib/storage.js";
+import { applySampleSeed, loadLastEntryDate, loadState, normalizeState, SAMPLE_SEED_ENABLED, saveLastEntryDate, saveState } from "./lib/storage.js";
 import { serializeWalletCsv } from "./lib/csv.js";
 import {
   addDays,
@@ -2542,7 +2542,7 @@ function AppRoot() {
   useEffect(() => {
     let cancelled = false;
     const localUpdatedAt = typeof state.updatedAt === "number" ? state.updatedAt : 0;
-    const isDevSeedMode = import.meta.env.VITE_INCLUDE_SAMPLE === "true";
+    const isDevSeedMode = SAMPLE_SEED_ENABLED;
 
     // Dev seed guard: skip remote fetch when using fresh sample seed (updatedAt=0)
     // to prevent old KV state from overwriting the sample data.
@@ -2561,7 +2561,9 @@ function AppRoot() {
         return; // skipNextPush stays false → next push will write local up to KV
       }
       skipNextPush.current = true;
-      setState(normalizeState(remote));
+      // Dev: re-seed samples on top of the adopted remote state too, otherwise
+      // a KV round-trip would bring back the sample wallets at their old dates.
+      setState(normalizeState(applySampleSeed(remote)));
     });
     return () => {
       cancelled = true;
@@ -2589,7 +2591,7 @@ function AppRoot() {
         remoteRevRef.current = refetched.updatedAt;
         if (refetched.state) {
           skipNextPush.current = true;
-          setState(normalizeState(refetched.state));
+          setState(normalizeState(applySampleSeed(refetched.state)));
         }
         if (typeof window !== "undefined") {
           notifications.show({
