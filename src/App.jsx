@@ -39,7 +39,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { loadState, normalizeState, saveState } from "./lib/storage.js";
-import { serializeWalletCsv, parseWalletCsv } from "./lib/csv.js";
+import { serializeWalletCsv } from "./lib/csv.js";
 import {
   addDays,
   bucketKeyForDate,
@@ -1159,12 +1159,6 @@ function App({ state, setState }) {
     const amount = metric === "income" ? bucket.income : -Math.abs(bucket.expense);
     setLedgerSelection({ chartMode: "flow", mode: ledgerMode, key: bucket.key, label: bucket.label, metric, amount });
     maybeShiftLedgerPage(bucket);
-  }
-
-  function handleLedgerPointSelect(point) {
-    setLedgerSelectedByMode((prev) => ({ ...prev, [ledgerMode]: point.key }));
-    setStatsSelectedByMode((prev) => ({ ...prev, [ledgerMode]: point.key }));
-    setLedgerSelection({ chartMode: "balance", mode: ledgerMode, key: point.key, label: point.label, amount: point.cumulative });
   }
 
   function renderLedgerList() {
@@ -2416,6 +2410,11 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
           {onDelete && <Button color="red" variant="light" leftSection={<Trash2 size={16} />} onClick={onDelete}>{t("entry.action.delete")}</Button>}
         </Group>
         <Group>
+          {onCancel && (
+            <Button variant="default" onClick={onCancel}>
+              {t("entry.action.cancel")}
+            </Button>
+          )}
           <Button
             leftSection={<Check size={16} />}
             onClick={() => onSubmit({ date, amount: Number(amount), categoryId, labelIds, note, repeat, repeatEndDate: repeat === "none" ? "" : repeatEndDate })}

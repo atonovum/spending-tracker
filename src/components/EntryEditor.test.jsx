@@ -132,6 +132,27 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     expect(screen.getByText('이 예약 거래를 어떻게 처리하시겠습니까?')).toBeInTheDocument();
   });
 
+  // The editor and the delete-confirmation modal both carry a "취소" button, and
+  // the editor stays mounted underneath the confirmation. Scope every 취소 query
+  // to its own dialog instead of searching the whole screen.
+  function getDialogContaining(text) {
+    return screen.getByText(text).closest('[role="dialog"]');
+  }
+
+  it('should close the editor when the cancel button is clicked', async () => {
+    const user = userEvent.setup();
+    renderWithMantine(<App />);
+
+    await openScheduledEntryEditor(user, 'Monthly subscription');
+
+    const editorModal = getDialogContaining('거래 수정');
+    await user.click(within(editorModal).getByRole('button', { name: /취소/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByText('거래 수정')).not.toBeInTheDocument();
+    });
+  });
+
   it('should have three options in the confirmation modal', async () => {
     const user = userEvent.setup();
     renderWithMantine(<App />);
@@ -145,7 +166,7 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     // Check for all three options
     expect(screen.getByText('반복만 중단 (권장)')).toBeInTheDocument();
     expect(screen.getByText('모든 기록 삭제')).toBeInTheDocument();
-    expect(screen.getByText('취소')).toBeInTheDocument();
+    expect(within(getDialogContaining('예약 거래 삭제')).getByText('취소')).toBeInTheDocument();
   });
 
   it('should stop future occurrences when "Stop Future" is selected', async () => {
@@ -223,7 +244,7 @@ describe('EntryEditor - Scheduled Transaction Delete Modal', () => {
     await waitForModal();
 
     // Click "Cancel"
-    const cancelButton = screen.getByRole('button', { name: /취소/i });
+    const cancelButton = within(getDialogContaining('예약 거래 삭제')).getByRole('button', { name: /취소/i });
     await user.click(cancelButton);
 
     // Wait for modal to close (Mantine animations)

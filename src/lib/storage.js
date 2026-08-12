@@ -45,6 +45,11 @@ export function normalizeLabel(label, index) {
 }
 
 export function normalizeWallet(wallet, categories, labels) {
+  // Imported or migrated state can reference labels that no longer exist. Drop
+  // those ids here, at the persistence boundary, so nothing downstream has to
+  // guard against dangling references.
+  const knownLabelIds = new Set((Array.isArray(labels) ? labels : []).map((label) => label.id));
+
   return {
     id: wallet.id || uid(),
     name: wallet.name || "지갑",
@@ -54,7 +59,7 @@ export function normalizeWallet(wallet, categories, labels) {
           date: entry.date || new Date().toISOString().slice(0, 10),
           amount: Number(entry.amount || 0),
           categoryId: entry.categoryId || categories[0]?.id || "",
-          labelIds: normalizeLabelIds(entry),
+          labelIds: normalizeLabelIds(entry).filter((id) => knownLabelIds.has(id)),
           note: entry.note || "",
           repeat: entry.repeat || "none",
           repeatEndDate: entry.repeatEndDate || "",

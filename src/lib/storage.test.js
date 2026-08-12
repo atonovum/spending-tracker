@@ -365,6 +365,28 @@ describe('normalizeWallet', () => {
     expect(result.entries[0].repeatEndDate).toBe('');
   });
 
+  it('drops label ids that no longer exist', () => {
+    const wallet = {
+      id: 'wallet-1',
+      entries: [
+        { date: '2026-01-01', amount: 1000, categoryId: 'cat-1', labelIds: ['label-1', 'label-deleted'] },
+      ],
+    };
+
+    const result = normalizeWallet(wallet, mockCategories, mockLabels);
+    expect(result.entries[0].labelIds).toEqual(['label-1']);
+  });
+
+  it('drops all label ids when no labels are provided', () => {
+    const wallet = {
+      id: 'wallet-1',
+      entries: [{ date: '2026-01-01', amount: 1000, categoryId: 'cat-1', labelIds: ['label-1'] }],
+    };
+
+    expect(normalizeWallet(wallet, mockCategories, []).entries[0].labelIds).toEqual([]);
+    expect(normalizeWallet(wallet, mockCategories, undefined).entries[0].labelIds).toEqual([]);
+  });
+
   it('returns empty entries for non-array entries', () => {
     const result1 = normalizeWallet({ id: 'wallet-1' }, mockCategories, mockLabels);
     expect(result1.entries).toEqual([]);
