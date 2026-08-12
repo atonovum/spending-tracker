@@ -75,9 +75,20 @@ label    { id, name }
 | 파일 편집 직후 | 그 파일만 lint | `.claude/hooks/post-edit-lint.mjs` |
 | 턴 종료 시 | `src/` 변경이 있었으면 테스트 전체 | `.claude/hooks/stop-verify.mjs` |
 | 커밋 직전 | build + staged 파일 lint | `.githooks/pre-commit` |
-| push 후 | lint·test·build 클린룸 재실행 | `.github/workflows/ci.yml` |
+| PR 생성 시 | lint·test·build 클린룸 재실행 | `.github/workflows/ci.yml` |
 
 `.githooks`는 `npm install`의 `prepare` 스크립트가 `core.hooksPath`로 등록한다.
+
+**CI는 `pull_request`에서만 돈다.** main에 직접 커밋하는 경로에는 자동 검증이
+없다는 뜻이므로, **main을 원격에 푸시하기 전에 반드시 아래 셋을 직접 실행하고
+전부 통과한 것을 확인한다.**
+
+```
+npm run lint && npm test && npm run build
+```
+
+하나라도 실패하면 푸시하지 않는다. 커밋별 pre-commit은 build와 staged lint만
+보므로, 여러 커밋이 쌓인 뒤의 테스트 전체 결과는 이 시점에만 확인된다.
 
 **검증을 통과시키려고 규칙 자체를 완화하지 말 것.** ESLint 규칙 하향,
 커버리지 임계값 인하, CI 스텝 제거, `--no-verify` 커밋은 전부 이 파일에
