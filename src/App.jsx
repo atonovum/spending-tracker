@@ -38,7 +38,7 @@ import {
   Trash2,
   Wallet,
 } from "lucide-react";
-import { loadState, normalizeState, saveState } from "./lib/storage.js";
+import { loadLastEntryDate, loadState, normalizeState, saveLastEntryDate, saveState } from "./lib/storage.js";
 import { serializeWalletCsv } from "./lib/csv.js";
 import {
   addDays,
@@ -61,6 +61,7 @@ import {
   sumSigned,
   toDateInput,
   uid,
+  validDate,
 } from "./lib/finance.js";
 import { aggregateCategoryBySubBucket, aggregateCategoryByLabel } from "./lib/categoryStats.js";
 import { CategoryIcon, getCategoryIconComponent } from "./lib/categoryIcons.jsx";
@@ -979,6 +980,9 @@ function App({ state, setState }) {
   const [statsCategoryModalId, setStatsCategoryModalId] = useState(null);
   const [statsCategoryModalOpen, setStatsCategoryModalOpen] = useState(false);
   const [pendingExpanded, setPendingExpanded] = useState(false);
+  // Date the last entry was created with — seeds the editor so consecutive
+  // entries for the same (often past) day do not need re-picking.
+  const [lastEntryDate, setLastEntryDate] = useState(() => loadLastEntryDate());
 
   useEffect(() => {
     const result = saveState(state);
@@ -2124,6 +2128,7 @@ function App({ state, setState }) {
           categories={state.categories}
           labels={state.labels}
           entry={editingEntry}
+          defaultDate={lastEntryDate}
           onCancel={() => setEntryModalOpen(false)}
           onDelete={editingEntry ? () => {
             if (editingEntry.repeat && editingEntry.repeat !== "none") {
@@ -2135,6 +2140,12 @@ function App({ state, setState }) {
           } : null}
           onSubmit={(payload) => {
             upsertEntry(payload);
+            // Remember the date only when a new entry is *added* — editing an
+            // old row should not re-seed the next add.
+            if (!editingEntry) {
+              saveLastEntryDate(payload.date);
+              setLastEntryDate(payload.date);
+            }
             // Jump to the bucket the user was looking at. For an occurrence of a
             // repeating series `payload.date` is the seed, which can be months
             // away from the row that was clicked.
@@ -2286,7 +2297,7 @@ function App({ state, setState }) {
   );
 }
 
-function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }) {
+function EntryEditor({ categories, labels, entry, defaultDate, onSubmit, onCancel, onDelete }) {
   const t = useT();
   const { currency } = useI18n();
   const isMobile = useMediaQuery("(max-width: 48em)");
@@ -2305,7 +2316,14 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
   const isSeriesOccurrence = !!entry?.occurrenceDate && !!entry?.repeat && entry.repeat !== "none";
   const seedDate = entry?.date || "";
 
-  const [date, setDate] = useState(entry?.occurrenceDate || entry?.date || toDateInput(startOfDay(new Date())));
+  const today = toDateInput(startOfDay(new Date()));
+  const yesterday = toDateInput(addDays(startOfDay(new Date()), -1));
+
+  // New entry: fall back to the date the last entry was added with, so a run of
+  // entries for the same past day does not need the picker every time.
+  const [date, setDate] = useState(
+    entry?.occurrenceDate || entry?.date || (validDate(defaultDate) ? defaultDate : today)
+  );
   const [amount, setAmount] = useState(entry?.amount || 0);
   const [categoryType, setCategoryType] = useState(initialCategory?.type || "expense");
   const [categoryId, setCategoryId] = useState(
@@ -2340,14 +2358,36 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
   return (
     <Stack>
       <SimpleGrid cols={2}>
-        <TextInput
-          label={t("entry.field.date")}
-          type="date"
-          value={date}
-          disabled={isSeriesOccurrence}
-          onChange={(e) => setDate(e.currentTarget.value)}
-          styles={{ input: { textAlign: "center" } }}
-        />
+        <Stack gap={6}>
+          <TextInput
+            label={t("entry.field.date")}
+            type="date"
+            value={date}
+            disabled={isSeriesOccurrence}
+            onChange={(e) => setDate(e.currentTarget.value)}
+            styles={{ input: { textAlign: "center" } }}
+          />
+          <Group gap={6} grow wrap="nowrap">
+            <Button
+              size="compact-xs"
+              variant={date === yesterday ? "filled" : "default"}
+              color={date === yesterday ? "dark" : "gray"}
+              disabled={isSeriesOccurrence}
+              onClick={() => setDate(yesterday)}
+            >
+              {t("entry.field.date.yesterday")}
+            </Button>
+            <Button
+              size="compact-xs"
+              variant={date === today ? "filled" : "default"}
+              color={date === today ? "dark" : "gray"}
+              disabled={isSeriesOccurrence}
+              onClick={() => setDate(today)}
+            >
+              {t("entry.field.date.today")}
+            </Button>
+          </Group>
+        </Stack>
         <NumberInput
           label={`${t("entry.field.amount")} (${currency})`}
           value={amount}
@@ -2428,6 +2468,12 @@ function EntryEditor({ categories, labels, entry, onSubmit, onCancel, onDelete }
             clearable
             hidePickedOptions
             placeholder={t("entry.field.label")}
+            // On mobile the modal body is the scroll container. A portaled
+            // dropdown is positioned against document.body and does not follow
+            // that scroll, so it visibly detaches from the input. Rendering it
+            // in place keeps it anchored. Desktop keeps the portal, which is
+            // what stops the dropdown being clipped by the modal body.
+            comboboxProps={{ withinPortal: !isMobile, position: "bottom-start" }}
           />
         )}
       </Stack>

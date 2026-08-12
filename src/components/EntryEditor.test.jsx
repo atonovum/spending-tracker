@@ -464,3 +464,143 @@ describe('EntryEditor - repeating occurrence date', () => {
     expect(dateInput).not.toBeDisabled();
   });
 });
+
+describe('EntryEditor - default date and date shortcuts', () => {
+  const formatDateLocal = (date) => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const todayStr = formatDateLocal(new Date());
+  const yesterdayStr = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return formatDateLocal(d);
+  })();
+
+  const LAST_DATE_KEY = 'spending-tracker-last-entry-date';
+
+  beforeEach(() => {
+    localStorage.clear();
+    const mockState = createMockState();
+    mockState.wallets[0].entries.push({
+      id: 'edit-me',
+      date: todayStr,
+      amount: 15000,
+      categoryId: 'cat-expense-1',
+      labelIds: [],
+      note: 'Editable today entry',
+      repeat: 'none',
+      repeatEndDate: '',
+    });
+    localStorage.setItem('spending-tracker-v3', JSON.stringify(mockState));
+  });
+
+  // The FAB and the modal heading share the "거래 추가" text, so this query is
+  // pinned to the button role, and everything inside the editor is scoped to
+  // the dialog.
+  async function openAddEntry(user) {
+    await user.click(screen.getByRole('button', { name: '거래 추가' }));
+    await waitForModal();
+    return screen.getByRole('dialog');
+  }
+
+  // The editor only re-reads its defaults when it remounts, and Mantine keeps a
+  // closing modal mounted through its exit transition. Reopening before that
+  // finishes would assert against the previous session's state.
+  async function waitForModalClosed() {
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+  }
+
+  it('defaults to today when no entry has been added on this device yet', async () => {
+    const user = userEvent.setup();
+    renderWithMantine(<App />);
+
+    const dialog = await openAddEntry(user);
+
+    expect(within(dialog).getByLabelText('날짜')).toHaveValue(todayStr);
+  });
+
+  it('defaults to the date the last entry was added with', async () => {
+    localStorage.setItem(LAST_DATE_KEY, '2026-02-14');
+    const user = userEvent.setup();
+    renderWithMantine(<App />);
+
+    const dialog = await openAddEntry(user);
+
+    expect(within(dialog).getByLabelText('날짜')).toHaveValue('2026-02-14');
+  });
+
+  it('falls back to today when the stored date is unusable', async () => {
+    localStorage.setItem(LAST_DATE_KEY, 'not-a-date');
+    const user = userEvent.setup();
+    renderWithMantine(<App />);
+
+    const dialog = await openAddEntry(user);
+
+    expect(within(dialog).getByLabelText('날짜')).toHaveValue(todayStr);
+  });
+
+  it('sets the date from the 어제 and 오늘 buttons', async () => {
+    localStorage.setItem(LAST_DATE_KEY, '2026-02-14');
+    const user = userEvent.setup();
+    renderWithMantine(<App />);
+
+    const dialog = await openAddEntry(user);
+    const dateInput = within(dialog).getByLabelText('날짜');
+
+    await user.click(within(dialog).getByRole('button', { name: '어제' }));
+    expect(dateInput).toHaveValue(yesterdayStr);
+
+    await user.click(within(dialog).getByRole('button', { name: '오늘' }));
+    expect(dateInput).toHaveValue(todayStr);
+  });
+
+  it('remembers the date after an entry is added, without touching the state schema', async () => {
+    const user = userEvent.setup();
+    renderWithMantine(<App />);
+
+    const dialog = await openAddEntry(user);
+    await user.click(within(dialog).getByRole('button', { name: '어제' }));
+    await user.click(within(dialog).getByRole('button', { name: /저장/i }));
+
+    await waitFor(() => {
+      expect(localStorage.getItem(LAST_DATE_KEY)).toBe(yesterdayStr);
+    });
+
+    // The preference lives in its own key: the persisted document is untouched.
+    const savedState = JSON.parse(localStorage.getItem('spending-tracker-v3'));
+    expect(savedState.version).toBe(3);
+    expect(savedState.lastEntryDate).toBeUndefined();
+
+    await waitForModalClosed();
+    const reopened = await openAddEntry(user);
+    expect(within(reopened).getByLabelText('날짜')).toHaveValue(yesterdayStr);
+  });
+
+  it('does not re-seed the default date when an existing entry is edited', async () => {
+    localStorage.setItem(LAST_DATE_KEY, '2026-02-14');
+    const user = userEvent.setup();
+    renderWithMantine(<App />);
+
+    await user.click(screen.getByText('Editable today entry'));
+    await waitForModal();
+    const editor = screen.getByText('거래 수정').closest('[role="dialog"]');
+    await user.click(within(editor).getByRole('button', { name: '어제' }));
+    await user.click(within(editor).getByRole('button', { name: /저장/i }));
+
+    await waitFor(() => {
+      const saved = JSON.parse(localStorage.getItem('spending-tracker-v3'));
+      expect(saved.wallets[0].entries.find(e => e.id === 'edit-me').date).toBe(yesterdayStr);
+    });
+    expect(localStorage.getItem(LAST_DATE_KEY)).toBe('2026-02-14');
+
+    await waitForModalClosed();
+    const dialog = await openAddEntry(user);
+    expect(within(dialog).getByLabelText('날짜')).toHaveValue('2026-02-14');
+  });
+});

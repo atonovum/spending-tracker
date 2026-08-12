@@ -2,7 +2,7 @@ import sample2y from "../../samples/2y-sample-wallet.json";
 import sample3y from "../../samples/3y-sample-wallet.json";
 import sample5y from "../../samples/5y-sample-wallet.json";
 import defaultSeed from "../../samples/default-seed.json";
-import { ACTIVE_STORAGE_KEY, normalizeLabelIds, STORAGE_KEYS, safeJsonParse, uid } from "./finance.js";
+import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, normalizeLabelIds, STORAGE_KEYS, safeJsonParse, uid, validDate } from "./finance.js";
 
 const INCLUDE_SAMPLE = import.meta.env.VITE_INCLUDE_SAMPLE === "true";
 
@@ -112,6 +112,33 @@ export function loadState() {
 export function saveState(state) {
   try {
     localStorage.setItem(ACTIVE_STORAGE_KEY, JSON.stringify(state));
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err };
+  }
+}
+
+/**
+ * Date the user last created an entry with. Stored under its own localStorage
+ * key rather than inside the normalised state: it is a per-device UI
+ * convenience, not part of the document, so it stays out of export/import, out
+ * of the KV sync payload, and needs no schema version bump.
+ *
+ * @returns {string} a valid "YYYY-MM-DD" string, or "" when unset/unusable.
+ */
+export function loadLastEntryDate() {
+  try {
+    const raw = localStorage.getItem(LAST_ENTRY_DATE_KEY);
+    return validDate(raw) ? raw : "";
+  } catch {
+    return "";
+  }
+}
+
+export function saveLastEntryDate(date) {
+  if (!validDate(date)) return { ok: false };
+  try {
+    localStorage.setItem(LAST_ENTRY_DATE_KEY, date);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err };

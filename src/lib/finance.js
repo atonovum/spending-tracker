@@ -1,5 +1,10 @@
 export const STORAGE_KEYS = ["spending-tracker-v3", "spending-tracker-v2", "spending-tracker-v1"];
 export const ACTIVE_STORAGE_KEY = "spending-tracker-v3";
+// Device-local UI preference, deliberately NOT part of the normalised state:
+// it is not user data, it must not travel through import/export or KV sync,
+// and keeping it out avoids a schema version bump + migration. Never add this
+// to STORAGE_KEYS — that list is the state migration path.
+export const LAST_ENTRY_DATE_KEY = "spending-tracker-last-entry-date";
 export const MAX_WALLETS = 5;
 
 export const REPEAT_OPTIONS = [

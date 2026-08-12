@@ -10,8 +10,10 @@ import {
   normalizeState,
   loadState,
   saveState,
+  loadLastEntryDate,
+  saveLastEntryDate,
 } from './storage.js';
-import { ACTIVE_STORAGE_KEY, STORAGE_KEYS } from './finance.js';
+import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, STORAGE_KEYS } from './finance.js';
 
 describe('inferCategoryIcon', () => {
   describe('income patterns', () => {
@@ -607,5 +609,66 @@ describe('saveState', () => {
     expect(result.error).toBeTruthy();
 
     mockSetItem.mockRestore();
+  });
+});
+
+describe('last entry date', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('returns an empty string when nothing has been stored', () => {
+    expect(loadLastEntryDate()).toBe('');
+  });
+
+  it('round-trips a valid date', () => {
+    expect(saveLastEntryDate('2026-02-14')).toEqual({ ok: true });
+    expect(localStorage.getItem(LAST_ENTRY_DATE_KEY)).toBe('2026-02-14');
+    expect(loadLastEntryDate()).toBe('2026-02-14');
+  });
+
+  it('refuses to store a malformed date', () => {
+    expect(saveLastEntryDate('yesterday')).toEqual({ ok: false });
+    expect(saveLastEntryDate('')).toEqual({ ok: false });
+    expect(saveLastEntryDate(undefined)).toEqual({ ok: false });
+    expect(localStorage.getItem(LAST_ENTRY_DATE_KEY)).toBeNull();
+  });
+
+  it('ignores a corrupted stored value instead of feeding it to the editor', () => {
+    localStorage.setItem(LAST_ENTRY_DATE_KEY, 'not-a-date');
+    expect(loadLastEntryDate()).toBe('');
+  });
+
+  it('is stored outside the normalised state so no schema migration is needed', () => {
+    saveLastEntryDate('2026-02-14');
+    expect(STORAGE_KEYS).not.toContain(LAST_ENTRY_DATE_KEY);
+    // loadState must not pick the preference key up as a state candidate.
+    expect(loadState().version).toBe(3);
+  });
+
+  it('returns ok: false when localStorage rejects the write', () => {
+    const mockSetItem = vi.spyOn(Storage.prototype, 'setItem');
+    const error = new Error('Private mode error');
+    mockSetItem.mockImplementation(() => {
+      throw error;
+    });
+
+    const result = saveLastEntryDate('2026-02-14');
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe(error);
+
+    mockSetItem.mockRestore();
+  });
+
+  it('returns an empty string when localStorage rejects the read', () => {
+    const mockGetItem = vi.spyOn(Storage.prototype, 'getItem');
+    mockGetItem.mockImplementation(() => {
+      throw new Error('Private mode error');
+    });
+
+    expect(loadLastEntryDate()).toBe('');
+
+    mockGetItem.mockRestore();
   });
 });
