@@ -359,15 +359,16 @@ describe('normalizeWallet', () => {
     expect(result.entries[0].date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
-  it('sets default repeat and repeatEndDate', () => {
+  it('strips the legacy repeat fields — repetition belongs to wallet.scheduled', () => {
     const wallet = {
       id: 'wallet-1',
       entries: [{ date: '2026-01-01', amount: 1000, categoryId: 'cat-1' }],
     };
 
     const result = normalizeWallet(wallet, mockCategories, mockLabels);
-    expect(result.entries[0].repeat).toBe('none');
-    expect(result.entries[0].repeatEndDate).toBe('');
+    expect(result.entries[0]).not.toHaveProperty('repeat');
+    expect(result.entries[0]).not.toHaveProperty('repeatEndDate');
+    expect(result.scheduled).toEqual([]);
   });
 
   it('drops label ids that no longer exist', () => {
@@ -431,14 +432,14 @@ describe('normalizeState', () => {
     expect(result.selectedWalletId).toBe('wallet-2');
   });
 
-  it('forces version 3', () => {
+  it('forces version 4', () => {
     const input1 = { wallets: [], categories: [], labels: [], version: 1 };
     const result1 = normalizeState(input1);
-    expect(result1.version).toBe(3);
+    expect(result1.version).toBe(4);
 
     const input2 = { wallets: [], categories: [], labels: [], version: 2 };
     const result2 = normalizeState(input2);
-    expect(result2.version).toBe(3);
+    expect(result2.version).toBe(4);
   });
 
   it('clamps language to en or ko', () => {
@@ -497,7 +498,7 @@ describe('loadState', () => {
 
   it('returns DEFAULT_SEED when localStorage is empty', () => {
     const result = loadState();
-    expect(result.version).toBe(3);
+    expect(result.version).toBe(4);
     expect(result.wallets.length).toBeGreaterThan(0);
     expect(result.categories.length).toBeGreaterThan(0);
     expect(result.labels.length).toBeGreaterThan(0);
@@ -516,7 +517,7 @@ describe('loadState', () => {
 
     const result = loadState();
     expect(result.wallets[0].id).toBe('wallet-1');
-    expect(result.version).toBe(3);
+    expect(result.version).toBe(4);
   });
 
   it('tries STORAGE_KEYS in order and uses first valid key', () => {
@@ -536,7 +537,7 @@ describe('loadState', () => {
     localStorage.setItem(ACTIVE_STORAGE_KEY, 'invalid json');
 
     const result = loadState();
-    expect(result.version).toBe(3);
+    expect(result.version).toBe(4);
     expect(result.wallets.length).toBeGreaterThan(0);
   });
 });
@@ -667,7 +668,7 @@ describe('last entry date', () => {
     saveLastEntryDate('2026-02-14');
     expect(STORAGE_KEYS).not.toContain(LAST_ENTRY_DATE_KEY);
     // loadState must not pick the preference key up as a state candidate.
-    expect(loadState().version).toBe(3);
+    expect(loadState().version).toBe(4);
   });
 
   it('returns ok: false when localStorage rejects the write', () => {

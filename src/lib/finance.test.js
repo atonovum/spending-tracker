@@ -912,23 +912,35 @@ describe('Time-dependent functions with fake timers', () => {
   });
 
   describe('buildPendingScheduledOccurrences', () => {
-    it('returns scheduled occurrences starting tomorrow', () => {
+    // Only the *future* is derived now: these rows are projections of
+    // wallet.scheduled, never of stored entries.
+    it('returns the next occurrence of a repeating schedule, starting tomorrow', () => {
       const wallet = {
-        entries: [
-          { id: '1', date: '2026-05-20', repeat: 'daily', amount: 100, note: 'Daily expense' },
+        scheduled: [
+          { id: '1', startDate: '2026-05-20', repeat: 'daily', amount: 100, note: 'Daily expense' },
         ],
       };
       const selectedRange = { end: new Date('2026-06-05') };
       const result = buildPendingScheduledOccurrences(wallet, selectedRange);
 
-      expect(result.length).toBeGreaterThan(0);
+      expect(result).toHaveLength(1);
       expect(result[0].occurrenceDate).toBe('2026-05-30');
+    });
+
+    it('ignores entries — a transaction is never a template', () => {
+      const wallet = {
+        entries: [{ id: 'e1', date: '2026-06-01', amount: 100 }],
+        scheduled: [],
+      };
+      const result = buildPendingScheduledOccurrences(wallet, { end: new Date('2026-06-05') });
+
+      expect(result).toEqual([]);
     });
 
     it('defaults to +366 days when selectedRange.end is missing', () => {
       const wallet = {
-        entries: [
-          { id: '1', date: '2026-05-29', repeat: 'daily', amount: 100 },
+        scheduled: [
+          { id: '1', startDate: '2026-05-29', repeat: 'daily', amount: 100 },
         ],
       };
       const result = buildPendingScheduledOccurrences(wallet, null);
@@ -938,73 +950,63 @@ describe('Time-dependent functions with fake timers', () => {
 
     it('sorts by occurrenceDate then id', () => {
       const wallet = {
-        entries: [
-          { id: '2', date: '2026-05-20', repeat: 'daily', amount: 100 },
-          { id: '1', date: '2026-05-20', repeat: 'daily', amount: 200 },
+        scheduled: [
+          { id: '2', startDate: '2026-05-20', repeat: 'daily', amount: 100 },
+          { id: '1', startDate: '2026-05-20', repeat: 'daily', amount: 200 },
         ],
       };
-      const selectedRange = { end: new Date('2026-05-30') };
-      const result = buildPendingScheduledOccurrences(wallet, selectedRange);
+      const result = buildPendingScheduledOccurrences(wallet, { end: new Date('2026-05-30') });
 
-      if (result.length >= 2) {
-        const first = result[0];
-        const second = result[1];
-        if (first.occurrenceDate === second.occurrenceDate) {
-          expect(first.id < second.id).toBe(true);
-        }
-      }
+      expect(result.map((occ) => occ.id)).toEqual(['1', '2']);
+      expect(result[0].occurrenceDate).toBe(result[1].occurrenceDate);
     });
 
-    it('adds note with start and end date info', () => {
+    it('keeps the schedule note verbatim', () => {
       const wallet = {
-        entries: [
-          { id: '1', date: '2026-05-20', repeat: 'daily', repeatEndDate: '2026-06-10', amount: 100, note: 'Test note' },
+        scheduled: [
+          { id: '1', startDate: '2026-05-20', repeat: 'daily', repeatEndDate: '2026-06-10', amount: 100, note: 'Test note' },
         ],
       };
-      const selectedRange = { end: new Date('2026-06-05') };
-      const result = buildPendingScheduledOccurrences(wallet, selectedRange);
+      const result = buildPendingScheduledOccurrences(wallet, { end: new Date('2026-06-05') });
 
-      expect(result[0].note).toContain('Test note');
-      expect(result[0].note).toContain('시작:2026-05-20');
-      expect(result[0].note).toContain('종료:2026-06-10');
+      expect(result[0].note).toBe('Test note');
+      expect(result[0].startDate).toBe('2026-05-20');
+      expect(result[0].repeatEndDate).toBe('2026-06-10');
     });
 
-    it('uses default note "메모 없음" when missing', () => {
+    it('includes a one-time schedule that has not fired yet', () => {
       const wallet = {
-        entries: [
-          { id: '1', date: '2026-05-20', repeat: 'daily', amount: 100 },
+        scheduled: [
+          { id: '1', startDate: '2026-05-30', repeat: 'none', amount: 100, note: 'One-time' },
+          { id: '2', startDate: '2026-05-20', repeat: 'daily', amount: 200 },
         ],
       };
-      const selectedRange = { end: new Date('2026-05-30') };
-      const result = buildPendingScheduledOccurrences(wallet, selectedRange);
-
-      expect(result[0].note).toContain('메모 없음');
-    });
-
-    it('includes future one-time entries', () => {
-      const wallet = {
-        entries: [
-          { id: '1', date: '2026-05-30', repeat: 'none', amount: 100, note: 'One-time' },
-          { id: '2', date: '2026-05-20', repeat: 'daily', amount: 200 },
-        ],
-      };
-      const selectedRange = { end: new Date('2026-06-05') };
-      const result = buildPendingScheduledOccurrences(wallet, selectedRange);
+      const result = buildPendingScheduledOccurrences(wallet, { end: new Date('2026-06-05') });
 
       expect(result.some((occ) => occ.id === '1' && occ.occurrenceDate === '2026-05-30')).toBe(true);
     });
 
-    it('skips past one-time entries', () => {
+    it('skips a one-time schedule whose date has passed', () => {
       const wallet = {
-        entries: [
-          { id: '1', date: '2026-05-29', repeat: 'none', amount: 100 },
-          { id: '2', date: '2026-05-20', repeat: 'daily', amount: 200 },
+        scheduled: [
+          { id: '1', startDate: '2026-05-29', repeat: 'none', amount: 100 },
+          { id: '2', startDate: '2026-05-20', repeat: 'daily', amount: 200 },
         ],
       };
-      const selectedRange = { end: new Date('2026-06-05') };
-      const result = buildPendingScheduledOccurrences(wallet, selectedRange);
+      const result = buildPendingScheduledOccurrences(wallet, { end: new Date('2026-06-05') });
 
       expect(result.every((occ) => occ.id !== '1')).toBe(true);
+    });
+
+    it('drops a repeating schedule whose end date has passed', () => {
+      const wallet = {
+        scheduled: [
+          { id: '1', startDate: '2026-05-01', repeat: 'daily', repeatEndDate: '2026-05-25', amount: 100 },
+        ],
+      };
+      const result = buildPendingScheduledOccurrences(wallet, { end: new Date('2026-06-05') });
+
+      expect(result).toEqual([]);
     });
   });
 });

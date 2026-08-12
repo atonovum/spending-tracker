@@ -250,7 +250,7 @@ describe('stats tables horizontal overflow', () => {
         repeatEndDate: '',
       },
     ];
-    localStorage.setItem('spending-tracker-v3', JSON.stringify(state));
+    localStorage.setItem('spending-tracker-v4', JSON.stringify(state));
   });
 
   async function openStatsTab(user) {

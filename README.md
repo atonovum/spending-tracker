@@ -130,13 +130,13 @@ Ledger·Stats 탭에는 공통 sticky 헤더 — 지갑 선택 + 기간(`week`/`
 ## 3. 데이터 모델
 
 ### 저장소
-- 로컬: `localStorage["spending-tracker-v3"]` (v2/v1는 마이그레이션 fallback)
+- 로컬: `localStorage["spending-tracker-v4"]` (v3/v2/v1는 마이그레이션 fallback)
 - 원격: Cloudflare KV (`STATE_KV` 바인딩, 키 `state` — 전체 state JSON 1개)
 
 ### State 스키마 (정규화 후, `storage.js` 참조)
 ```js
 {
-  version: 3,
+  version: 4,
   selectedWalletId: string,
   language: "ko" | "en",
   wallets: Wallet[],     // 최대 5
@@ -150,23 +150,40 @@ Ledger·Stats 탭에는 공통 sticky 헤더 — 지갑 선택 + 기간(`week`/`
 {
   id: string,
   name: string,
-  entries: Entry[],
+  entries: Entry[],        // 실제로 일어난 거래
+  scheduled: Schedule[],   // 앞으로 거래를 만들어낼 템플릿 (예약 거래)
 }
 ```
 
 ### Entry
 ```js
 {
-  id: string,              // 16자 hex (uid())
+  id: string,              // 16자 hex (uid()). 예약이 만든 거래는 `{scheduleId}-{date}`
   date: "YYYY-MM-DD",
   amount: number,          // 양수, 부호는 category.type으로 결정
   categoryId: string,
   labelIds: string[],      // 다중 라벨. 레거시 `labelId`(단수)는 정규화 시 흡수
   note: string,
-  repeat: "none"|"daily"|"every_other_day"|"weekday"|"weekend"|"biweekly"|"fourweekly"|"monthly",
-  repeatEndDate: "YYYY-MM-DD" | "",  // 빈 문자열이면 무기한
 }
 ```
+Entry는 반복하지 않는다. 예약이 만들어낸 거래도 그 순간부터 예약과 무관한
+독립 레코드다 — 예약을 고치거나 지워도 바뀌지 않는다.
+
+### Schedule (예약 거래)
+```js
+{
+  id: string,
+  startDate: "YYYY-MM-DD",  // 시리즈 시작일. 회차가 만들어져도 움직이지 않는다
+  amount: number,
+  categoryId: string,
+  labelIds: string[],
+  note: string,
+  repeat: "none"|"daily"|"every_other_day"|"weekday"|"weekend"|"biweekly"|"fourweekly"|"monthly"|"3months"|"6months"|"yearly",
+  repeatEndDate: "YYYY-MM-DD" | "",  // 빈 문자열이면 무기한
+  lastRunDate: "YYYY-MM-DD" | "",    // 실체화 커서: 마지막으로 만들어낸 회차
+}
+```
+`repeat: "none"`이면 일회성 예약이고, 한 번 거래를 만든 뒤에는 목록에서 사라진다.
 
 ### Category
 ```js
@@ -191,9 +208,9 @@ Ledger·Stats 탭에는 공통 sticky 헤더 — 지갑 선택 + 기간(`week`/`
 ### Export/Import 페이로드
 ```js
 {
-  version: 3,
+  version: 4,
   exportedAt: ISO,
-  wallet: Wallet,          // 단일 지갑
+  wallet: Wallet,          // 단일 지갑 (entries + scheduled)
   categories: Category[],  // 그 시점 전역 카테고리
   labels: Label[],
 }

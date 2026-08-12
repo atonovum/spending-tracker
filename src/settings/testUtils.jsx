@@ -57,7 +57,7 @@ export function renderWithMantine(ui, options = {}) {
  */
 export function createMockState(overrides = {}) {
   return {
-    version: 3,
+    version: 4,
     language: 'ko',
     currency: 'KRW',
     wallets: [
@@ -72,8 +72,6 @@ export function createMockState(overrides = {}) {
             categoryId: 'cat-expense-1',
             labelIds: ['label-1'],
             note: '',
-            repeat: 'none',
-            repeatEndDate: '',
           },
           {
             id: 'entry-2',
@@ -82,10 +80,9 @@ export function createMockState(overrides = {}) {
             categoryId: 'cat-income-1',
             labelIds: [],
             note: '',
-            repeat: 'none',
-            repeatEndDate: '',
           },
         ],
+        scheduled: [],
       },
     ],
     categories: [

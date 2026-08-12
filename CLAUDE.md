@@ -18,6 +18,7 @@
 | 파일 | 책임 |
 |---|---|
 | `src/lib/finance.js` | 금액·반복·날짜 계산, 상수, `uid()` |
+| `src/lib/schedules.js` | 예약 거래 템플릿 정규화·실체화(materialisation)·v3 마이그레이션 |
 | `src/lib/storage.js` | 정규화 + localStorage 영속화 |
 | `src/lib/csv.js` | CSV 가져오기/내보내기 |
 | `src/lib/cloudSync.js` | Worker KV 동기화 |
@@ -32,20 +33,34 @@
 정확한 정의는 `src/lib/storage.js`의 `normalizeState`가 진실이다. 아래는 형태만.
 
 ```
-state    { version: 3, selectedWalletId, language: "ko"|"en",
+state    { version: 4, selectedWalletId, language: "ko"|"en",
            currency: "KRW"|"USD", wallets[], categories[], labels[] }
-wallet   { id, name, entries[] }
+wallet   { id, name, entries[], scheduled[] }
 entry    { id, date: "YYYY-MM-DD", amount: number, categoryId,
-           labelIds[], note, repeat, repeatEndDate }
+           labelIds[], note }
+schedule { id, startDate: "YYYY-MM-DD", amount: number, categoryId,
+           labelIds[], note, repeat, repeatEndDate, lastRunDate }
 category { id, name, type: "expense"|"income", color, icon }
 label    { id, name }
 ```
 
-- `repeat` 허용값은 `finance.js`의 `REPEAT_OPTIONS`.
-- localStorage 키는 `spending-tracker-v3` (`ACTIVE_STORAGE_KEY`).
-  `STORAGE_KEYS`에 v1·v2가 남아 있는 건 마이그레이션 경로다.
+- **entry는 반복하지 않는다.** 반복은 `wallet.scheduled`의 템플릿이 갖는다.
+  `repeat` 허용값은 `finance.js`의 `REPEAT_OPTIONS`.
+- **예약 거래는 때가 되면 진짜 entry를 만든다**(materialisation). 만들어진
+  거래와 예약은 그때부터 서로 독립이다 — 예약을 고쳐도 과거 거래는 안 바뀌고,
+  예약을 지워도 과거 거래는 남는다. 미래(아직 안 일어난 회차)만 파생으로
+  보여준다: `buildPendingScheduledOccurrences`.
+- `lastRunDate`가 실체화 커서다. 마지막으로 만들어낸 회차 날짜이고, 그 이후
+  날짜만 생성한다. 커서가 사라져도 entry id(`{scheduleId}-{date}`)가 두 번째
+  방어선이라 중복 생성이 안 된다. 실체화는 **멱등**이어야 한다.
+- **실체화는 `normalizeState`에 넣지 않는다.** 정규화는 가져오기·KV 읽기·로드
+  때마다 도는 순수 정화기라 레코드를 만들어내면 안 된다. 실체화는 앱이 문서를
+  소유하는 지점(최초 로드, 원격 상태 채택)에서 `materializeState`로 한 번 돈다.
+- localStorage 키는 `spending-tracker-v4` (`ACTIVE_STORAGE_KEY`).
+  `STORAGE_KEYS`에 v1~v3이 남아 있는 건 마이그레이션 경로다.
 - **`normalizeState`가 유일한 정화 지점.** 외부에서 들어온 상태(가져오기,
   KV 동기화, 구버전)는 전부 여기를 통과한다. 검증을 다른 곳에 흩뿌리지 말 것.
+  v3→v4 마이그레이션(반복 entry → schedule + 과거 entry들)도 여기서 한다.
 - 지갑 상한 `MAX_WALLETS` = 5.
 
 ## 코드베이스에서 안 드러나는 것
@@ -105,9 +120,14 @@ npm run lint && npm test && npm run build
 - UI에 기존과 같은 문구의 버튼을 추가하면 기존 테스트의 전역 `getByText` /
   `getByRole` 쿼리가 모호해져 깨질 수 있다. 쿼리는 dialog 등 컨테이너
   범위로 한정할 것.
-- **원장의 거래 행은 저장된 entry가 아니라 occurrence다** (`occurrenceDate`,
-  해석된 `category`/`labels`가 붙어 있다). occurrence를 그대로 저장 경로에
-  펼쳐 넣지 말 것 — 반복 시리즈의 시드 `date`가 밀리고, 낡은 `category`
+- **원장의 거래 행은 저장된 entry다.** occurrence 뷰(`occurrenceDate`, 해석된
+  `category`/`labels`)를 그대로 저장 경로에 펼쳐 넣지 말 것 — 낡은 `category`
   스냅샷이 `signedAmount`의 부호를 뒤집는다. 저장은 `id` + 에디터 payload로만
-  재구성한다. 반복 회차의 날짜는 에디터에서 잠겨 있고, 시리즈 시작일은
-  설정 > 예약 거래(시드 entry)에서만 바꾼다.
+  재구성한다. (v4 이전엔 행이 템플릿에서 계산된 값이라 날짜를 잠가야 했다.
+  지금은 저장된 레코드라 잠글 이유가 없다 — 회차 하나만 자유롭게 고친다.)
+- **아직 안 일어난 거래는 entry가 아니라 schedule이다.** 저장 시 규칙은 하나다:
+  반복이 있거나 날짜가 미래면 `scheduled[]`, 아니면 `entries[]`. 원장 버킷은
+  오늘에서 끊기므로 미래 날짜 entry는 화면에서 사라진다. `upsertEntry`가 양방향
+  으로 이 규칙을 지킨다(미래로 고치면 schedule이 되고, 과거로 당기면 즉시 실체화).
+- 예약 거래를 지우는 UI는 확인 하나뿐이다. "반복만 중단"은 템플릿을 살려둬야
+  과거 행이 계속 계산되던 옛 모델의 잔재이므로 되살리지 말 것.

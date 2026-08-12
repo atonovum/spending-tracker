@@ -38,7 +38,8 @@ import {
   Trash2,
   Wallet,
 } from "lucide-react";
-import { applySampleSeed, loadLastEntryDate, loadState, normalizeState, SAMPLE_SEED_ENABLED, saveLastEntryDate, saveState } from "./lib/storage.js";
+import { applySampleSeed, loadLastEntryDate, loadState, normalizeState, SAMPLE_SEED_ENABLED, saveLastEntryDate, saveState, SCHEMA_VERSION } from "./lib/storage.js";
+import { materializeState, migrateLegacyTemplates, normalizeSchedule, todayString, upcomingDate } from "./lib/schedules.js";
 import { serializeWalletCsv } from "./lib/csv.js";
 import {
   addDays,
@@ -50,7 +51,6 @@ import {
   fromDateInput,
   groupOccurrences,
   MAX_WALLETS,
-  nextOccurrenceOnOrAfter,
   normalizeLabelIds,
   REPEAT_OPTIONS as REPEAT_OPTIONS_DATA,
   resolveFlowRange,
@@ -984,7 +984,9 @@ function App({ state, setState }) {
   const [searchActive, setSearchActive] = useState(false);
   const [entryModalOpen, setEntryModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
-  const [deleteConfirmEntry, setDeleteConfirmEntry] = useState(null);
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState(null);
+  const [deleteConfirmSchedule, setDeleteConfirmSchedule] = useState(null);
   const [statsCategoryModalId, setStatsCategoryModalId] = useState(null);
   const [statsCategoryModalOpen, setStatsCategoryModalOpen] = useState(false);
   const [pendingExpanded, setPendingExpanded] = useState(false);
@@ -1113,37 +1115,97 @@ function App({ state, setState }) {
     setEntryModalOpen(true);
   }
 
-  function upsertEntry(payload) {
-    updateWallets((wallets) =>
-      wallets.map((wallet) => {
-        if (wallet.id !== state.selectedWalletId) return wallet;
-        // `editingEntry` can be an *occurrence* view (see resolveEntryData /
-        // withOccurrence): it carries derived fields — `occurrenceDate`, a
-        // resolved `category` object, a resolved `labels` array. Spreading it
-        // into the stored entry would persist a stale category snapshot, and
-        // `signedAmount` prefers that object over `categoryId`, so a later
-        // expense→income edit would keep the old sign. Rebuild the entry from
-        // the id plus the editor payload only — payload already covers every
-        // field of the entry schema.
-        const entries = editingEntry
-          ? wallet.entries.map((entry) => (entry.id === editingEntry.id ? { id: entry.id, ...payload } : entry))
-          : [{ id: uid(), ...payload }, ...wallet.entries];
-        return { ...wallet, entries };
+  function openNewSchedule() {
+    setEditingSchedule(null);
+    setScheduleModalOpen(true);
+  }
+
+  function openEditSchedule(schedule) {
+    setEditingSchedule(schedule);
+    setScheduleModalOpen(true);
+  }
+
+  /**
+   * Rewrite the selected wallet, then let any newly-due schedule occurrence
+   * materialise. The second half matters when a schedule is created or
+   * lengthened: its past occurrences become real entries immediately, the way
+   * adding a repeating entry used to fill the ledger at once.
+   */
+  function applyWalletChange(changer) {
+    persistState((prev) =>
+      materializeState({
+        ...prev,
+        wallets: prev.wallets.map((wallet) => (wallet.id === prev.selectedWalletId ? changer(wallet, prev) : wallet)),
       })
     );
+  }
+
+  /**
+   * One rule decides where a saved transaction lands: **anything that has not
+   * happened yet is a schedule, everything else is an entry.** A repeat, or a
+   * date in the future, means the row is a template for transactions that will
+   * be created later; a plain past-or-today row is the transaction itself.
+   *
+   * The rule is symmetric, so nothing can hide: editing an entry into the
+   * future turns it into a schedule, and dragging a schedule's start date back
+   * into the past makes it fire on the spot (`materializeState` in
+   * `applyWalletChange`).
+   */
+  function upsertEntry(payload) {
+    const target = editingEntry;
+    const { date, repeat, repeatEndDate, ...fields } = payload;
+    const becomesSchedule = (repeat && repeat !== "none") || date > todayString();
+
+    applyWalletChange((wallet, prev) => {
+      if (becomesSchedule) {
+        const schedule = normalizeSchedule({ id: target?.id || uid(), startDate: date, repeat, repeatEndDate, ...fields }, prev.categories);
+        return {
+          ...wallet,
+          entries: target ? wallet.entries.filter((entry) => entry.id !== target.id) : wallet.entries,
+          scheduled: [...wallet.scheduled, schedule],
+        };
+      }
+      // `target` can be an occurrence *view* (see resolveEntryData): it carries
+      // a resolved `category` object and a resolved `labels` array. Spreading it
+      // into the stored entry would persist a stale category snapshot, and
+      // `signedAmount` prefers that object over `categoryId`, so a later
+      // expense→income edit would keep the old sign. Rebuild the entry from the
+      // id plus the editor payload only.
+      const entries = target
+        ? wallet.entries.map((entry) => (entry.id === target.id ? { id: entry.id, date, ...fields } : entry))
+        : [{ id: uid(), date, ...fields }, ...wallet.entries];
+      return { ...wallet, entries };
+    });
   }
 
   function deleteEntry(entryId) {
     updateWallets((wallets) => wallets.map((wallet) => (wallet.id === state.selectedWalletId ? { ...wallet, entries: wallet.entries.filter((entry) => entry.id !== entryId) } : wallet)));
   }
 
-  function stopRepeat(entryId) {
-    const today = startOfDay(new Date());
-    const yesterday = toDateInput(addDays(today, -1));
-    const entry = currentWallet.entries.find((e) => e.id === entryId);
-    if (entry) {
-      upsertEntry({ ...entry, repeatEndDate: yesterday });
-    }
+  /**
+   * Editing a schedule rewrites the template only. Transactions it already
+   * created are ordinary entries and are never touched — that is the whole
+   * point of materialisation. The cursor (`lastRunDate`) is carried over, so a
+   * lengthened schedule fills forward from where it left off instead of
+   * back-filling history the user never had.
+   */
+  function upsertSchedule(payload) {
+    const target = editingSchedule;
+    applyWalletChange((wallet, prev) => {
+      const scheduled = target
+        ? wallet.scheduled.map((schedule) =>
+            schedule.id === target.id
+              ? normalizeSchedule({ ...payload, id: schedule.id, lastRunDate: schedule.lastRunDate }, prev.categories)
+              : schedule
+          )
+        : [...wallet.scheduled, normalizeSchedule({ ...payload, id: uid() }, prev.categories)];
+      return { ...wallet, scheduled };
+    });
+  }
+
+  /** Deleting a schedule stops future occurrences. Past ones are real entries and stay. */
+  function deleteSchedule(scheduleId) {
+    applyWalletChange((wallet) => ({ ...wallet, scheduled: wallet.scheduled.filter((schedule) => schedule.id !== scheduleId) }));
   }
 
   function resolveEntryData(item) {
@@ -1560,21 +1622,18 @@ function App({ state, setState }) {
     return map;
   }, [state.wallets, state.categories]);
 
+  // 설정 > 예약 거래 lists the templates themselves, each annotated with the
+  // date it will next create a transaction. The start date stays in the data
+  // (and on screen) — it is what the series is anchored to.
   const scheduledEntriesForSettings = useMemo(() => {
-    const today = startOfDay(new Date());
-    const todayStr = toDateInput(today);
-    const horizon = addDays(today, 365 * 5);
-    return currentWallet.entries
-      .filter((entry) => (entry.repeat && entry.repeat !== "none") || (entry.repeat === "none" && entry.date > todayStr))
-      .map((entry) => {
-        const next = nextOccurrenceOnOrAfter(entry, today, horizon);
-        return { ...entry, nextDate: next ? toDateInput(next) : null };
-      })
+    const horizon = addDays(startOfDay(new Date()), 365 * 5);
+    return (currentWallet.scheduled || [])
+      .map((schedule) => ({ ...schedule, nextDate: upcomingDate(schedule, horizon) }))
       .sort((a, b) => {
         if (a.nextDate && b.nextDate) return a.nextDate < b.nextDate ? -1 : 1;
         if (a.nextDate) return -1;
         if (b.nextDate) return 1;
-        return a.date < b.date ? -1 : 1;
+        return a.startDate < b.startDate ? -1 : 1;
       });
   }, [currentWallet]);
 
@@ -1651,7 +1710,9 @@ function App({ state, setState }) {
       filename = `${safeName}-${dateStr}.csv`;
     } else {
       const payload = {
-        version: 3,
+        // Carries `wallet.scheduled` with it; the version tells an importer
+        // whether the entries still need the v3 → v4 template migration.
+        version: SCHEMA_VERSION,
         exportedAt: new Date().toISOString(),
         wallet,
         categories: state.categories,
@@ -1699,15 +1760,34 @@ function App({ state, setState }) {
         repeatEndDate: entry.repeatEndDate || "",
       });
 
+      // A file exported before v4 keeps its repeating transactions inside
+      // `entries`. Run the same migration the storage layer runs, so an old
+      // export lands as schedules plus the history it used to render, and a v4
+      // export keeps the schedules it already carries.
+      const prepare = (entries, existingEntryIds) => {
+        const normalized = entries.map((entry) => normalizeEntry(entry, existingEntryIds));
+        const result = migrateLegacyTemplates(
+          normalized,
+          (Array.isArray(incoming.scheduled) ? incoming.scheduled : []).map((schedule) => normalizeSchedule(schedule, prev.categories)),
+          { convertFutureOneTime: !(Number(parsed.version) >= SCHEMA_VERSION), categories: prev.categories }
+        );
+        return {
+          entries: result.entries.map(({ repeat: _repeat, repeatEndDate: _repeatEndDate, ...entry }) => entry),
+          scheduled: result.scheduled,
+        };
+      };
+
       if (targetWalletId) {
         const target = prev.wallets.find((wallet) => wallet.id === targetWalletId);
         if (!target) return prev;
         const existingEntryIds = new Set(target.entries.map((entry) => entry.id));
-        const merged = incoming.entries.map((entry) => normalizeEntry(entry, existingEntryIds));
+        const merged = prepare(incoming.entries, existingEntryIds);
         return {
           ...prev,
           wallets: prev.wallets.map((wallet) =>
-            wallet.id === targetWalletId ? { ...wallet, entries: [...wallet.entries, ...merged] } : wallet
+            wallet.id === targetWalletId
+              ? { ...wallet, entries: [...wallet.entries, ...merged.entries], scheduled: [...wallet.scheduled, ...merged.scheduled] }
+              : wallet
           ),
           categories: mergedCategories,
           labels: mergedLabels,
@@ -1723,10 +1803,12 @@ function App({ state, setState }) {
         attempt += 1;
         name = `${incoming.name || "가져온 지갑"} (${attempt})`;
       }
+      const prepared = prepare(incoming.entries, null);
       const wallet = {
         id: existingIds.has(incoming.id) ? uid() : incoming.id || uid(),
         name,
-        entries: incoming.entries.map((entry) => normalizeEntry(entry, null)),
+        entries: prepared.entries,
+        scheduled: prepared.scheduled,
       };
       return {
         ...prev,
@@ -2105,7 +2187,8 @@ function App({ state, setState }) {
               onMergeCategories={mergeCategories}
               onSaveLabel={saveLabel}
               onDeleteLabel={deleteLabel}
-              onEditEntry={openEditEntry}
+              onEditSchedule={openEditSchedule}
+              onAddSchedule={openNewSchedule}
             />
           </Tabs.Panel>
 
@@ -2147,12 +2230,11 @@ function App({ state, setState }) {
           defaultDate={lastEntryDate}
           onCancel={() => setEntryModalOpen(false)}
           onDelete={editingEntry ? () => {
-            if (editingEntry.repeat && editingEntry.repeat !== "none") {
-              setDeleteConfirmEntry(editingEntry);
-            } else {
-              deleteEntry(editingEntry.id);
-              setEntryModalOpen(false);
-            }
+            // A ledger row is an ordinary, independent transaction now — even
+            // one a schedule created. Deleting it deletes exactly that row, so
+            // there is nothing to ask about.
+            deleteEntry(editingEntry.id);
+            setEntryModalOpen(false);
           } : null}
           onSubmit={(payload) => {
             upsertEntry(payload);
@@ -2162,10 +2244,7 @@ function App({ state, setState }) {
               saveLastEntryDate(payload.date);
               setLastEntryDate(payload.date);
             }
-            // Jump to the bucket the user was looking at. For an occurrence of a
-            // repeating series `payload.date` is the seed, which can be months
-            // away from the row that was clicked.
-            const entryDate = fromDateInput(editingEntry?.occurrenceDate || payload.date);
+            const entryDate = fromDateInput(payload.date);
             if (entryDate) {
               const key = bucketKeyForDate(ledgerMode, entryDate);
               setLedgerSelectedByMode((prev) => ({ ...prev, [ledgerMode]: key }));
@@ -2177,74 +2256,58 @@ function App({ state, setState }) {
       </Modal>
 
       <Modal
-        opened={!!deleteConfirmEntry}
-        onClose={() => setDeleteConfirmEntry(null)}
-        title={t("entry.action.delete.scheduled.title")}
+        opened={scheduleModalOpen}
+        onClose={() => setScheduleModalOpen(false)}
+        title={editingSchedule ? t("schedule.edit") : t("schedule.add")}
+        centered
+        size="lg"
+        zIndex={201}
+      >
+        <EntryEditor
+          kind="schedule"
+          categories={state.categories}
+          labels={state.labels}
+          entry={editingSchedule}
+          onCancel={() => setScheduleModalOpen(false)}
+          onDelete={editingSchedule ? () => setDeleteConfirmSchedule(editingSchedule) : null}
+          onSubmit={(payload) => {
+            const { date, ...fields } = payload;
+            upsertSchedule({ startDate: date, ...fields });
+            setScheduleModalOpen(false);
+          }}
+        />
+      </Modal>
+
+      <Modal
+        opened={!!deleteConfirmSchedule}
+        onClose={() => setDeleteConfirmSchedule(null)}
+        title={t("schedule.delete.title")}
         centered
         size="md"
         zIndex={202}
       >
         <Stack>
-          <Text size="sm">{t("entry.action.delete.scheduled.body")}</Text>
-
-          {(() => {
-            if (!deleteConfirmEntry) return null;
-            const startDate = fromDateInput(deleteConfirmEntry.date);
-            const today = startOfDay(new Date());
-            const hasPastOccurrences = startDate && startDate <= today;
-
-            return (
-              <Stack gap="sm" mt="md">
-                {hasPastOccurrences && (
-                  <Button
-                    variant="light"
-                    fullWidth
-                    onClick={() => {
-                      stopRepeat(deleteConfirmEntry.id);
-                      setDeleteConfirmEntry(null);
-                      setEntryModalOpen(false);
-                    }}
-                  >
-                    <Stack gap={4} align="flex-start" style={{ width: '100%' }}>
-                      <Text size="sm" fw={600}>{t("entry.action.delete.scheduled.stopFuture")}</Text>
-                      <Text size="xs" c="dimmed">{t("entry.action.delete.scheduled.stopFutureDesc")}</Text>
-                    </Stack>
-                  </Button>
-                )}
-
-                {!hasPastOccurrences && (
-                  <Text size="xs" c="dimmed" ta="center">
-                    {t("entry.action.delete.scheduled.noFuture")}
-                  </Text>
-                )}
-
-                <Button
-                  variant="light"
-                  color="red"
-                  fullWidth
-                  onClick={() => {
-                    deleteEntry(deleteConfirmEntry.id);
-                    setDeleteConfirmEntry(null);
-                    setEntryModalOpen(false);
-                  }}
-                >
-                  <Stack gap={4} align="flex-start" style={{ width: '100%' }}>
-                    <Text size="sm" fw={600}>{t("entry.action.delete.scheduled.deleteAll")}</Text>
-                    <Text size="xs" c="dimmed">{t("entry.action.delete.scheduled.deleteAllDesc")}</Text>
-                  </Stack>
-                </Button>
-
-                <Button
-                  variant="subtle"
-                  color="gray"
-                  fullWidth
-                  onClick={() => setDeleteConfirmEntry(null)}
-                >
-                  {t("entry.action.delete.scheduled.cancel")}
-                </Button>
-              </Stack>
-            );
-          })()}
+          {/* One option, because there is only one thing left to decide.
+              "반복만 중단" existed to keep the template alive so past rows kept
+              being computed; past rows are real entries now and deleting the
+              schedule already means "stop creating new ones". */}
+          <Text size="sm">{t("schedule.delete.body")}</Text>
+          <Text size="xs" c="dimmed">{t("schedule.delete.keepsHistory")}</Text>
+          <Group justify="flex-end" mt="md">
+            <Button variant="default" onClick={() => setDeleteConfirmSchedule(null)}>
+              {t("entry.action.cancel")}
+            </Button>
+            <Button
+              color="red"
+              onClick={() => {
+                deleteSchedule(deleteConfirmSchedule.id);
+                setDeleteConfirmSchedule(null);
+                setScheduleModalOpen(false);
+              }}
+            >
+              {t("entry.action.delete")}
+            </Button>
+          </Group>
         </Stack>
       </Modal>
 
@@ -2313,24 +2376,29 @@ function App({ state, setState }) {
   );
 }
 
-function EntryEditor({ categories, labels, entry, defaultDate, onSubmit, onCancel, onDelete }) {
+/**
+ * The transaction editor, in two modes.
+ *
+ * `kind="entry"` edits a real transaction; `kind="schedule"` edits a 예약 거래
+ * template, where the date field is the series *start* date. The repeat
+ * controls appear for schedules and when adding — adding is the one moment a
+ * plain transaction can still be turned into a schedule in a single step (see
+ * `upsertEntry`). They are hidden when editing an existing entry, because an
+ * entry does not repeat: a transaction a schedule created is independent of it.
+ *
+ * Nothing is locked. The date lock this editor used to apply to a repeating
+ * occurrence was a workaround for rows that were computed from a template, so
+ * moving one moved the whole series. Rows are stored records now.
+ */
+function EntryEditor({ kind = "entry", categories, labels, entry, defaultDate, onSubmit, onCancel, onDelete }) {
   const t = useT();
   const { currency } = useI18n();
   const isMobile = useMediaQuery("(max-width: 48em)");
   const initialCategory = categories.find((c) => c.id === entry?.categoryId);
   const initialLabelIds = normalizeLabelIds(entry);
 
-  // A ledger row is an *occurrence*, not the stored entry: for a repeating
-  // series `entry.date` is the seed (series start) while `entry.occurrenceDate`
-  // is the row the user actually clicked. Show the occurrence.
-  //
-  // Saving is the ambiguous part. There is no per-occurrence override in the
-  // schema, so writing the occurrence date back into `date` would silently move
-  // the whole series. The date is therefore locked while editing an occurrence
-  // of a repeating series; the series start stays editable from
-  // 설정 > 예약 거래, which opens the seed entry (no `occurrenceDate`).
-  const isSeriesOccurrence = !!entry?.occurrenceDate && !!entry?.repeat && entry.repeat !== "none";
-  const seedDate = entry?.date || "";
+  const isSchedule = kind === "schedule";
+  const allowRepeat = isSchedule || !entry;
 
   const today = toDateInput(startOfDay(new Date()));
   const yesterday = toDateInput(addDays(startOfDay(new Date()), -1));
@@ -2338,7 +2406,7 @@ function EntryEditor({ categories, labels, entry, defaultDate, onSubmit, onCance
   // New entry: fall back to the date the last entry was added with, so a run of
   // entries for the same past day does not need the picker every time.
   const [date, setDate] = useState(
-    entry?.occurrenceDate || entry?.date || (validDate(defaultDate) ? defaultDate : today)
+    entry?.startDate || entry?.date || (validDate(defaultDate) ? defaultDate : today)
   );
   const [amount, setAmount] = useState(entry?.amount || 0);
   const [categoryType, setCategoryType] = useState(initialCategory?.type || "expense");
@@ -2376,10 +2444,9 @@ function EntryEditor({ categories, labels, entry, defaultDate, onSubmit, onCance
       <SimpleGrid cols={2}>
         <Stack gap={6}>
           <TextInput
-            label={t("entry.field.date")}
+            label={isSchedule ? t("schedule.field.startDate") : t("entry.field.date")}
             type="date"
             value={date}
-            disabled={isSeriesOccurrence}
             onChange={(e) => setDate(e.currentTarget.value)}
             styles={{ input: { textAlign: "center" } }}
           />
@@ -2388,7 +2455,6 @@ function EntryEditor({ categories, labels, entry, defaultDate, onSubmit, onCance
               size="compact-xs"
               variant={date === yesterday ? "filled" : "default"}
               color={date === yesterday ? "dark" : "gray"}
-              disabled={isSeriesOccurrence}
               onClick={() => setDate(yesterday)}
             >
               {t("entry.field.date.yesterday")}
@@ -2397,7 +2463,6 @@ function EntryEditor({ categories, labels, entry, defaultDate, onSubmit, onCance
               size="compact-xs"
               variant={date === today ? "filled" : "default"}
               color={date === today ? "dark" : "gray"}
-              disabled={isSeriesOccurrence}
               onClick={() => setDate(today)}
             >
               {t("entry.field.date.today")}
@@ -2418,9 +2483,9 @@ function EntryEditor({ categories, labels, entry, defaultDate, onSubmit, onCance
         />
       </SimpleGrid>
 
-      {isSeriesOccurrence && (
+      {isSchedule && (
         <Text size="xs" c="dimmed" mt={-8}>
-          {t("entry.field.date.seriesLocked", { date: seedDate })}
+          {t("schedule.field.startDate.hint")}
         </Text>
       )}
 
@@ -2495,8 +2560,10 @@ function EntryEditor({ categories, labels, entry, defaultDate, onSubmit, onCance
       </Stack>
 
       <Textarea label={t("entry.field.note")} value={note} onChange={(e) => setNote(e.currentTarget.value)} minRows={3} />
-      <Select label={t("entry.field.repeat")} data={REPEAT_OPTIONS_DATA.map((item) => ({ value: item.value, label: t(`repeat.${item.value}`) }))} value={repeat} onChange={(value) => setRepeat(value || "none")} />
-      {repeat !== "none" && <TextInput label={t("entry.field.repeatEnd")} type="date" value={repeatEndDate} onChange={(e) => setRepeatEndDate(e.currentTarget.value)} placeholder={t("entry.field.repeatEnd.placeholder")} />}
+      {allowRepeat && (
+        <Select label={t("entry.field.repeat")} data={REPEAT_OPTIONS_DATA.map((item) => ({ value: item.value, label: t(`repeat.${item.value}`) }))} value={repeat} onChange={(value) => setRepeat(value || "none")} />
+      )}
+      {allowRepeat && repeat !== "none" && <TextInput label={t("entry.field.repeatEnd")} type="date" value={repeatEndDate} onChange={(e) => setRepeatEndDate(e.currentTarget.value)} placeholder={t("entry.field.repeatEnd.placeholder")} />}
       <Group justify="space-between" pt="sm">
         <Group>
           {onDelete && <Button color="red" variant="light" leftSection={<Trash2 size={16} />} onClick={onDelete}>{t("entry.action.delete")}</Button>}
@@ -2511,14 +2578,13 @@ function EntryEditor({ categories, labels, entry, defaultDate, onSubmit, onCance
             leftSection={<Check size={16} />}
             onClick={() =>
               onSubmit({
-                // Never write an occurrence date back into the series seed.
-                date: isSeriesOccurrence ? seedDate : date,
+                date,
                 amount: Number(amount),
                 categoryId,
                 labelIds,
                 note,
-                repeat,
-                repeatEndDate: repeat === "none" ? "" : repeatEndDate,
+                repeat: allowRepeat ? repeat : "none",
+                repeatEndDate: allowRepeat && repeat !== "none" ? repeatEndDate : "",
               })
             }
           >
@@ -2531,7 +2597,12 @@ function EntryEditor({ categories, labels, entry, defaultDate, onSubmit, onCance
 }
 
 function AppRoot() {
-  const [state, setState] = useState(() => loadState());
+  // Materialisation runs where the app takes ownership of a document — here on
+  // load, and again below when a remote document is adopted. It is deliberately
+  // not inside `normalizeState`/`loadState`: those sanitise, this one writes new
+  // records (see `schedules.js`). `materializeState` returns the same object
+  // when nothing was due, so a quiet load stays a no-op.
+  const [state, setState] = useState(() => materializeState(loadState()));
   const lang = state.language || DEFAULT_LANGUAGE;
   const currency = state.currency || "KRW";
   const skipNextPush = useRef(true);
@@ -2563,7 +2634,7 @@ function AppRoot() {
       skipNextPush.current = true;
       // Dev: re-seed samples on top of the adopted remote state too, otherwise
       // a KV round-trip would bring back the sample wallets at their old dates.
-      setState(normalizeState(applySampleSeed(remote)));
+      setState(materializeState(normalizeState(applySampleSeed(remote))));
     });
     return () => {
       cancelled = true;

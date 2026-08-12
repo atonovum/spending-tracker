@@ -1,6 +1,9 @@
 import defaultSeed from "../../samples/default-seed.json";
 import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, normalizeLabelIds, STORAGE_KEYS, safeJsonParse, uid, validDate } from "./finance.js";
+import { migrateLegacyTemplates, normalizeSchedule, todayString } from "./schedules.js";
 import { withSampleData } from "./sampleData.js";
+
+export const SCHEMA_VERSION = 4;
 
 /**
  * Whether the dev sample wallets are seeded. Not an opt-in flag any more: local
@@ -63,27 +66,64 @@ export function normalizeLabel(label, index) {
   };
 }
 
-export function normalizeWallet(wallet, categories, labels) {
+/**
+ * An entry is a plain transaction — no `repeat`, no `repeatEndDate`. Repetition
+ * belongs to `wallet.scheduled` (see `schedules.js`); the legacy fields are
+ * dropped here, after `normalizeWallet` has used them to migrate.
+ */
+export function normalizeEntry(entry, categories, knownLabelIds) {
+  return {
+    id: entry.id || uid(),
+    date: entry.date || new Date().toISOString().slice(0, 10),
+    amount: Number(entry.amount || 0),
+    categoryId: entry.categoryId || categories[0]?.id || "",
+    labelIds: normalizeLabelIds(entry).filter((id) => knownLabelIds.has(id)),
+    note: entry.note || "",
+  };
+}
+
+/**
+ * @param {object} wallet raw wallet, v1..v4 shaped.
+ * @param {object[]} categories normalised categories.
+ * @param {object[]} labels normalised labels.
+ * @param {{ today?: string, convertFutureOneTime?: boolean }} [options]
+ *   `convertFutureOneTime` is the version-gated half of the v3 → v4 migration;
+ *   `normalizeState` turns it on only for documents older than v4. Repeating
+ *   entries are migrated unconditionally — they cannot exist in a v4 wallet, so
+ *   finding one always means legacy data (a v3 import, a sample fixture).
+ */
+export function normalizeWallet(wallet, categories, labels, options = {}) {
   // Imported or migrated state can reference labels that no longer exist. Drop
   // those ids here, at the persistence boundary, so nothing downstream has to
   // guard against dangling references.
   const knownLabelIds = new Set((Array.isArray(labels) ? labels : []).map((label) => label.id));
+  const todayStr = options.today || todayString();
+
+  const rawEntries = Array.isArray(wallet.entries) ? wallet.entries : [];
+  const rawScheduled = Array.isArray(wallet.scheduled) ? wallet.scheduled : [];
+
+  const { entries, scheduled } = migrateLegacyTemplates(
+    // Keep the legacy repeat fields alongside the normalised entry so the
+    // migration can read them; they never reach the returned entries.
+    rawEntries.map((entry) => ({
+      ...normalizeEntry(entry, categories, knownLabelIds),
+      repeat: entry.repeat || "none",
+      repeatEndDate: entry.repeatEndDate || "",
+    })),
+    rawScheduled.map((schedule) => normalizeSchedule(schedule, categories, knownLabelIds)),
+    {
+      todayStr,
+      convertFutureOneTime: options.convertFutureOneTime === true,
+      categories,
+      knownLabelIds,
+    }
+  );
 
   return {
     id: wallet.id || uid(),
     name: wallet.name || "지갑",
-    entries: Array.isArray(wallet.entries)
-      ? wallet.entries.map((entry) => ({
-          id: entry.id || uid(),
-          date: entry.date || new Date().toISOString().slice(0, 10),
-          amount: Number(entry.amount || 0),
-          categoryId: entry.categoryId || categories[0]?.id || "",
-          labelIds: normalizeLabelIds(entry).filter((id) => knownLabelIds.has(id)),
-          note: entry.note || "",
-          repeat: entry.repeat || "none",
-          repeatEndDate: entry.repeatEndDate || "",
-        }))
-      : [],
+    entries: entries.map(({ repeat: _repeat, repeatEndDate: _repeatEndDate, ...entry }) => entry),
+    scheduled,
   };
 }
 
@@ -100,14 +140,19 @@ export function normalizeState(parsed) {
 
   const categories = (Array.isArray(seed.categories) && seed.categories.length ? seed.categories : fallbackCategories).map(normalizeCategory);
   const labels = (Array.isArray(seed.labels) && seed.labels.length ? seed.labels : fallbackLabels).map(normalizeLabel);
-  const wallets = (Array.isArray(seed.wallets) ? seed.wallets : []).map((wallet) => normalizeWallet(wallet, categories, labels));
+  // A document that predates v4 kept future-dated one-time transactions in
+  // `entries`, where they behaved as schedules. Only those documents get that
+  // half of the migration; in a v4 document a future-dated entry is a real
+  // record the user chose to write and must stay one.
+  const walletOptions = { convertFutureOneTime: !(Number(seed.version) >= SCHEMA_VERSION) };
+  const wallets = (Array.isArray(seed.wallets) ? seed.wallets : []).map((wallet) => normalizeWallet(wallet, categories, labels, walletOptions));
 
   if (!wallets.length && fallbackWallet) {
-    wallets.push(normalizeWallet(fallbackWallet, categories, labels));
+    wallets.push(normalizeWallet(fallbackWallet, categories, labels, walletOptions));
   }
 
   return {
-    version: 3,
+    version: SCHEMA_VERSION,
     selectedWalletId: seed.selectedWalletId || wallets[0]?.id || "",
     language: seed.language === "en" ? "en" : "ko",
     currency: seed.currency === "USD" ? "USD" : "KRW",

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Badge,
+  Button,
   Card,
   Group,
   Modal,
@@ -11,12 +12,12 @@ import {
   Title,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { CategoryIcon } from "../lib/categoryIcons.jsx";
 import { normalizeLabelIds } from "../lib/finance.js";
 import { useI18n } from "../lib/i18n.jsx";
 
-function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEditEntry }) {
+function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEditSchedule, onAddSchedule }) {
   const { t, formatMoney } = useI18n();
   const isMobile = useMediaQuery("(max-width: 48em)");
   const recurringEntries = entries.filter((entry) => entry.repeat && entry.repeat !== "none");
@@ -28,9 +29,11 @@ function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEdi
     const category = getCategory(entry.categoryId);
     const entryLabels = normalizeLabelIds(entry).map((id) => getLabel(id)).filter(Boolean);
     const isRecurring = entry.repeat && entry.repeat !== "none";
+    // The start date stays on screen: it is what the series is anchored to,
+    // and it does not move when occurrences are created.
     const dateRangeText = isRecurring
-      ? `${formatWithDots(entry.date)} ~ ${entry.repeatEndDate ? formatWithDots(entry.repeatEndDate) : "∞"}`
-      : formatWithDots(entry.date);
+      ? `${formatWithDots(entry.startDate)} ~ ${entry.repeatEndDate ? formatWithDots(entry.repeatEndDate) : "∞"}`
+      : formatWithDots(entry.startDate);
     const repeatText = isRecurring
       ? t(`repeat.${entry.repeat}`)
       : t("settings.scheduled.oneTime");
@@ -48,7 +51,7 @@ function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEdi
         style={{ transition: 'background 150ms ease' }}
         onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(138, 143, 154, 0.04)'}
         onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-        onClick={() => onEditEntry(entry)}
+        onClick={() => onEditSchedule(entry)}
       >
         <Group justify="space-between" wrap="nowrap" align="flex-start">
           <Group gap="sm" wrap="nowrap" className="min-w-0 flex-1">
@@ -105,21 +108,26 @@ function ScheduledModal({ opened, onClose, entries, getCategory, getLabel, onEdi
       size="lg"
       fullScreen={isMobile}
     >
-      {entries.length === 0 ? (
-        <Text size="sm" c="dimmed">{t("settings.scheduled.empty")}</Text>
-      ) : (
-        <ScrollArea.Autosize mah={isMobile ? "calc(100dvh - 110px)" : 520}>
-          <Stack gap="md" pr={4}>
-            {recurringEntries.length > 0 ? renderSection(t("settings.scheduled.recurring"), recurringEntries) : null}
-            {oneTimeEntries.length > 0 ? renderSection(t("settings.scheduled.oneTimeSection"), oneTimeEntries) : null}
-          </Stack>
-        </ScrollArea.Autosize>
-      )}
+      <Stack gap="md">
+        <Button variant="light" leftSection={<Plus size={16} />} onClick={onAddSchedule}>
+          {t("settings.scheduled.add")}
+        </Button>
+        {entries.length === 0 ? (
+          <Text size="sm" c="dimmed">{t("settings.scheduled.empty")}</Text>
+        ) : (
+          <ScrollArea.Autosize mah={isMobile ? "calc(100dvh - 160px)" : 480}>
+            <Stack gap="md" pr={4}>
+              {recurringEntries.length > 0 ? renderSection(t("settings.scheduled.recurring"), recurringEntries) : null}
+              {oneTimeEntries.length > 0 ? renderSection(t("settings.scheduled.oneTimeSection"), oneTimeEntries) : null}
+            </Stack>
+          </ScrollArea.Autosize>
+        )}
+      </Stack>
     </Modal>
   );
 }
 
-export function ScheduledCard({ scheduledEntries, getCategory, getLabel, onEditEntry }) {
+export function ScheduledCard({ scheduledEntries, getCategory, getLabel, onEditSchedule, onAddSchedule }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
@@ -141,7 +149,8 @@ export function ScheduledCard({ scheduledEntries, getCategory, getLabel, onEditE
         entries={scheduledEntries}
         getCategory={getCategory}
         getLabel={getLabel}
-        onEditEntry={onEditEntry}
+        onEditSchedule={onEditSchedule}
+        onAddSchedule={onAddSchedule}
       />
     </>
   );

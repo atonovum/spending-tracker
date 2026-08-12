@@ -1,5 +1,5 @@
-export const STORAGE_KEYS = ["spending-tracker-v3", "spending-tracker-v2", "spending-tracker-v1"];
-export const ACTIVE_STORAGE_KEY = "spending-tracker-v3";
+export const STORAGE_KEYS = ["spending-tracker-v4", "spending-tracker-v3", "spending-tracker-v2", "spending-tracker-v1"];
+export const ACTIVE_STORAGE_KEY = "spending-tracker-v4";
 // Device-local UI preference, deliberately NOT part of the normalised state:
 // it is not user data, it must not travel through import/export or KV sync,
 // and keeping it out avoids a schema version bump + migration. Never add this
@@ -297,31 +297,40 @@ export function nextOccurrenceOnOrAfter(entry, target, hardEnd) {
   return cursor;
 }
 
+/**
+ * A schedule is a template, not a transaction, so its start date lives in
+ * `startDate`. Every date walker here works on the `{ date, repeat,
+ * repeatEndDate }` series shape — adapt schedules to it rather than growing a
+ * second set of walkers.
+ */
+export function scheduleSeries(schedule) {
+  return {
+    date: schedule?.startDate || "",
+    repeat: schedule?.repeat || "none",
+    repeatEndDate: schedule?.repeatEndDate || "",
+  };
+}
+
+/** First occurrence of a schedule on or after `target`, or null. */
+export function nextScheduleDate(schedule, target, hardEnd) {
+  return nextOccurrenceOnOrAfter(scheduleSeries(schedule), target, hardEnd);
+}
+
+/**
+ * Upcoming (not yet materialised) occurrences, one row per schedule: the
+ * *next* date each schedule will fire, from tomorrow to the end of the range.
+ * Purely derived — the ledger's own rows are real entries.
+ */
 export function buildPendingScheduledOccurrences(wallet, selectedRange) {
   const now = startOfDay(new Date());
   const end = selectedRange?.end ? startOfDay(selectedRange.end) : addDays(now, 366);
   const windowStart = addDays(now, 1);
   if (windowStart > end) return [];
   const result = [];
-  for (const entry of wallet.entries) {
-    const repeat = entry.repeat || "none";
-    const origin = fromDateInput(entry.date);
-    if (!origin || origin > end) continue;
-    if (repeat === "none") {
-      if (origin < windowStart) continue;
-      const view = withOccurrence(entry, origin);
-      view.note = entry.note || "메모 없음";
-      result.push(view);
-      continue;
-    }
-    const repeatEnd = validDate(entry.repeatEndDate) ? fromDateInput(entry.repeatEndDate) : null;
-    if (repeatEnd && repeatEnd < windowStart) continue;
-    const next = nextOccurrenceOnOrAfter(entry, windowStart, end);
+  for (const schedule of wallet?.scheduled || []) {
+    const next = nextScheduleDate(schedule, windowStart, end);
     if (!next) continue;
-    const view = withOccurrence(entry, next);
-    const endText = validDate(entry.repeatEndDate) ? entry.repeatEndDate : "없음";
-    view.note = `${entry.note || "메모 없음"} · 시작:${entry.date} · 종료:${endText}`;
-    result.push(view);
+    result.push(withOccurrence(schedule, next));
   }
   return result.sort((a, b) => (a.occurrenceDate === b.occurrenceDate ? (a.id > b.id ? 1 : -1) : a.occurrenceDate > b.occurrenceDate ? 1 : -1));
 }

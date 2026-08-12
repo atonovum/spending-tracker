@@ -28,7 +28,8 @@ function Settings({
   onMergeCategories,
   onSaveLabel,
   onDeleteLabel,
-  onEditEntry,
+  onEditSchedule,
+  onAddSchedule,
 }) {
   const [confirm, setConfirm] = useState(EMPTY_CONFIRM);
 
@@ -89,7 +90,8 @@ function Settings({
         scheduledEntries={scheduledEntries}
         getCategory={getCategory}
         getLabel={getLabel}
-        onEditEntry={onEditEntry}
+        onEditSchedule={onEditSchedule}
+        onAddSchedule={onAddSchedule}
       />
 
       <PreferencesCard

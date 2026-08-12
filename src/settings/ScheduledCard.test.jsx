@@ -19,7 +19,7 @@ describe('ScheduledCard', () => {
     mockScheduledEntries = [
       {
         id: 'sched-1',
-        date: '2026-01-01',
+        startDate: '2026-01-01',
         amount: 3000,
         categoryId: 'cat-expense-1',
         labelIds: ['label-1'],
@@ -30,7 +30,7 @@ describe('ScheduledCard', () => {
       },
       {
         id: 'sched-2',
-        date: '2026-01-15',
+        startDate: '2026-01-15',
         amount: 50000,
         categoryId: 'cat-income-1',
         labelIds: [],
@@ -41,7 +41,7 @@ describe('ScheduledCard', () => {
       },
       {
         id: 'sched-3',
-        date: '2026-03-01',
+        startDate: '2026-03-01',
         amount: 7000,
         categoryId: 'cat-expense-2',
         labelIds: ['label-2'],
@@ -55,7 +55,8 @@ describe('ScheduledCard', () => {
     mockHandlers = {
       getCategory: vi.fn((id) => mockState.categories.find((c) => c.id === id)),
       getLabel: vi.fn((id) => mockState.labels.find((l) => l.id === id)),
-      onEditEntry: vi.fn(),
+      onEditSchedule: vi.fn(),
+      onAddSchedule: vi.fn(),
     };
   });
 
@@ -295,7 +296,7 @@ describe('ScheduledCard', () => {
   });
 
   describe('Editing scheduled entry', () => {
-    it('calls onEditEntry when entry is clicked', async () => {
+    it('calls onEditSchedule when a schedule is clicked', async () => {
       const user = userEvent.setup();
       renderWithMantine(
         <ScheduledCard
@@ -313,7 +314,7 @@ describe('ScheduledCard', () => {
       const firstEntry = screen.getByText('식비').closest('[class*="Paper"]');
       await user.click(firstEntry);
 
-      expect(mockHandlers.onEditEntry).toHaveBeenCalledWith(mockScheduledEntries[0]);
+      expect(mockHandlers.onEditSchedule).toHaveBeenCalledWith(mockScheduledEntries[0]);
     });
 
     it('shows hover effect on entry', async () => {
