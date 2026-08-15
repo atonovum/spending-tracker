@@ -1492,8 +1492,12 @@ function App({ state, setState }) {
 
           {/* Narrow viewports: the table scrolls inside its own box rather
               than pushing the page body sideways. */}
-          <Table.ScrollContainer minWidth={420} type="native">
-            <Table striped highlightOnHover verticalSpacing="xs" className="text-center">
+          {/*
+            No scroll container: this table is sized to fit the viewport instead.
+            The three numeric columns are given fixed shares and the category
+            name — the only cell whose width is genuinely unbounded — truncates.
+          */}
+          <Table striped highlightOnHover verticalSpacing="xs" className="text-center stats-category-table">
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th className="text-center">{t("stats.column.share")}</Table.Th>
@@ -1515,11 +1519,13 @@ function App({ state, setState }) {
                       >
                         <Table.Td className="text-center font-semibold text-muted text-xs">{percent}%</Table.Td>
                         <Table.Td className="text-center">
-                          <Group gap={6} justify="center" wrap="nowrap">
-                            <span style={{ color: category.color }} className="inline-flex items-center">
+                          <Group gap={6} justify="center" wrap="nowrap" className="min-w-0">
+                            <span style={{ color: category.color }} className="inline-flex shrink-0 items-center">
                               <CategoryIcon category={category} size={16} />
                             </span>
-                            <span style={{ color: category.color, fontWeight: 600 }}>{category.name}</span>
+                            <span style={{ color: category.color, fontWeight: 600 }} className="stats-category-name" title={category.name}>
+                              {category.name}
+                            </span>
                           </Group>
                         </Table.Td>
                         <Table.Td className="text-center">{count}</Table.Td>
@@ -1529,8 +1535,7 @@ function App({ state, setState }) {
                   });
                 })()}
               </Table.Tbody>
-            </Table>
-          </Table.ScrollContainer>
+          </Table>
         </Card>
       </Stack>
     );
@@ -2441,34 +2446,46 @@ function EntryEditor({ kind = "entry", categories, labels, entry, defaultDate, o
 
   return (
     <Stack>
-      <SimpleGrid cols={2}>
-        <Stack gap={6}>
-          <TextInput
-            label={isSchedule ? t("schedule.field.startDate") : t("entry.field.date")}
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.currentTarget.value)}
-            styles={{ input: { textAlign: "center" } }}
-          />
-          <Group gap={6} grow wrap="nowrap">
-            <Button
-              size="compact-xs"
-              variant={date === yesterday ? "filled" : "default"}
-              color={date === yesterday ? "dark" : "gray"}
-              onClick={() => setDate(yesterday)}
-            >
-              {t("entry.field.date.yesterday")}
-            </Button>
-            <Button
-              size="compact-xs"
-              variant={date === today ? "filled" : "default"}
-              color={date === today ? "dark" : "gray"}
-              onClick={() => setDate(today)}
-            >
-              {t("entry.field.date.today")}
-            </Button>
-          </Group>
-        </Stack>
+      {/*
+        Label / input / (date only) shortcut buttons, laid out as one grid so the
+        두 labels share a column that auto-sizes to the longest of them — 날짜 vs
+        금액 (KRW), 시작일 vs Amount (KRW). `display: contents` on each Mantine
+        input's root lets its label and wrapper become direct grid items, which
+        is what keeps a label vertically centred against its own input; the
+        components keep rendering their real <label for>, so the accessible name
+        is unchanged.
+      */}
+      <div className="entry-field-grid">
+        <TextInput
+          label={isSchedule ? t("schedule.field.startDate") : t("entry.field.date")}
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.currentTarget.value)}
+          styles={{
+            root: { display: "contents" },
+            label: { marginBottom: 0 },
+            wrapper: { marginBottom: 0 },
+            input: { textAlign: "center" },
+          }}
+        />
+        <Group gap={6} wrap="nowrap">
+          <Button
+            size="compact-xs"
+            variant={date === yesterday ? "filled" : "default"}
+            color={date === yesterday ? "dark" : "gray"}
+            onClick={() => setDate(yesterday)}
+          >
+            {t("entry.field.date.yesterday")}
+          </Button>
+          <Button
+            size="compact-xs"
+            variant={date === today ? "filled" : "default"}
+            color={date === today ? "dark" : "gray"}
+            onClick={() => setDate(today)}
+          >
+            {t("entry.field.date.today")}
+          </Button>
+        </Group>
         <NumberInput
           label={`${t("entry.field.amount")} (${currency})`}
           value={amount}
@@ -2479,9 +2496,15 @@ function EntryEditor({ kind = "entry", categories, labels, entry, defaultDate, o
           thousandSeparator=","
           hideControls
           inputMode="numeric"
-          styles={{ input: { textAlign: "center" } }}
+          styles={{
+            root: { display: "contents" },
+            label: { marginBottom: 0 },
+            // Spans the input column and the date row's button column.
+            wrapper: { marginBottom: 0, gridColumn: "2 / -1" },
+            input: { textAlign: "right" },
+          }}
         />
-      </SimpleGrid>
+      </div>
 
       {isSchedule && (
         <Text size="xs" c="dimmed" mt={-8}>

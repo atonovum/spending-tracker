@@ -84,6 +84,66 @@
 }
 
 @layer components {
+  /*
+   * Entry editor: 날짜 / 금액 rows. The label column is `max-content` so it
+   * sizes to the longest label rather than a guessed width — 날짜 and 금액 (KRW)
+   * differ, and so do their English translations. Row 1 is label / input /
+   * 어제·오늘 buttons; row 2's input spans the last two columns.
+   */
+  .entry-field-grid {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 10px;
+  }
+
+  /*
+   * 카테고리별 통계: fits the viewport instead of scrolling sideways.
+   *
+   * The viewport width is perfectly knowable; what is not is how wide a row
+   * renders, because a category name is arbitrary text. So the three numeric
+   * columns take fixed shares — an amount like 1,234,567원 has a bounded width —
+   * and the name column absorbs whatever is left, truncating with an ellipsis.
+   * `table-layout: fixed` is what stops one long name from widening the table.
+   */
+  .stats-category-table {
+    table-layout: fixed;
+    width: 100%;
+  }
+  .stats-category-table th,
+  .stats-category-table td {
+    padding-inline: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .stats-category-table th:nth-child(1),
+  .stats-category-table td:nth-child(1),
+  .stats-category-table th:nth-child(3),
+  .stats-category-table td:nth-child(3) {
+    width: 14%;
+  }
+  .stats-category-table th:nth-child(4),
+  .stats-category-table td:nth-child(4) {
+    width: 34%;
+  }
+  .stats-category-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  @media (max-width: 30em) {
+    .stats-category-table {
+      font-size: 12px;
+    }
+    .stats-category-table th,
+    .stats-category-table td {
+      padding-inline: 4px;
+    }
+  }
+
   .bucket-scroller {
     scrollbar-width: none;
   }

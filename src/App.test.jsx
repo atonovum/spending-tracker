@@ -258,19 +258,24 @@ describe('stats tables horizontal overflow', () => {
     await user.click(screen.getByRole('tab', { name: /stats/i }));
   }
 
-  function scrollContainerOf(headerText) {
-    const table = screen.getByText(headerText).closest('table');
-    expect(table).not.toBeNull();
-    return table.closest('.mantine-TableScrollContainer-scrollContainer');
-  }
-
-  it('wraps the 카테고리별 통계 table in a horizontal scroll container', async () => {
+  // The 카테고리별 통계 table is fitted to the viewport rather than scrolled:
+  // `table-layout: fixed` (via .stats-category-table) bounds the numeric columns
+  // and the category name truncates. jsdom does not lay out, so this pins the
+  // structural contract — no scroll container, and the name cell carries the
+  // class the truncation rule targets.
+  it('fits the 카테고리별 통계 table instead of scrolling it sideways', async () => {
     const user = userEvent.setup();
     await openStatsTab(user);
 
-    const container = scrollContainerOf('비중');
-    expect(container).not.toBeNull();
-    expect(container.getAttribute('style')).toContain('--table-overflow: auto');
+    const table = screen.getByText('비중').closest('table');
+    expect(table).not.toBeNull();
+    expect(table.className).toContain('stats-category-table');
+    expect(table.closest('.mantine-TableScrollContainer-scrollContainer')).toBeNull();
+
+    const name = table.querySelector('.stats-category-name');
+    expect(name).not.toBeNull();
+    // Full text stays reachable even when the rendered name is clipped.
+    expect(name.getAttribute('title')).toBe(name.textContent);
   });
 
   it('wraps the 레이블 stats table in a horizontal scroll container', async () => {
