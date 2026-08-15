@@ -1493,10 +1493,12 @@ function App({ state, setState }) {
           {/* Narrow viewports: the table scrolls inside its own box rather
               than pushing the page body sideways. */}
           {/*
-            No scroll container: this table is sized to fit the viewport instead.
-            The three numeric columns are given fixed shares and the category
-            name — the only cell whose width is genuinely unbounded — truncates.
+            Fit first, scroll only as a fallback. The three numeric columns take
+            fixed shares and the category name — the only genuinely unbounded
+            cell — truncates, so the table fits any real phone; the wrapper only
+            scrolls if the viewport drops under the table's readable floor.
           */}
+          <div className="stats-category-scroll">
           <Table striped highlightOnHover verticalSpacing="xs" className="text-center stats-category-table">
               <Table.Thead>
                 <Table.Tr>
@@ -1536,6 +1538,7 @@ function App({ state, setState }) {
                 })()}
               </Table.Tbody>
           </Table>
+          </div>
         </Card>
       </Stack>
     );

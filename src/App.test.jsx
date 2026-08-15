@@ -270,7 +270,9 @@ describe('stats tables horizontal overflow', () => {
     const table = screen.getByText('비중').closest('table');
     expect(table).not.toBeNull();
     expect(table.className).toContain('stats-category-table');
-    expect(table.closest('.mantine-TableScrollContainer-scrollContainer')).toBeNull();
+    // Fit is the primary mechanism; the wrapper is only a fallback for
+    // viewports below the table's readable floor.
+    expect(table.closest('.stats-category-scroll')).not.toBeNull();
 
     const name = table.querySelector('.stats-category-name');
     expect(name).not.toBeNull();

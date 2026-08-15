@@ -107,9 +107,25 @@
    * and the name column absorbs whatever is left, truncating with an ellipsis.
    * `table-layout: fixed` is what stops one long name from widening the table.
    */
+  /*
+   * Scroll only as a fallback. Above the floor the table fits and this never
+   * scrolls; below it, scrolling beats squeezing the columns past the point
+   * where they say anything.
+   */
+  .stats-category-scroll {
+    overflow-x: auto;
+  }
   .stats-category-table {
     table-layout: fixed;
     width: 100%;
+    /*
+     * The floor: 12px text (the smallest that still reads on a phone) needs
+     * roughly 38px 비중 + 34px 건수 + 86px 총 금액 + ~90px before a category
+     * name stops being recognisable, plus cell padding. 288px also clears the
+     * narrowest common viewport (320px) once page and card padding are taken
+     * out, so a real phone fits without scrolling.
+     */
+    min-width: 288px;
   }
   .stats-category-table th,
   .stats-category-table td {
