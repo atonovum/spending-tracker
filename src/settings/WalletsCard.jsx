@@ -24,7 +24,7 @@ import {
   Upload,
 } from "lucide-react";
 import { MAX_WALLETS } from "../lib/finance.js";
-import { useI18n } from "../lib/i18n.jsx";
+import { CURRENCIES, useI18n } from "../lib/i18n.jsx";
 
 function WalletRow({ wallet, isSelected, total, onSelect, onEdit, onExport }) {
   const { t, formatMoney } = useI18n();
@@ -77,13 +77,15 @@ function WalletRow({ wallet, isSelected, total, onSelect, onEdit, onExport }) {
   );
 }
 
-function WalletEditModal({ opened, wallet, isOnly, onClose, onRename, onDelete }) {
+function WalletEditModal({ opened, wallet, isOnly, onClose, onRename, onCurrencyChange, onDelete }) {
   const { t } = useI18n();
   const [draft, setDraft] = useState(wallet?.name || "");
+  const [currency, setCurrency] = useState(wallet?.currency || "KRW");
 
   function handleSave() {
     const trimmed = draft.trim();
     if (trimmed && trimmed !== wallet?.name) onRename(trimmed);
+    if (currency !== wallet?.currency) onCurrencyChange(currency);
     onClose();
   }
 
@@ -96,7 +98,7 @@ function WalletEditModal({ opened, wallet, isOnly, onClose, onRename, onDelete }
       title={t("settings.wallets.editTitle")}
       centered
       size="md"
-      onTransitionEnd={() => setDraft(wallet.name)}
+      onTransitionEnd={() => { setDraft(wallet.name); setCurrency(wallet.currency || "KRW"); }}
     >
       <Stack gap="sm">
         <TextInput
@@ -104,6 +106,15 @@ function WalletEditModal({ opened, wallet, isOnly, onClose, onRename, onDelete }
           value={draft}
           onChange={(event) => setDraft(event.currentTarget.value)}
           autoFocus
+        />
+        {/* Currency is a property of the wallet, not of the document: one wallet
+            can be kept in KRW and another in USD. */}
+        <Select
+          label={t("settings.currency")}
+          data={CURRENCIES}
+          value={currency}
+          onChange={(value) => setCurrency(value || "KRW")}
+          allowDeselect={false}
         />
         <Text size="xs" c="dimmed">
           {t("settings.wallets.containsEntries", { count: wallet.entries.length })}
@@ -238,6 +249,7 @@ export function WalletsCard({
   onDeleteWallet,
   onExportWallet,
   onImportWallet,
+  onWalletCurrencyChange,
   onConfirm,
 }) {
   const { t } = useI18n();
@@ -279,9 +291,12 @@ export function WalletsCard({
         }
 
         // Convert CSV result to wallet format
+        // A v5 export carries the wallet's own name and currency; older files
+        // do not, so fall back to the file name and the default currency.
         const csvWallet = {
           id: "",
-          name: file.name.replace(/\.csv$/i, ""),
+          name: result.walletName || file.name.replace(/\.csv$/i, ""),
+          currency: result.walletCurrency || "KRW",
           entries: result.entries,
         };
 
@@ -416,6 +431,7 @@ export function WalletsCard({
         isOnly={state.wallets.length <= 1}
         onClose={() => setEditModal({ open: false, wallet: null })}
         onRename={(name) => editModal.wallet && onRenameWallet(editModal.wallet.id, name)}
+        onCurrencyChange={(value) => editModal.wallet && onWalletCurrencyChange(editModal.wallet.id, value)}
         onDelete={() => editModal.wallet && requestDelete(editModal.wallet)}
       />
 

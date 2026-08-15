@@ -37,6 +37,15 @@ function sortEntriesByNewestDate(entries) {
  * @param {Array} labels - Array of label objects
  * @returns {string} CSV string with UTF-8 encoding (no BOM)
  */
+/**
+ * The six transaction columns are required and must come first, in this order.
+ * `Wallet` / `Currency` were added in v5 and are optional on import, so a CSV
+ * exported before then still loads.
+ */
+export const CSV_ENTRY_COLUMNS = ["Date", "Type", "Category", "Amount", "Note", "Labels"];
+export const CSV_WALLET_COLUMNS = ["Wallet", "Currency"];
+export const CSV_COLUMNS = [...CSV_ENTRY_COLUMNS, ...CSV_WALLET_COLUMNS];
+
 export function serializeWalletCsv(wallet, categories, labels) {
   const categoryMap = new Map(categories.map((cat) => [cat.id, cat]));
   const labelMap = new Map(labels.map((lbl) => [lbl.id, lbl]));
@@ -67,17 +76,21 @@ export function serializeWalletCsv(wallet, categories, labels) {
       Amount: entry.amount,
       Note: entry.note || "",
       Labels: labelNames,
+      // Constant for the whole file, but repeated per row so the result stays a
+      // plain rectangular CSV that a spreadsheet can open.
+      Wallet: wallet.name || "",
+      Currency: wallet.currency || "KRW",
     });
   }
 
   // PapaParse returns empty string for empty data, but we need header
   if (rows.length === 0) {
-    return "Date,Type,Category,Amount,Note,Labels\n";
+    return `${CSV_COLUMNS.join(",")}\n`;
   }
 
   return Papa.unparse(rows, {
     header: true,
-    columns: ["Date", "Type", "Category", "Amount", "Note", "Labels"],
+    columns: CSV_COLUMNS,
     newline: "\n",
     // Quote fields that need it: commas, quotes, newlines (RFC 4180), plus individual label names with semicolons
     quotes(value, columnIndex) {
@@ -109,6 +122,9 @@ export function parseWalletCsv(text, categories, labels) {
     unknownLabels: new Set(),
     newCategories: [],
     newLabels: [],
+    // Populated only when the file carries the v5 wallet columns.
+    walletName: "",
+    walletCurrency: null,
     error: null,
   };
 
@@ -118,11 +134,24 @@ export function parseWalletCsv(text, categories, labels) {
     transformHeader: (header) => header.trim(),
   });
 
-  // Validate header
-  const expectedHeader = ["Date", "Type", "Category", "Amount", "Note", "Labels"];
-  if (parsed.meta.fields?.length !== expectedHeader.length || !expectedHeader.every((h, i) => parsed.meta.fields[i] === h)) {
+  // Validate header. The entry columns are required verbatim; any trailing
+  // columns must be the known wallet ones, in order, so a v5 export round-trips
+  // while a pre-v5 file (six columns) still imports.
+  const fields = parsed.meta.fields || [];
+  const entryHeaderOk = CSV_ENTRY_COLUMNS.every((name, index) => fields[index] === name);
+  const extras = fields.slice(CSV_ENTRY_COLUMNS.length);
+  const extrasOk = extras.every((name, index) => name === CSV_WALLET_COLUMNS[index]);
+  if (!entryHeaderOk || !extrasOk) {
     result.error = "invalidHeader";
     return result;
+  }
+
+  // Wallet name and currency are file-level facts stored on every row; the first
+  // row that carries them wins.
+  const walletRow = parsed.data.find((row) => row.Wallet || row.Currency);
+  if (walletRow) {
+    result.walletName = (walletRow.Wallet || "").trim();
+    result.walletCurrency = walletRow.Currency === "USD" ? "USD" : walletRow.Currency === "KRW" ? "KRW" : null;
   }
 
   const categoryMap = new Map();

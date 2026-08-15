@@ -38,7 +38,7 @@ import {
   Trash2,
   Wallet,
 } from "lucide-react";
-import { applySampleSeed, loadLastEntryDate, loadState, normalizeState, SAMPLE_SEED_ENABLED, saveLastEntryDate, saveState, SCHEMA_VERSION } from "./lib/storage.js";
+import { applySampleSeed, loadLastEntryDate, loadState, normalizeCurrency, normalizeState, SAMPLE_SEED_ENABLED, saveLastEntryDate, saveState, SCHEMA_VERSION } from "./lib/storage.js";
 import { materializeState, migrateLegacyTemplates, normalizeSchedule, todayString, upcomingDate } from "./lib/schedules.js";
 import { serializeWalletCsv } from "./lib/csv.js";
 import {
@@ -1666,8 +1666,13 @@ function App({ state, setState }) {
     persistState((prev) => ({ ...prev, language: language === "en" ? "en" : "ko" }));
   }
 
-  function setCurrency(currency) {
-    persistState((prev) => ({ ...prev, currency: currency === "USD" ? "USD" : "KRW" }));
+  function setWalletCurrency(walletId, currency) {
+    persistState((prev) => ({
+      ...prev,
+      wallets: prev.wallets.map((wallet) =>
+        wallet.id === walletId ? { ...wallet, currency: normalizeCurrency(currency) } : wallet
+      ),
+    }));
   }
 
   function resetSearchUi() {
@@ -2193,9 +2198,8 @@ function App({ state, setState }) {
               scheduledEntries={scheduledEntriesForSettings}
               walletTotals={walletTotals}
               language={state.language || "ko"}
-              currency={state.currency || "KRW"}
               onLanguageChange={setLanguage}
-              onCurrencyChange={setCurrency}
+              onWalletCurrencyChange={setWalletCurrency}
               onSelectWallet={selectWallet}
               onAddWallet={addWallet}
               onRenameWallet={renameWallet}
@@ -2642,7 +2646,11 @@ function AppRoot() {
   // when nothing was due, so a quiet load stays a no-op.
   const [state, setState] = useState(() => materializeState(loadState()));
   const lang = state.language || DEFAULT_LANGUAGE;
-  const currency = state.currency || "KRW";
+  // Currency is per wallet, so the formatter follows the selected one. Language
+  // stays document-wide.
+  const currency = normalizeCurrency(
+    state.wallets?.find((wallet) => wallet.id === state.selectedWalletId)?.currency
+  );
   const skipNextPush = useRef(true);
   // Last server revision the client knows about. Used as `If-Match` on push.
   // null = server has no state yet (no precondition required).

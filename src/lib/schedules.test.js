@@ -13,7 +13,7 @@ import {
   upcomingDate,
 } from './schedules.js';
 import { buildOccurrences, fromDateInput, resolveFullRange } from './finance.js';
-import { normalizeState } from './storage.js';
+import { normalizeState, SCHEMA_VERSION } from './storage.js';
 
 const TODAY = '2026-08-12';
 
@@ -385,7 +385,7 @@ describe('v3 → v4 migration through normalizeState', () => {
     const result = normalizeState(legacyState());
     const wallet = result.wallets[0];
 
-    expect(result.version).toBe(4);
+    expect(result.version).toBe(SCHEMA_VERSION);
     expect(wallet.scheduled.map((schedule) => schedule.id).sort()).toEqual(['future', 'sub']);
     expect(wallet.entries.every((entry) => !('repeat' in entry))).toBe(true);
   });

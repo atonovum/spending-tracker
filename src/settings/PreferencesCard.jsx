@@ -1,7 +1,11 @@
 import { Card, Group, Select, Stack, Text, Title } from "@mantine/core";
-import { CURRENCIES, LANGUAGES, useT } from "../lib/i18n.jsx";
+import { LANGUAGES, useT } from "../lib/i18n.jsx";
 
-export function PreferencesCard({ language, currency = "KRW", onLanguageChange, onCurrencyChange = () => {} }) {
+/**
+ * Language only. Currency moved to the wallet card in v5 — it varies per wallet,
+ * while the language is a property of the whole document.
+ */
+export function PreferencesCard({ language, onLanguageChange }) {
   const t = useT();
   return (
     <Card withBorder radius="card" shadow="soft">
@@ -14,17 +18,6 @@ export function PreferencesCard({ language, currency = "KRW", onLanguageChange, 
             data={LANGUAGES}
             value={language}
             onChange={(value) => onLanguageChange(value || "ko")}
-            allowDeselect={false}
-            w={160}
-          />
-        </Group>
-        <Group justify="space-between" wrap="nowrap" align="center">
-          <Text size="sm">{t("settings.currency")}</Text>
-          <Select
-            aria-label={t("settings.currency")}
-            data={CURRENCIES}
-            value={currency}
-            onChange={(value) => onCurrencyChange(value || "KRW")}
             allowDeselect={false}
             w={160}
           />

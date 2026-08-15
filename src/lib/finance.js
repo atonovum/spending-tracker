@@ -1,5 +1,5 @@
-export const STORAGE_KEYS = ["spending-tracker-v4", "spending-tracker-v3", "spending-tracker-v2", "spending-tracker-v1"];
-export const ACTIVE_STORAGE_KEY = "spending-tracker-v4";
+export const STORAGE_KEYS = ["spending-tracker-v5", "spending-tracker-v4", "spending-tracker-v3", "spending-tracker-v2", "spending-tracker-v1"];
+export const ACTIVE_STORAGE_KEY = "spending-tracker-v5";
 // Device-local UI preference, deliberately NOT part of the normalised state:
 // it is not user data, it must not travel through import/export or KV sync,
 // and keeping it out avoids a schema version bump + migration. Never add this

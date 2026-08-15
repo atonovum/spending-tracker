@@ -6,8 +6,10 @@ import { screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithMantine, createMockState, waitForModal } from '../settings/testUtils.jsx';
 import App from '../App.jsx';
+import { ACTIVE_STORAGE_KEY } from '../lib/finance.js';
+import { SCHEMA_VERSION } from '../lib/storage.js';
 
-const STATE_KEY = 'spending-tracker-v4';
+const STATE_KEY = ACTIVE_STORAGE_KEY;
 
 const formatDateLocal = (date) => {
   const yyyy = date.getFullYear();
@@ -461,7 +463,7 @@ describe('EntryEditor - default date and date shortcuts', () => {
 
     // The preference lives in its own key: the persisted document is untouched.
     const savedState = readState();
-    expect(savedState.version).toBe(4);
+    expect(savedState.version).toBe(SCHEMA_VERSION);
     expect(savedState.lastEntryDate).toBeUndefined();
 
     await waitForModalClosed();

@@ -14,9 +14,8 @@ function Settings({
   scheduledEntries,
   walletTotals,
   language,
-  currency,
   onLanguageChange,
-  onCurrencyChange,
+  onWalletCurrencyChange,
   onSelectWallet,
   onAddWallet,
   onRenameWallet,
@@ -68,6 +67,7 @@ function Settings({
         onDeleteWallet={onDeleteWallet}
         onExportWallet={onExportWallet}
         onImportWallet={onImportWallet}
+        onWalletCurrencyChange={onWalletCurrencyChange}
         onConfirm={requestConfirm}
       />
 
@@ -96,9 +96,7 @@ function Settings({
 
       <PreferencesCard
         language={language}
-        currency={currency}
         onLanguageChange={onLanguageChange}
-        onCurrencyChange={onCurrencyChange}
       />
 
       <ConfirmModal

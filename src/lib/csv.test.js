@@ -17,7 +17,7 @@ describe("serializeWalletCsv", () => {
   it("should serialize empty wallet with header only", () => {
     const wallet = { id: "w1", name: "Empty", entries: [] };
     const csv = serializeWalletCsv(wallet, categories, labels);
-    expect(csv).toBe("Date,Type,Category,Amount,Note,Labels\n");
+    expect(csv).toBe("Date,Type,Category,Amount,Note,Labels,Wallet,Currency\n");
   });
 
   it("should serialize single entry correctly", () => {
@@ -39,8 +39,8 @@ describe("serializeWalletCsv", () => {
     };
     const csv = serializeWalletCsv(wallet, categories, labels);
     const lines = csv.split("\n");
-    expect(lines[0]).toBe("Date,Type,Category,Amount,Note,Labels");
-    expect(lines[1]).toBe("2026-01-15,Income,Salary,50000,January salary,");
+    expect(lines[0]).toBe("Date,Type,Category,Amount,Note,Labels,Wallet,Currency");
+    expect(lines[1]).toBe("2026-01-15,Income,Salary,50000,January salary,,Test,KRW");
   });
 
   it("should serialize multiple entries with labels", () => {
@@ -72,9 +72,9 @@ describe("serializeWalletCsv", () => {
     };
     const csv = serializeWalletCsv(wallet, categories, labels);
     const lines = csv.split("\n");
-    expect(lines[0]).toBe("Date,Type,Category,Amount,Note,Labels");
-    expect(lines[1]).toBe("2026-01-20,Expense,Groceries,30000,Weekly shopping,Variable;Events");
-    expect(lines[2]).toBe("2026-01-15,Income,Salary,50000,Salary,Work");
+    expect(lines[0]).toBe("Date,Type,Category,Amount,Note,Labels,Wallet,Currency");
+    expect(lines[1]).toBe("2026-01-20,Expense,Groceries,30000,Weekly shopping,Variable;Events,Test,KRW");
+    expect(lines[2]).toBe("2026-01-15,Income,Salary,50000,Salary,Work,Test,KRW");
   });
 
   it("should serialize entries newest-first by date", () => {
@@ -117,7 +117,7 @@ describe("serializeWalletCsv", () => {
     };
     const csv = serializeWalletCsv(wallet, categories, labels);
     const lines = csv.split("\n");
-    expect(lines[1]).toBe("2026-01-15,Expense,Transport,15000,,");
+    expect(lines[1]).toBe("2026-01-15,Expense,Transport,15000,,,Test,KRW");
   });
 
   it("should escape commas in category names (RFC 4180)", () => {
@@ -140,7 +140,7 @@ describe("serializeWalletCsv", () => {
     };
     const csv = serializeWalletCsv(wallet, categoriesWithComma, labels);
     const lines = csv.split("\n");
-    expect(lines[1]).toBe('2026-01-15,Expense,"Food, Dining",10000,Lunch,');
+    expect(lines[1]).toBe('2026-01-15,Expense,"Food, Dining",10000,Lunch,,Test,KRW');
   });
 
   it("should escape quotes in note (RFC 4180)", () => {
@@ -162,7 +162,7 @@ describe("serializeWalletCsv", () => {
     };
     const csv = serializeWalletCsv(wallet, categories, labels);
     const lines = csv.split("\n");
-    expect(lines[1]).toBe('2026-01-15,Expense,Groceries,5000,"Bought ""milk"" and bread",');
+    expect(lines[1]).toBe('2026-01-15,Expense,Groceries,5000,"Bought ""milk"" and bread",,Test,KRW');
   });
 
   it("should escape newlines in note (RFC 4180)", () => {
@@ -206,7 +206,7 @@ describe("serializeWalletCsv", () => {
     };
     const csv = serializeWalletCsv(wallet, categories, labelsWithSemicolon);
     const lines = csv.split("\n");
-    expect(lines[1]).toBe('2026-01-15,Income,Salary,10000,Test,"Work;Home"');
+    expect(lines[1]).toBe('2026-01-15,Income,Salary,10000,Test,"Work;Home",Test,KRW');
   });
 
   it("should skip entries with unknown categoryId", () => {
@@ -250,7 +250,7 @@ describe("serializeWalletCsv", () => {
     };
     const csv = serializeWalletCsv(wallet, categories, labels);
     const lines = csv.split("\n");
-    expect(lines[1]).toBe("2026-01-15,Income,Salary,10000,Test,Variable;Events");
+    expect(lines[1]).toBe("2026-01-15,Income,Salary,10000,Test,Variable;Events,Test,KRW");
   });
 });
 
@@ -443,7 +443,7 @@ describe("parseWalletCsv", () => {
 
   it("should parse CSV with RFC 4180 escaped commas", () => {
     const categoriesWithComma = [{ id: "cat1", name: "Food, Dining", type: "Expense" }];
-    const csv = 'Date,Type,Category,Amount,Note,Labels\n2026-01-15,Expense,"Food, Dining",10000,Lunch,';
+    const csv = 'Date,Type,Category,Amount,Note,Labels\n2026-01-15,Expense,"Food, Dining",10000,Lunch,,Test,KRW';
     const result = parseWalletCsv(csv, categoriesWithComma, labels);
     expect(result.entries).toHaveLength(1);
     expect(result.entries[0].categoryId).toBe("cat1");
@@ -451,7 +451,7 @@ describe("parseWalletCsv", () => {
 
   it("should parse CSV with RFC 4180 escaped quotes", () => {
     const csv =
-      'Date,Type,Category,Amount,Note,Labels\n2026-01-15,Expense,Groceries,5000,"Bought ""milk"" and bread",';
+      'Date,Type,Category,Amount,Note,Labels\n2026-01-15,Expense,Groceries,5000,"Bought ""milk"" and bread",,Test,KRW';
     const result = parseWalletCsv(csv, categories, labels);
     expect(result.entries).toHaveLength(1);
     expect(result.entries[0].note).toBe('Bought "milk" and bread');
@@ -541,5 +541,58 @@ describe("parseWalletCsv", () => {
       repeat: "none",
       repeatEndDate: "",
     });
+  });
+});
+
+describe("wallet columns (v5)", () => {
+  const categories = [{ id: "cat1", name: "Salary", type: "income", color: "#111" }];
+  const labels = [];
+
+  it("carries the wallet name and currency on every row", () => {
+    const wallet = {
+      id: "w1",
+      name: "여행 지갑",
+      currency: "USD",
+      entries: [{ id: "e1", date: "2026-01-15", amount: 100, categoryId: "cat1", labelIds: [], note: "" }],
+    };
+
+    const lines = serializeWalletCsv(wallet, categories, labels).split("\n");
+
+    expect(lines[0]).toBe("Date,Type,Category,Amount,Note,Labels,Wallet,Currency");
+    expect(lines[1].endsWith(",여행 지갑,USD")).toBe(true);
+  });
+
+  it("round-trips the wallet name and currency through a parse", () => {
+    const wallet = {
+      id: "w1",
+      name: "여행 지갑",
+      currency: "USD",
+      entries: [{ id: "e1", date: "2026-01-15", amount: 100, categoryId: "cat1", labelIds: [], note: "" }],
+    };
+
+    const result = parseWalletCsv(serializeWalletCsv(wallet, categories, labels), categories, labels);
+
+    expect(result.error).toBeNull();
+    expect(result.walletName).toBe("여행 지갑");
+    expect(result.walletCurrency).toBe("USD");
+    expect(result.entries).toHaveLength(1);
+  });
+
+  it("still imports a pre-v5 file that has no wallet columns", () => {
+    const csv = "Date,Type,Category,Amount,Note,Labels\n2026-01-15,Income,Salary,50000,,";
+
+    const result = parseWalletCsv(csv, categories, labels);
+
+    expect(result.error).toBeNull();
+    expect(result.entries).toHaveLength(1);
+    // Nothing to read: the caller falls back to the file name and the default.
+    expect(result.walletName).toBe("");
+    expect(result.walletCurrency).toBeNull();
+  });
+
+  it("rejects a header whose trailing columns are not the wallet ones", () => {
+    const csv = "Date,Type,Category,Amount,Note,Labels,Nonsense\n2026-01-15,Income,Salary,50000,,,x";
+
+    expect(parseWalletCsv(csv, categories, labels).error).toBe("invalidHeader");
   });
 });

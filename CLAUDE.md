@@ -33,9 +33,9 @@
 정확한 정의는 `src/lib/storage.js`의 `normalizeState`가 진실이다. 아래는 형태만.
 
 ```
-state    { version: 4, selectedWalletId, language: "ko"|"en",
-           currency: "KRW"|"USD", wallets[], categories[], labels[] }
-wallet   { id, name, entries[], scheduled[] }
+state    { version: 5, selectedWalletId, language: "ko"|"en",
+           wallets[], categories[], labels[] }
+wallet   { id, name, currency: "KRW"|"USD", entries[], scheduled[] }
 entry    { id, date: "YYYY-MM-DD", amount: number, categoryId,
            labelIds[], note }
 schedule { id, startDate: "YYYY-MM-DD", amount: number, categoryId,
@@ -56,11 +56,21 @@ label    { id, name }
 - **실체화는 `normalizeState`에 넣지 않는다.** 정규화는 가져오기·KV 읽기·로드
   때마다 도는 순수 정화기라 레코드를 만들어내면 안 된다. 실체화는 앱이 문서를
   소유하는 지점(최초 로드, 원격 상태 채택)에서 `materializeState`로 한 번 돈다.
-- localStorage 키는 `spending-tracker-v4` (`ACTIVE_STORAGE_KEY`).
-  `STORAGE_KEYS`에 v1~v3이 남아 있는 건 마이그레이션 경로다.
+- **통화는 지갑마다, 언어는 문서 전체.** 지갑 하나는 KRW, 다른 하나는 USD로
+  둘 수 있다. 표시용 통화는 선택된 지갑을 따라가고, `I18nProvider`가 그 값을
+  받는다. 설정 UI도 통화는 지갑 카드, 언어는 Preferences 카드에 있다.
+- CSV 내보내기는 `Wallet`·`Currency` 열을 덧붙인다. 파일 전체에 하나뿐인
+  값이지만 행마다 반복해 평범한 직사각형 CSV를 유지한다. 가져올 때 이 두 열은
+  **선택**이라 v5 이전 6열 파일도 그대로 읽힌다.
+- localStorage 키는 `spending-tracker-v5` (`ACTIVE_STORAGE_KEY`).
+  `STORAGE_KEYS`에 v1~v4가 남아 있는 건 마이그레이션 경로다.
 - **`normalizeState`가 유일한 정화 지점.** 외부에서 들어온 상태(가져오기,
   KV 동기화, 구버전)는 전부 여기를 통과한다. 검증을 다른 곳에 흩뿌리지 말 것.
-  v3→v4 마이그레이션(반복 entry → schedule + 과거 entry들)도 여기서 한다.
+  v3→v4(반복 entry → schedule + 과거 entry들), v4→v5(문서 통화 → 지갑별 통화)
+  마이그레이션도 여기서 한다. 스키마 버전을 올릴 때 마이그레이션 게이트를
+  `SCHEMA_VERSION`으로 판정하지 말 것 — 그러면 버전을 올릴 때마다 과거
+  마이그레이션이 다시 돈다. 일정 이관 게이트는 `SCHEDULE_MIGRATION_VERSION`
+  처럼 고정 상수로 둔다.
 - 지갑 상한 `MAX_WALLETS` = 5.
 
 ## 코드베이스에서 안 드러나는 것

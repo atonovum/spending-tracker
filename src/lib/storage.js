@@ -3,7 +3,22 @@ import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, normalizeLabelIds, STORAGE_KEY
 import { migrateLegacyTemplates, normalizeSchedule, todayString } from "./schedules.js";
 import { withSampleData } from "./sampleData.js";
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
+
+/**
+ * The version at which schedules moved out of `entries`. Pinned as its own
+ * constant rather than reusing `SCHEMA_VERSION`: gating on "older than current"
+ * would re-run the schedule migration on every future bump, and converting a
+ * v4 document's future-dated entries back into schedules would destroy records
+ * the user deliberately wrote.
+ */
+export const SCHEDULE_MIGRATION_VERSION = 4;
+
+/** Currency is per wallet. Anything unrecognised falls back to KRW. */
+export function normalizeCurrency(value, fallback = "KRW") {
+  if (value === "USD" || value === "KRW") return value;
+  return fallback === "USD" ? "USD" : "KRW";
+}
 
 /**
  * Whether the dev sample wallets are seeded. Not an opt-in flag any more: local
@@ -122,6 +137,9 @@ export function normalizeWallet(wallet, categories, labels, options = {}) {
   return {
     id: wallet.id || uid(),
     name: wallet.name || "지갑",
+    // Per wallet since v5. `fallbackCurrency` carries the pre-v5 document-wide
+    // setting, so an upgraded document keeps showing the currency it always did.
+    currency: normalizeCurrency(wallet.currency, options.fallbackCurrency),
     entries: entries.map(({ repeat: _repeat, repeatEndDate: _repeatEndDate, ...entry }) => entry),
     scheduled,
   };
@@ -144,7 +162,12 @@ export function normalizeState(parsed) {
   // `entries`, where they behaved as schedules. Only those documents get that
   // half of the migration; in a v4 document a future-dated entry is a real
   // record the user chose to write and must stay one.
-  const walletOptions = { convertFutureOneTime: !(Number(seed.version) >= SCHEMA_VERSION) };
+  const walletOptions = {
+    convertFutureOneTime: !(Number(seed.version) >= SCHEDULE_MIGRATION_VERSION),
+    // Pre-v5 documents carried one currency for the whole document; hand it to
+    // every wallet so the migration is invisible to the user.
+    fallbackCurrency: normalizeCurrency(seed.currency),
+  };
   const wallets = (Array.isArray(seed.wallets) ? seed.wallets : []).map((wallet) => normalizeWallet(wallet, categories, labels, walletOptions));
 
   if (!wallets.length && fallbackWallet) {
@@ -154,8 +177,8 @@ export function normalizeState(parsed) {
   return {
     version: SCHEMA_VERSION,
     selectedWalletId: seed.selectedWalletId || wallets[0]?.id || "",
+    // Language stays document-wide; currency lives on each wallet.
     language: seed.language === "en" ? "en" : "ko",
-    currency: seed.currency === "USD" ? "USD" : "KRW",
     wallets,
     categories,
     labels,

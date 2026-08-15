@@ -14,6 +14,7 @@ import {
   saveLastEntryDate,
   applySampleSeed,
   SAMPLE_SEED_ENABLED,
+  SCHEMA_VERSION,
 } from './storage.js';
 import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, STORAGE_KEYS } from './finance.js';
 import { SAMPLE_WALLETS } from './sampleData.js';
@@ -432,14 +433,14 @@ describe('normalizeState', () => {
     expect(result.selectedWalletId).toBe('wallet-2');
   });
 
-  it('forces version 4', () => {
+  it('forces the current schema version', () => {
     const input1 = { wallets: [], categories: [], labels: [], version: 1 };
     const result1 = normalizeState(input1);
-    expect(result1.version).toBe(4);
+    expect(result1.version).toBe(SCHEMA_VERSION);
 
     const input2 = { wallets: [], categories: [], labels: [], version: 2 };
     const result2 = normalizeState(input2);
-    expect(result2.version).toBe(4);
+    expect(result2.version).toBe(SCHEMA_VERSION);
   });
 
   it('clamps language to en or ko', () => {
@@ -498,7 +499,7 @@ describe('loadState', () => {
 
   it('returns DEFAULT_SEED when localStorage is empty', () => {
     const result = loadState();
-    expect(result.version).toBe(4);
+    expect(result.version).toBe(SCHEMA_VERSION);
     expect(result.wallets.length).toBeGreaterThan(0);
     expect(result.categories.length).toBeGreaterThan(0);
     expect(result.labels.length).toBeGreaterThan(0);
@@ -517,7 +518,7 @@ describe('loadState', () => {
 
     const result = loadState();
     expect(result.wallets[0].id).toBe('wallet-1');
-    expect(result.version).toBe(4);
+    expect(result.version).toBe(SCHEMA_VERSION);
   });
 
   it('tries STORAGE_KEYS in order and uses first valid key', () => {
@@ -537,7 +538,7 @@ describe('loadState', () => {
     localStorage.setItem(ACTIVE_STORAGE_KEY, 'invalid json');
 
     const result = loadState();
-    expect(result.version).toBe(4);
+    expect(result.version).toBe(SCHEMA_VERSION);
     expect(result.wallets.length).toBeGreaterThan(0);
   });
 });
@@ -668,7 +669,7 @@ describe('last entry date', () => {
     saveLastEntryDate('2026-02-14');
     expect(STORAGE_KEYS).not.toContain(LAST_ENTRY_DATE_KEY);
     // loadState must not pick the preference key up as a state candidate.
-    expect(loadState().version).toBe(4);
+    expect(loadState().version).toBe(SCHEMA_VERSION);
   });
 
   it('returns ok: false when localStorage rejects the write', () => {
@@ -695,5 +696,56 @@ describe('last entry date', () => {
     expect(loadLastEntryDate()).toBe('');
 
     mockGetItem.mockRestore();
+  });
+});
+
+describe('per-wallet currency (v5)', () => {
+  it('moves a pre-v5 document-wide currency onto every wallet', () => {
+    const result = normalizeState({
+      version: 4,
+      currency: 'USD',
+      selectedWalletId: 'w1',
+      wallets: [
+        { id: 'w1', name: 'A', entries: [] },
+        { id: 'w2', name: 'B', entries: [] },
+      ],
+      categories: [{ id: 'c1', name: 'Food', type: 'expense' }],
+      labels: [],
+    });
+
+    expect(result.wallets.map((wallet) => wallet.currency)).toEqual(['USD', 'USD']);
+    // The document-wide field is gone; language stays document-wide.
+    expect(result.currency).toBeUndefined();
+    expect(result.language).toBe('ko');
+  });
+
+  it('keeps each wallet on its own currency once set', () => {
+    const result = normalizeState({
+      version: SCHEMA_VERSION,
+      selectedWalletId: 'w1',
+      wallets: [
+        { id: 'w1', name: 'A', currency: 'USD', entries: [] },
+        { id: 'w2', name: 'B', currency: 'KRW', entries: [] },
+      ],
+      categories: [{ id: 'c1', name: 'Food', type: 'expense' }],
+      labels: [],
+    });
+
+    expect(result.wallets.map((wallet) => wallet.currency)).toEqual(['USD', 'KRW']);
+  });
+
+  it('falls back to KRW for a missing or unrecognised currency', () => {
+    const result = normalizeState({
+      version: SCHEMA_VERSION,
+      selectedWalletId: 'w1',
+      wallets: [
+        { id: 'w1', name: 'A', currency: 'JPY', entries: [] },
+        { id: 'w2', name: 'B', entries: [] },
+      ],
+      categories: [{ id: 'c1', name: 'Food', type: 'expense' }],
+      labels: [],
+    });
+
+    expect(result.wallets.map((wallet) => wallet.currency)).toEqual(['KRW', 'KRW']);
   });
 });

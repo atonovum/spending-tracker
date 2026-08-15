@@ -102,22 +102,6 @@ describe('PreferencesCard', () => {
       expect(await screen.findByDisplayValue('English')).toHaveValue('English');
     });
 
-    it('toggles currency from KRW to USD', async () => {
-      const user = userEvent.setup();
-      renderWithMantine(
-        <PreferencesCard language="ko" currency="KRW" {...mockHandlers} />
-      );
-
-      await screen.findByDisplayValue('￦ (KRW)');
-      const currencySelect = getSelectInputByLabel(/통화/i);
-      expect(currencySelect).toHaveValue('￦ (KRW)');
-
-      await user.click(currencySelect);
-      const usdOption = await screen.findByRole('option', { name: /\$ \(USD\)/i });
-      await user.click(usdOption);
-
-      expect(mockHandlers.onCurrencyChange).toHaveBeenCalledWith('USD');
-    });
   });
 
   describe('Rendering', () => {
@@ -137,12 +121,14 @@ describe('PreferencesCard', () => {
       expect(screen.getByText(/언어/i)).toBeInTheDocument();
     });
 
-    it('renders currency label', () => {
+    // Currency moved to the wallet card in v5: it varies per wallet, so it must
+    // not reappear as a document-wide preference here.
+    it('does not offer a document-wide currency setting', () => {
       renderWithMantine(
-        <PreferencesCard language="ko" currency="KRW" {...mockHandlers} />
+        <PreferencesCard language="ko" {...mockHandlers} />
       );
 
-      expect(screen.getByText(/통화/i)).toBeInTheDocument();
+      expect(screen.queryByText(/통화/i)).not.toBeInTheDocument();
     });
 
     it('does not allow deselecting language', async () => {

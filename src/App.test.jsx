@@ -6,6 +6,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App, { filterEntriesByFacets, resolveFacetFilter, sortEntriesForDisplay, summarizeEntries, CategoryStatsChart, StatsCurveChart } from './App.jsx';
 import { createMockState, renderWithMantine } from './settings/testUtils.jsx';
+import { ACTIVE_STORAGE_KEY } from './lib/finance.js';
 
 describe('sortEntriesForDisplay', () => {
   it('orders imported ascending entries newest-first before pagination', () => {
@@ -250,7 +251,7 @@ describe('stats tables horizontal overflow', () => {
         repeatEndDate: '',
       },
     ];
-    localStorage.setItem('spending-tracker-v4', JSON.stringify(state));
+    localStorage.setItem(ACTIVE_STORAGE_KEY, JSON.stringify(state));
   });
 
   async function openStatsTab(user) {
