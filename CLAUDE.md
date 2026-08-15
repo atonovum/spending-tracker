@@ -109,11 +109,21 @@ label    { id, name }
 전부 통과한 것을 확인한다.**
 
 ```
-npm run lint && npm test && npm run build
+npm run lint && npm run test:coverage && npm run build
 ```
 
 하나라도 실패하면 푸시하지 않는다. 커밋별 pre-commit은 build와 staged lint만
 보므로, 여러 커밋이 쌓인 뒤의 테스트 전체 결과는 이 시점에만 확인된다.
+
+`npm test`가 아니라 `test:coverage`인 이유는 CI가 강제하는 것이 후자이기
+때문이다. 커버리지 임계값 미달은 `npm test`로는 드러나지 않으므로, 로컬
+점검을 `npm test`로 두면 CI가 잡는 것을 로컬이 놓치는 구간이 생긴다.
+
+로컬에서 재현할 수 없는 것이 하나 남는다: CI의 `npm ci`는 lockfile만 보고
+빈 상태에서 설치하지만, 로컬은 이미 설치된 `node_modules`에서 돈다. 그래서
+`package.json`에 없는데 로컬에만 깔린 패키지를 import해도 로컬은 통과한다.
+의존성을 추가·제거했다면 `docker build`(내부에서 `npm ci`를 돈다)로 한 번
+확인하는 것이 가장 가깝다.
 
 **검증을 통과시키려고 규칙 자체를 완화하지 말 것.** ESLint 규칙 하향,
 커버리지 임계값 인하, CI 스텝 제거, `--no-verify` 커밋은 전부 이 파일에
