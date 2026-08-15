@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WalletsCard } from './WalletsCard.jsx';
 import { renderWithMantine, createMockState, waitForModal } from './testUtils.jsx';
@@ -23,6 +23,7 @@ describe('WalletsCard', () => {
       onDeleteWallet: vi.fn(),
       onExportWallet: vi.fn(),
       onImportWallet: vi.fn(),
+      onWalletCurrencyChange: vi.fn(),
       onConfirm: vi.fn((payload) => {
         if (payload.action) payload.action();
       }),
@@ -170,6 +171,57 @@ describe('WalletsCard', () => {
 
       await waitForModal();
       expect(screen.getByRole('dialog', { name: /지갑 수정/ })).toBeInTheDocument();
+    });
+
+    // Currency is per wallet since v5, and it is edited here rather than in the
+    // document-wide Preferences card.
+    it('changes the currency of a single wallet', async () => {
+      const user = userEvent.setup();
+      renderWithMantine(
+        <WalletsCard
+          state={mockState}
+          walletTotals={mockWalletTotals}
+          {...mockHandlers}
+        />
+      );
+
+      const walletPaper = screen.getByText('메인 지갑').closest('[class*="Paper"]');
+      await user.click(within(walletPaper).getByLabelText('수정'));
+      await waitForModal();
+
+      const dialog = screen.getByRole('dialog');
+      // Mantine renders a hidden input alongside the visible one, so drive the
+      // labelled control directly rather than matching on display value.
+      const select = within(dialog).getByLabelText(/통화/i);
+      await waitFor(() => expect(select).toHaveValue('￦ (KRW)'));
+
+      await user.click(select);
+      await user.click(await screen.findByRole('option', { name: /USD/i }));
+      await waitFor(() => expect(select).toHaveValue('$ (USD)'));
+
+      await user.click(within(dialog).getByRole('button', { name: /저장/i }));
+
+      expect(mockHandlers.onWalletCurrencyChange).toHaveBeenCalledWith('wallet-1', 'USD');
+    });
+
+    it('does not report a currency change when the field was never touched', async () => {
+      const user = userEvent.setup();
+      renderWithMantine(
+        <WalletsCard
+          state={mockState}
+          walletTotals={mockWalletTotals}
+          {...mockHandlers}
+        />
+      );
+
+      const walletPaper = screen.getByText('메인 지갑').closest('[class*="Paper"]');
+      await user.click(within(walletPaper).getByLabelText('수정'));
+      await waitForModal();
+
+      const dialog = screen.getByRole('dialog');
+      await user.click(within(dialog).getByRole('button', { name: /저장/i }));
+
+      expect(mockHandlers.onWalletCurrencyChange).not.toHaveBeenCalled();
     });
 
     it('renames wallet when save is clicked', async () => {

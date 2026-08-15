@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActionIcon,
   Badge,
@@ -80,12 +80,26 @@ function WalletRow({ wallet, isSelected, total, onSelect, onEdit, onExport }) {
 function WalletEditModal({ opened, wallet, isOnly, onClose, onRename, onCurrencyChange, onDelete }) {
   const { t } = useI18n();
   const [draft, setDraft] = useState(wallet?.name || "");
-  const [currency, setCurrency] = useState(wallet?.currency || "KRW");
+  // Compare against the same default the field is seeded with. Reading
+  // `wallet.currency` raw would make an unset wallet look changed the moment the
+  // modal opens, firing a save for a currency the user never touched.
+  const initialCurrency = wallet?.currency || "KRW";
+  const [currency, setCurrency] = useState(initialCurrency);
+
+  // Re-seed the fields when the modal opens on a wallet. This used to hang off
+  // the modal's onTransitionEnd, which also caught transitions bubbling up from
+  // children — opening the currency dropdown ended a transition and silently
+  // reset whatever had been typed or picked.
+  useEffect(() => {
+    if (!opened || !wallet) return;
+    setDraft(wallet.name || "");
+    setCurrency(wallet.currency || "KRW");
+  }, [opened, wallet]);
 
   function handleSave() {
     const trimmed = draft.trim();
     if (trimmed && trimmed !== wallet?.name) onRename(trimmed);
-    if (currency !== wallet?.currency) onCurrencyChange(currency);
+    if (currency !== initialCurrency) onCurrencyChange(currency);
     onClose();
   }
 
@@ -98,7 +112,6 @@ function WalletEditModal({ opened, wallet, isOnly, onClose, onRename, onCurrency
       title={t("settings.wallets.editTitle")}
       centered
       size="md"
-      onTransitionEnd={() => { setDraft(wallet.name); setCurrency(wallet.currency || "KRW"); }}
     >
       <Stack gap="sm">
         <TextInput
