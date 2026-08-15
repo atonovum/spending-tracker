@@ -134,6 +134,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  /* Desktop: 비중 / 카테고리 / 건수 / 총 금액. The name column takes the rest. */
   .stats-category-table th:nth-child(1),
   .stats-category-table td:nth-child(1),
   .stats-category-table th:nth-child(3),
@@ -150,13 +151,33 @@
     white-space: nowrap;
     min-width: 0;
   }
+  /*
+   * Phones drop the icon and the 건수 column — the count is one tap away in the
+   * category detail modal, and the width it frees goes to the name. Hiding the
+   * cells rather than branching the markup keeps one source of truth for the
+   * layout, and nth-child still counts hidden cells so the width rules below
+   * address the same columns as above.
+   */
   @media (max-width: 30em) {
     .stats-category-table {
       font-size: 12px;
+      min-width: 240px;
     }
     .stats-category-table th,
     .stats-category-table td {
       padding-inline: 4px;
+    }
+    .stats-col-count,
+    .stats-col-icon {
+      display: none;
+    }
+    .stats-category-table th:nth-child(1),
+    .stats-category-table td:nth-child(1) {
+      width: 16%;
+    }
+    .stats-category-table th:nth-child(4),
+    .stats-category-table td:nth-child(4) {
+      width: 38%;
     }
   }
 

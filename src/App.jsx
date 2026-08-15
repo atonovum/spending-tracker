@@ -510,9 +510,11 @@ function PieChart({ items, type }) {
   const cx = width / 2;
   const cy = height / 2;
   const radius = 110;
-  const iconRadius = radius + 24;
-  const percentRadius = iconRadius + 22;
-  const iconSize = 24;
+  // Icon and percentage sit together on one callout radius: the icon is what
+  // identifies the slice, so it belongs next to the number it labels rather
+  // than on a ring of its own.
+  const calloutRadius = radius + 34;
+  const iconSize = 20;
   const totals = new Map();
   for (const item of items) {
     if (item.category.type !== type) continue;
@@ -529,9 +531,9 @@ function PieChart({ items, type }) {
   const entries = slices.map((slice, index) => {
     const angle = (slice.value / sum) * Math.PI * 2;
     const mid = start + angle / 2;
-    const currentIconRadius = iconRadius + (index % 2 === 0 ? 12 : -10);
-    const currentPercentRadius = percentRadius + (index % 2 === 0 ? 14 : -12);
-    const result = { ...slice, start, end: start + angle, mid, currentIconRadius, currentPercentRadius };
+    // Alternate the radius so adjacent callouts do not collide.
+    const currentCalloutRadius = calloutRadius + (index % 2 === 0 ? 14 : -12);
+    const result = { ...slice, start, end: start + angle, mid, currentCalloutRadius };
     start += angle;
     return result;
   });
@@ -580,26 +582,29 @@ function PieChart({ items, type }) {
         const sinA = Math.sin(slice.mid);
         const sx = cx + cosA * radius;
         const sy = cy + sinA * radius;
-        const lineEndR = slice.currentIconRadius - iconSize / 2 - 2;
+        const lineEndR = slice.currentCalloutRadius - iconSize - 4;
         const lx = cx + cosA * lineEndR;
         const ly = cy + sinA * lineEndR;
-        const ix = cx + cosA * slice.currentIconRadius;
-        const iy = cy + sinA * slice.currentIconRadius;
-        const px = cx + cosA * slice.currentPercentRadius;
-        const py = cy + sinA * slice.currentPercentRadius;
+        // Anchor point of the icon+percentage pair, laid out horizontally so the
+        // icon reads as a label for the number beside it.
+        const ax = cx + cosA * slice.currentCalloutRadius;
+        const ay = cy + sinA * slice.currentCalloutRadius;
         const percent = (slice.value / sum) * 100;
         const percentText = percent >= 10 ? `${Math.round(percent)}%` : `${percent.toFixed(1)}%`;
         return (
           <g key={`${slice.category.id}-callout`}>
             <line x1={sx} y1={sy} x2={lx} y2={ly} stroke={slice.category.color} strokeWidth="1.2" strokeDasharray="2,2" />
             <circle cx={sx} cy={sy} r="2.5" fill={slice.category.color} />
-            <g transform={`translate(${ix - iconSize / 2}, ${iy - iconSize / 2})`} style={{ color: slice.category.color }}>
+            <g
+              transform={`translate(${ax - iconSize - 2}, ${ay - iconSize / 2})`}
+              style={{ color: slice.category.color }}
+            >
               <Cmp size={iconSize} stroke={2} />
             </g>
             <text
-              x={px}
-              y={py}
-              textAnchor="middle"
+              x={ax + 2}
+              y={ay}
+              textAnchor="start"
               dominantBaseline="central"
               style={{ fill: CHART.ink, fontWeight: 600, fontSize: isMobile ? 13 : 11 }}
             >
@@ -1504,7 +1509,7 @@ function App({ state, setState }) {
                 <Table.Tr>
                   <Table.Th className="text-center">{t("stats.column.share")}</Table.Th>
                   <Table.Th className="text-center">{t("stats.column.category")}</Table.Th>
-                  <Table.Th className="text-center">{t("stats.column.count")}</Table.Th>
+                  <Table.Th className="text-center stats-col-count">{t("stats.column.count")}</Table.Th>
                   <Table.Th className="text-center">{t("stats.column.amount")}</Table.Th>
                 </Table.Tr>
               </Table.Thead>
@@ -1520,17 +1525,24 @@ function App({ state, setState }) {
                         onClick={() => { setStatsCategoryModalId(category.id); setStatsCategoryModalOpen(true); }}
                       >
                         <Table.Td className="text-center font-semibold text-muted text-xs">{percent}%</Table.Td>
+                        {/*
+                          The icon and the 건수 column are desktop-only (hidden by
+                          CSS below the breakpoint): on a phone the width is
+                          better spent on the name, and the pie chart above
+                          already carries the icons. Colour alone identifies the
+                          row there.
+                        */}
                         <Table.Td className="text-center">
                           <Group gap={6} justify="center" wrap="nowrap" className="min-w-0">
-                            <span style={{ color: category.color }} className="inline-flex shrink-0 items-center">
+                            <span style={{ color: category.color }} className="stats-col-icon inline-flex shrink-0 items-center">
                               <CategoryIcon category={category} size={16} />
                             </span>
-                            <span style={{ color: category.color, fontWeight: 600 }} className="stats-category-name" title={category.name}>
+                            <span style={{ color: category.color }} className="stats-category-name" title={category.name}>
                               {category.name}
                             </span>
                           </Group>
                         </Table.Td>
-                        <Table.Td className="text-center">{count}</Table.Td>
+                        <Table.Td className="text-center stats-col-count">{count}</Table.Td>
                         <Table.Td className="text-center">{formatMoney(amount)}</Table.Td>
                       </Table.Tr>
                     );
