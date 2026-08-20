@@ -2748,16 +2748,22 @@ function AppRoot() {
   // It used to be two effects right here, which is why a failed push could
   // silently lose an edit: nothing in this file is covered by tests.
   const notifySync = useCallback(
-    ({ kind }) => {
+    ({ kind, adopted }) => {
       if (typeof window === "undefined") return;
       if (kind === "conflict") {
+        // Not auto-dismissed: this reports an edit that was discarded, and a
+        // message that vanishes before it can be read is no report at all.
         notifications.show({
           color: "yellow",
+          autoClose: false,
           title: lang === "en" ? "Updated on another device" : "다른 기기에서 갱신됨",
-          message:
-            lang === "en"
+          message: adopted
+            ? lang === "en"
               ? "Reloading the latest state."
-              : "최신 상태를 다시 불러왔습니다.",
+              : "최신 상태를 다시 불러왔습니다."
+            : lang === "en"
+              ? "Another device has newer data, but it could not be read. Retrying."
+              : "다른 기기의 최신 데이터를 읽지 못했습니다. 다시 시도합니다.",
         });
         return;
       }

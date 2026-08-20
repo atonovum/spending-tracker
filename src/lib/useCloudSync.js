@@ -155,13 +155,22 @@ export function useCloudSync({ state, setState, onNotify }) {
         // the local unpushed edit goes, but the user is told.
         const refetched = await fetchRemoteState();
         remoteRevRef.current = refetched.ok ? refetched.updatedAt : outcome.remoteRev;
-        attemptRef.current = 0;
-        if (refetched.ok && refetched.state) {
+        const adopted = Boolean(refetched.ok && refetched.state);
+        if (adopted) {
+          attemptRef.current = 0;
           markDirty(false);
           skipNextPushRef.current = true;
           setState(materializeState(normalizeState(applySampleSeed(refetched.state))));
+        } else {
+          // The rejection landed but the document behind it did not. Saying
+          // "reloaded the latest state" here would be a lie, and leaving it at
+          // that strands the device: still dirty, still losing every push, and
+          // every retry replays the same conflict. Retry the read instead.
+          attemptRef.current += 1;
+          markDirty(true);
+          schedulePush(nextRetryDelay(attemptRef.current));
         }
-        if (onNotifyRef.current) onNotifyRef.current({ kind: "conflict" });
+        if (onNotifyRef.current) onNotifyRef.current({ kind: "conflict", adopted });
         return;
       }
 

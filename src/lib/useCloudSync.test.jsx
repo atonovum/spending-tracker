@@ -305,8 +305,37 @@ describe('failure handling', () => {
     });
 
     await waitFor(() => expect(entryIdsOf(result.current.state)).toEqual(['other-device']));
-    expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'conflict' }));
+    expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'conflict', adopted: true }));
     expect(localStorage.getItem(PENDING_SYNC_KEY)).not.toBe('1');
+  });
+
+  // The rejection landed but the document behind it did not. Reporting "reloaded
+  // the latest state" here would be a lie, and stopping there strands the
+  // device: still dirty, still losing every push, every retry replaying the
+  // same conflict.
+  it('says so and retries when the server document could not be read after a conflict', async () => {
+    fetchRemoteState
+      .mockResolvedValueOnce({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 })
+      .mockResolvedValue({ ok: false, authRequired: false, state: null, updatedAt: null });
+    pushRemoteState.mockResolvedValue({ ok: false, conflict: true, current: 8000 });
+
+    const { result, onNotify } = setup(docWith(['local-1'], 1000));
+    await settle();
+
+    act(() => result.current.setState(docWith(['local-1', 'local-2'], 1000)));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(PUSH_DEBOUNCE_MS + 50);
+    });
+
+    expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'conflict', adopted: false }));
+    expect(entryIdsOf(result.current.state)).toEqual(['local-1', 'local-2']);
+    expect(localStorage.getItem(PENDING_SYNC_KEY)).toBe('1');
+
+    const before = pushRemoteState.mock.calls.length;
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(RETRY_DELAYS_MS[0] + 50);
+    });
+    expect(pushRemoteState.mock.calls.length).toBeGreaterThan(before);
   });
 
   it('notifies and stops retrying when the payload is too large', async () => {
