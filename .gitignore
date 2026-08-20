@@ -26,6 +26,7 @@ yarn-error.log*
 # Editor
 .idea/
 .vscode/
+.orca/
 *.swp
 
 # wrangler files
@@ -35,6 +36,5 @@ yarn-error.log*
 !.env.example
 
 coverage/
+data/
 
-# Private sample exports
-samples/spendee/
