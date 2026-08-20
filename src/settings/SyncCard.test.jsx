@@ -24,7 +24,9 @@ function render(props = {}) {
   return renderWithMantine(
     <SyncCard
       pendingSync={false}
-      onSyncNow={vi.fn()}
+      onSyncNow={vi.fn(() => Promise.resolve(true))}
+      onConfirm={vi.fn()}
+      onNotify={vi.fn()}
       {...props}
     />
   );
@@ -103,14 +105,56 @@ describe('applying an update', () => {
 });
 
 describe('manual sync', () => {
-  it('re-reads the server on demand', async () => {
+  // The two directions are not symmetric on purpose: local -> server happens on
+  // its own when a transaction changes, server -> local is this button.
+  it('pulls the server document down', async () => {
     const user = userEvent.setup();
-    const onSyncNow = vi.fn(() => Promise.resolve());
+    const onSyncNow = vi.fn(() => Promise.resolve(true));
     render({ onSyncNow });
 
     await user.click(screen.getByRole('button', { name: /지금 동기화/ }));
 
     expect(onSyncNow).toHaveBeenCalledTimes(1);
+  });
+
+  // Pressing the button is the expression of intent, so nothing is asked when
+  // there is nothing to lose.
+  it('does not ask first when everything has landed', async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn();
+    render({ onConfirm, pendingSync: false });
+
+    await user.click(screen.getByRole('button', { name: /지금 동기화/ }));
+
+    expect(onConfirm).not.toHaveBeenCalled();
+  });
+
+  it('asks first when this device is holding unsent changes', async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn();
+    const onSyncNow = vi.fn(() => Promise.resolve(true));
+    render({ onConfirm, onSyncNow, pendingSync: true });
+
+    await user.click(screen.getByRole('button', { name: /지금 동기화/ }));
+
+    expect(onConfirm).toHaveBeenCalledWith(
+      expect.objectContaining({ confirmColor: 'red', action: expect.any(Function) })
+    );
+    // Nothing happens until the confirmation is taken.
+    expect(onSyncNow).not.toHaveBeenCalled();
+
+    await onConfirm.mock.calls[0][0].action();
+    expect(onSyncNow).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports when the server document could not be read', async () => {
+    const user = userEvent.setup();
+    const onNotify = vi.fn();
+    render({ onNotify, onSyncNow: vi.fn(() => Promise.resolve(false)) });
+
+    await user.click(screen.getByRole('button', { name: /지금 동기화/ }));
+
+    await waitFor(() => expect(onNotify).toHaveBeenCalledWith(expect.any(String), false));
   });
 
   it('reports that this device is holding unsent changes', async () => {

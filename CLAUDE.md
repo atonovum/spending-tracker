@@ -193,6 +193,13 @@ npm run lint && npm run test:coverage && npm run build
   `registration.update()` 때만 일어난다. 재개는 그 셋 중 아무것도 아니라
   배포가 영영 안 보인다. `main.jsx`가 `visibilitychange`/`pageshow`에서
   `checkForServiceWorkerUpdate()`를 부른다 — 원격 읽기와 같은 이유, 같은 자리.
+- **두 방향은 대칭이 아니다.** 로컬 → 서버는 거래가 바뀔 때 저절로 나가고,
+  서버 → 로컬은 Settings의 [지금 동기화]가 유일한 수동 경로다. 그 버튼은
+  **항상 내려받는다** — `decideInitialSync`를 다시 태우면 미전송 편집을 든
+  기기가 "동기화"를 눌렀을 때 오히려 *올려버려서*, 로컬이 낡은 쪽인 기기는
+  서버 것을 영영 못 받는다. `localDirty` 규칙은 사용자가 아무 의사표시도 하지
+  않은 **자동 경로(시작·복귀)**에만 적용한다. 버튼을 누른 것 자체가 의사표시
+  이므로, 잃을 것이 있을 때만 확인을 한 번 받는다.
 - **푸시 실패는 최종이 아니라 일시적인 것으로 다룬다.** 백오프 재시도 +
   `online` 재시도가 있고, `pagehide`/`visibilitychange(hidden)`에서
   `keepalive: true`로 마지막 flush를 한다. iOS는 백그라운드로 넘어간

@@ -19,6 +19,7 @@ function Settings({
   state,
   pendingSync,
   onSyncNow,
+  onNotify,
   scheduledEntries,
   walletTotals,
   language,
@@ -123,6 +124,8 @@ function Settings({
       <SyncCard
         pendingSync={pendingSync}
         onSyncNow={onSyncNow}
+        onConfirm={requestConfirm}
+        onNotify={onNotify}
       />
 
       <SignOutButton pendingSync={pendingSync} onConfirm={requestConfirm} />

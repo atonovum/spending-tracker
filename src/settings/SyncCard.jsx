@@ -16,7 +16,7 @@ import { useT } from "../lib/i18n.jsx";
  * and label (`KV_KEY` in `src/worker.js`). A per-wallet button would be five
  * buttons doing the same global thing, teaching a model that does not exist.
  */
-export function SyncCard({ pendingSync, onSyncNow }) {
+export function SyncCard({ pendingSync, onSyncNow, onConfirm, onNotify }) {
   const t = useT();
   const [deployed, setDeployed] = useState({ state: "checking", version: null, reason: "ok", status: 0 });
   const [busy, setBusy] = useState(false);
@@ -45,19 +45,48 @@ export function SyncCard({ pendingSync, onSyncNow }) {
     setBusy(false);
   }
 
-  async function handleSyncNow() {
+  /**
+   * Pull the server's document down. That is all this button does.
+   *
+   * The two directions are deliberately not symmetric. Local → server happens
+   * on its own whenever a transaction is added or edited; server → local is
+   * this button. Making it re-run the startup decision instead meant a device
+   * holding unsent edits would *push* when the user pressed "sync" — so a
+   * device whose local copy was the stale one could never take the server's,
+   * and kept showing old data however many times it was pressed.
+   *
+   * `decideInitialSync`'s refusal to adopt over unsent edits still governs the
+   * automatic paths (startup, resume), where the user has expressed nothing.
+   * Pressing this button *is* the expression, so it only asks first when there
+   * is something to lose.
+   */
+  function handleSyncNow() {
+    if (!pendingSync) {
+      runSync();
+      return;
+    }
+    onConfirm({
+      title: t("settings.sync.adoptTitle"),
+      message: t("settings.sync.adoptMessage"),
+      confirmLabel: t("settings.sync.adopt"),
+      confirmColor: "red",
+      action: runSync,
+    });
+  }
+
+  async function runSync() {
     setBusy(true);
     try {
-      await onSyncNow();
+      const adopted = await onSyncNow();
       await checkVersion();
+      if (onNotify) {
+        onNotify(adopted ? t("settings.sync.adoptDone") : t("settings.sync.adoptFailed"), adopted);
+      }
     } finally {
       setBusy(false);
     }
   }
 
-  // Naming the failure is the whole point: "unavailable" covered a missing
-  // asset, an expired session and a dead network alike, and each needs
-  // something different from the user.
   const deployedLabel =
     deployed.state === "checking"
       ? t("settings.sync.checking")

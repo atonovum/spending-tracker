@@ -363,6 +363,11 @@ const DICT = {
     "settings.sync.reason.missing": "배포본에 없음",
     "settings.sync.reason.unreachable": "서버 응답 없음",
     "settings.sync.reason.malformed": "형식 오류",
+    "settings.sync.adopt": "서버 데이터로 덮어쓰기",
+    "settings.sync.adoptTitle": "서버 데이터로 덮어쓸까요?",
+    "settings.sync.adoptMessage": "이 기기에만 있고 서버로 못 보낸 변경은 사라집니다.\n먼저 지갑을 JSON으로 내보내 백업하세요.",
+    "settings.sync.adoptFailed": "서버 데이터를 읽지 못했습니다",
+    "settings.sync.adoptDone": "서버 데이터를 불러왔습니다",
   },
   en: {
     "tab.ledger": "Ledger",
@@ -713,6 +718,11 @@ const DICT = {
     "settings.sync.reason.missing": "Not in this deployment",
     "settings.sync.reason.unreachable": "No answer from server",
     "settings.sync.reason.malformed": "Malformed response",
+    "settings.sync.adopt": "Replace with server data",
+    "settings.sync.adoptTitle": "Replace with server data?",
+    "settings.sync.adoptMessage": "Changes that live only on this device and never reached the server will be lost.\nExport the wallet as JSON first.",
+    "settings.sync.adoptFailed": "Could not read the server's data",
+    "settings.sync.adoptDone": "Loaded the server's data",
   },
 };
 

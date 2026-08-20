@@ -2282,6 +2282,9 @@ function App({ state, setState, pendingSync = false, syncNow }) {
               state={state}
               pendingSync={pendingSync}
               onSyncNow={syncNow}
+              onNotify={(message, ok) =>
+                notifications.show({ color: ok ? "green" : "red", message })
+              }
               scheduledEntries={scheduledEntriesForSettings}
               walletTotals={walletTotals}
               language={state.language || "ko"}
@@ -2796,11 +2799,11 @@ function AppRoot() {
     [lang]
   );
 
-  const { pendingSync, syncNow } = useCloudSync({ state, setState, onNotify: notifySync });
+  const { pendingSync, adoptRemote } = useCloudSync({ state, setState, onNotify: notifySync });
 
   return (
     <I18nProvider lang={lang} currency={currency}>
-      <App state={state} setState={setState} pendingSync={pendingSync} syncNow={syncNow} />
+      <App state={state} setState={setState} pendingSync={pendingSync} syncNow={adoptRemote} />
     </I18nProvider>
   );
 }

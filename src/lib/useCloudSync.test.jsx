@@ -362,6 +362,68 @@ describe('failure handling', () => {
   });
 });
 
+describe('adoptRemote', () => {
+  // The manual "sync now" direction. It is a pull and never a push: local ->
+  // server already happens on its own whenever a transaction changes.
+  it('takes the server document even while local edits are unsent', async () => {
+    localStorage.setItem(PENDING_SYNC_KEY, '1');
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['from-server'], 9000), updatedAt: 9000 });
+
+    const view = renderHook(() => {
+      const [state, setState] = useState(docWith(['stale-local'], 1000));
+      const sync = useCloudSync({ state, setState, onNotify: vi.fn() });
+      return { state, sync };
+    });
+    await settle();
+
+    await act(async () => {
+      await view.result.current.sync.adoptRemote();
+    });
+
+    expect(entryIdsOf(view.result.current.state)).toEqual(['from-server']);
+    expect(localStorage.getItem(PENDING_SYNC_KEY)).not.toBe('1');
+    expect(pushRemoteState).not.toHaveBeenCalled();
+  });
+
+  it('changes nothing when the server cannot be read', async () => {
+    fetchRemoteState.mockResolvedValue({ ok: false, authRequired: false, state: null, updatedAt: null });
+
+    const view = renderHook(() => {
+      const [state, setState] = useState(docWith(['local-1'], 1000));
+      const sync = useCloudSync({ state, setState, onNotify: vi.fn() });
+      return { state, sync };
+    });
+    await settle();
+
+    let adopted;
+    await act(async () => {
+      adopted = await view.result.current.sync.adoptRemote();
+    });
+
+    expect(adopted).toBe(false);
+    expect(entryIdsOf(view.result.current.state)).toEqual(['local-1']);
+  });
+
+  it('warns when the read hits the login page', async () => {
+    const onNotify = vi.fn();
+    fetchRemoteState.mockResolvedValue({ ok: false, authRequired: true, state: null, updatedAt: null });
+
+    const view = renderHook(() => {
+      const [state, setState] = useState(docWith(['local-1'], 1000));
+      const sync = useCloudSync({ state, setState, onNotify });
+      return { state, sync };
+    });
+    await settle();
+    onNotify.mockClear();
+
+    await act(async () => {
+      await view.result.current.sync.adoptRemote();
+    });
+
+    expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'authRequired' }));
+  });
+});
+
 describe('re-reading on resume', () => {
   /** Wake the app the way iOS does when a home-screen web app is reopened. */
   async function resume(hidden = false) {

@@ -46,10 +46,10 @@ import {
  * @param {(event: { kind: "conflict"|"tooLarge"|"authRequired" }) => void} [input.onNotify]
  *   called for the two outcomes the user has to be told about. Message text is
  *   the caller's job — this module holds no translations.
- * @returns {{ pendingSync: boolean, syncNow: () => Promise<void> }}
- *   `pendingSync` is whether a push is still owed; `syncNow` re-reads the
- *   server on demand, for the case where the user does not want to background
- *   the app to find out what another device wrote.
+ * @returns {{ pendingSync: boolean, adoptRemote: () => Promise<boolean> }}
+ *   `pendingSync` is whether a push is still owed. `adoptRemote` pulls the
+ *   server's document down unconditionally — the manual "sync now" direction,
+ *   which is deliberately a pull and never a push.
  */
 export function useCloudSync({ state, setState, onNotify }) {
   const stateRef = useRef(state);
@@ -333,9 +333,40 @@ export function useCloudSync({ state, setState, onNotify }) {
     };
   }, [clearTimer, pullFromRemote, runPush, schedulePush]);
 
-  const syncNow = useCallback(() => pullFromRemote({ force: true }), [pullFromRemote]);
+  /**
+   * Take the server's document and drop whatever this device was holding.
+   *
+   * The `localDirty` rule in `decideInitialSync` exists so a stale server
+   * cannot overwrite an edit that never landed, and it is what stopped this
+   * app losing data. But it locks a device whose local copy is the stale one:
+   * every sync tries to push, nothing adopts, and the screen keeps showing old
+   * data — with the standing risk that the push eventually succeeds and the
+   * stale document overwrites the good one.
+   *
+   * This is the way out, and it only belongs behind an explicit choice: the
+   * unsent edits are gone once it runs.
+   *
+   * @returns {Promise<boolean>} whether a document was actually adopted.
+   */
+  const adoptRemote = useCallback(async () => {
+    const remote = await fetchRemoteState();
+    if (!mountedRef.current) return false;
+    if (!remote.ok || !remote.state) {
+      if (remote.authRequired && onNotifyRef.current) {
+        onNotifyRef.current({ kind: "authRequired" });
+      }
+      return false;
+    }
+    clearTimer();
+    remoteRevRef.current = remote.updatedAt;
+    attemptRef.current = 0;
+    markDirty(false);
+    skipNextPushRef.current = true;
+    setState(materializeState(normalizeState(applySampleSeed(remote.state))));
+    return true;
+  }, [clearTimer, markDirty, setState]);
 
-  return { pendingSync, syncNow };
+  return { pendingSync, adoptRemote };
 }
 
 function revisionIsSet(value) {
