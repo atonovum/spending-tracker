@@ -5,6 +5,12 @@ export const ACTIVE_STORAGE_KEY = "spending-tracker-v5";
 // and keeping it out avoids a schema version bump + migration. Never add this
 // to STORAGE_KEYS — that list is the state migration path.
 export const LAST_ENTRY_DATE_KEY = "spending-tracker-last-entry-date";
+// Per-device sync bookkeeping, under the same rules as the key above: never in
+// STORAGE_KEYS, never in the document. Set while this device holds edits the
+// server has not confirmed, so that a push lost to a dead connection is still
+// known about after a reload — `updatedAt` alone cannot say it, because it only
+// ever advances when the server confirms.
+export const PENDING_SYNC_KEY = "spending-tracker-pending-sync";
 export const MAX_WALLETS = 5;
 
 export const REPEAT_OPTIONS = [

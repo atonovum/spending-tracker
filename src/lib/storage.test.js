@@ -9,6 +9,8 @@ import {
   normalizeWallet,
   normalizeState,
   loadState,
+  loadPendingSync,
+  savePendingSync,
   saveState,
   loadLastEntryDate,
   saveLastEntryDate,
@@ -747,5 +749,54 @@ describe('per-wallet currency (v5)', () => {
     });
 
     expect(result.wallets.map((wallet) => wallet.currency)).toEqual(['KRW', 'KRW']);
+  });
+});
+
+describe('pending sync flag', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('is false when nothing was ever written', () => {
+    expect(loadPendingSync()).toBe(false);
+  });
+
+  it('round-trips through localStorage', () => {
+    savePendingSync(true);
+    expect(loadPendingSync()).toBe(true);
+
+    savePendingSync(false);
+    expect(loadPendingSync()).toBe(false);
+  });
+
+  it('clears the key rather than storing a falsy value', () => {
+    savePendingSync(true);
+    savePendingSync(false);
+
+    expect(localStorage.getItem('spending-tracker-pending-sync')).toBeNull();
+  });
+
+  // It describes this device's relationship with the server, not the user's
+  // data, so it must never ride along in the document.
+  it('stays out of the normalised document', () => {
+    savePendingSync(true);
+    const state = normalizeState({ wallets: [], categories: [], labels: [] });
+
+    expect(state).not.toHaveProperty('pendingSync');
+  });
+
+  it('survives a storage failure without throwing', () => {
+    const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('denied');
+    });
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('denied');
+    });
+
+    expect(loadPendingSync()).toBe(false);
+    expect(savePendingSync(true).ok).toBe(false);
+
+    getItem.mockRestore();
+    setItem.mockRestore();
   });
 });

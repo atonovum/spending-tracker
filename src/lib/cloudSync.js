@@ -3,7 +3,12 @@ const API_URL = "/api/state";
 /**
  * Fetch remote state with its server-side version.
  *
- * @returns {Promise<{ state: unknown, updatedAt: number | null }>}
+ * @returns {Promise<{ ok: boolean, state: unknown, updatedAt: number | null }>}
+ *   - `ok` is whether the server actually answered. It exists because the two
+ *     situations that used to collapse into `state: null` need opposite
+ *     handling: an *empty* server should be seeded with the local document,
+ *     while an *unreachable* one must be left alone — pushing to it would send
+ *     no `If-Match` and overwrite a revision the client never read.
  *   - `state` is the parsed JSON payload, or `null` if KV is empty / fetch failed.
  *   - `updatedAt` is the server's current revision (parsed from the `ETag`
  *     response header). `null` when the server has no state yet.
@@ -11,16 +16,17 @@ const API_URL = "/api/state";
 export async function fetchRemoteState() {
   try {
     const response = await fetch(API_URL, { cache: "no-store" });
-    if (!response.ok) return { state: null, updatedAt: null };
+    if (!response.ok) return { ok: false, state: null, updatedAt: null };
     const data = await response.json();
     const etag = response.headers.get("etag");
     const updatedAt = etag !== null && etag !== "" ? Number(etag) : null;
     return {
+      ok: true,
       state: data && typeof data === "object" ? data : null,
       updatedAt: Number.isFinite(updatedAt) ? updatedAt : null,
     };
   } catch {
-    return { state: null, updatedAt: null };
+    return { ok: false, state: null, updatedAt: null };
   }
 }
 
@@ -28,10 +34,14 @@ export async function fetchRemoteState() {
  * Push local state with optimistic-concurrency control (EUN-16 Tier 2).
  *
  * @param {object} state - State payload to PUT.
- * @param {{ ifMatch?: number | null }} [options]
+ * @param {{ ifMatch?: number | null, keepalive?: boolean }} [options]
  *   - When `ifMatch` is a number, the server enforces `If-Match` and rejects
  *     the write with 409 if the stored revision does not match.
  *   - Omit (or pass `null`) for the first write against an empty KV.
+ *   - `keepalive` lets the request outlive the page. It is what makes a flush
+ *     on `pagehide` reach the server at all: iOS freezes a backgrounded web
+ *     app, and an ordinary fetch started on the way out is dropped with it.
+ *     `sendBeacon` is not an option here — it cannot set `If-Match`.
  *
  * @returns {Promise<
  *   | { ok: true, newUpdatedAt: number | null }
@@ -42,6 +52,7 @@ export async function fetchRemoteState() {
  */
 export async function pushRemoteState(state, options) {
   const ifMatch = options && options.ifMatch;
+  const keepalive = Boolean(options && options.keepalive);
   const headers = { "content-type": "application/json" };
   if (typeof ifMatch === "number" && Number.isFinite(ifMatch)) {
     headers["if-match"] = String(ifMatch);
@@ -51,6 +62,7 @@ export async function pushRemoteState(state, options) {
       method: "PUT",
       headers,
       body: JSON.stringify(state),
+      keepalive,
     });
     if (response.status === 409) {
       let current = null;

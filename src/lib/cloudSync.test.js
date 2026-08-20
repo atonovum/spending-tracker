@@ -28,6 +28,7 @@ describe("cloudSync (Tier 2 contract, EUN-4)", () => {
 
       const result = await fetchRemoteState();
       expect(result).toEqual({
+        ok: true,
         state: { foo: "bar" },
         updatedAt: 1717000000000,
       });
@@ -41,18 +42,33 @@ describe("cloudSync (Tier 2 contract, EUN-4)", () => {
       expect(result.updatedAt).toBeNull();
     });
 
-    it("returns state=null on non-2xx response", async () => {
+    it("returns ok=false on non-2xx response", async () => {
       mockFetch(jsonResponse({ status: 500, body: { error: "boom" } }));
 
       const result = await fetchRemoteState();
-      expect(result).toEqual({ state: null, updatedAt: null });
+      expect(result).toEqual({ ok: false, state: null, updatedAt: null });
     });
 
-    it("returns state=null on network failure", async () => {
+    it("returns ok=false on network failure", async () => {
       globalThis.fetch = vi.fn(() => Promise.reject(new Error("offline")));
 
       const result = await fetchRemoteState();
-      expect(result).toEqual({ state: null, updatedAt: null });
+      expect(result).toEqual({ ok: false, state: null, updatedAt: null });
+    });
+
+    // The caller has to tell these two apart: an empty server should be seeded
+    // with the local document, an unreachable one must be left untouched.
+    it("separates an empty server (ok=true, state=null) from an unreachable one", async () => {
+      mockFetch(jsonResponse({ body: null }));
+      const empty = await fetchRemoteState();
+
+      globalThis.fetch = vi.fn(() => Promise.reject(new Error("offline")));
+      const unreachable = await fetchRemoteState();
+
+      expect(empty.state).toBeNull();
+      expect(unreachable.state).toBeNull();
+      expect(empty.ok).toBe(true);
+      expect(unreachable.ok).toBe(false);
     });
   });
 
@@ -110,6 +126,24 @@ describe("cloudSync (Tier 2 contract, EUN-4)", () => {
 
       const result = await pushRemoteState({ foo: 1 });
       expect(result).toEqual({ ok: false, payloadTooLarge: true });
+    });
+
+    // `keepalive` is what lets a flush on `pagehide` survive the page being
+    // frozen on the way out; without it the request dies with the tab.
+    it("passes keepalive through to fetch when asked", async () => {
+      mockFetch(jsonResponse({ body: { ok: true }, etag: "5" }));
+
+      await pushRemoteState({ a: 1 }, { keepalive: true });
+
+      expect(globalThis.fetch.mock.calls[0][1]).toMatchObject({ keepalive: true });
+    });
+
+    it("defaults keepalive to false", async () => {
+      mockFetch(jsonResponse({ body: { ok: true }, etag: "5" }));
+
+      await pushRemoteState({ a: 1 });
+
+      expect(globalThis.fetch.mock.calls[0][1]).toMatchObject({ keepalive: false });
     });
 
     it("returns { ok: false } on network error", async () => {

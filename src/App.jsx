@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import {
   ActionIcon,
@@ -38,7 +38,8 @@ import {
   Trash2,
   Wallet,
 } from "lucide-react";
-import { applySampleSeed, loadLastEntryDate, loadState, normalizeCurrency, normalizeState, SAMPLE_SEED_ENABLED, saveLastEntryDate, saveState, SCHEMA_VERSION } from "./lib/storage.js";
+import { loadLastEntryDate, loadState, normalizeCurrency, saveLastEntryDate, saveState, SCHEMA_VERSION } from "./lib/storage.js";
+import { useCloudSync } from "./lib/useCloudSync.js";
 import { materializeState, migrateLegacyTemplates, normalizeSchedule, todayString, upcomingDate } from "./lib/schedules.js";
 import { serializeWalletCsv } from "./lib/csv.js";
 import {
@@ -66,7 +67,6 @@ import {
 import { aggregateCategoryBySubBucket, aggregateCategoryByLabel } from "./lib/categoryStats.js";
 import { CategoryIcon, getCategoryIconComponent } from "./lib/categoryIcons.jsx";
 import { I18nProvider, useI18n, useT, DEFAULT_LANGUAGE } from "./lib/i18n.jsx";
-import { fetchRemoteState, pushRemoteState } from "./lib/cloudSync.js";
 import { notifications } from "@mantine/notifications";
 import Settings from "./settings/Settings.jsx";
 
@@ -2698,78 +2698,24 @@ function AppRoot() {
   const currency = normalizeCurrency(
     state.wallets?.find((wallet) => wallet.id === state.selectedWalletId)?.currency
   );
-  const skipNextPush = useRef(true);
-  // Last server revision the client knows about. Used as `If-Match` on push.
-  // null = server has no state yet (no precondition required).
-  const remoteRevRef = useRef(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    const localUpdatedAt = typeof state.updatedAt === "number" ? state.updatedAt : 0;
-    const isDevSeedMode = SAMPLE_SEED_ENABLED;
-
-    // Dev seed guard: skip remote fetch when using fresh sample seed (updatedAt=0)
-    // to prevent old KV state from overwriting the sample data.
-    if (isDevSeedMode && localUpdatedAt === 0) {
-      return;
-    }
-
-    fetchRemoteState().then(({ state: remote, updatedAt }) => {
-      if (cancelled) return;
-      remoteRevRef.current = updatedAt;
-      if (!remote) return;
-      // Tier 2: if local is strictly newer than remote, keep local and push it.
-      // Otherwise, overwrite local with remote (last-write-wins read path).
-      const remoteUpdatedAt = typeof updatedAt === "number" ? updatedAt : 0;
-      if (localUpdatedAt > remoteUpdatedAt) {
-        return; // skipNextPush stays false → next push will write local up to KV
-      }
-      skipNextPush.current = true;
-      // Dev: re-seed samples on top of the adopted remote state too, otherwise
-      // a KV round-trip would bring back the sample wallets at their old dates.
-      setState(materializeState(normalizeState(applySampleSeed(remote))));
-    });
-    return () => {
-      cancelled = true;
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (skipNextPush.current) {
-      skipNextPush.current = false;
-      return;
-    }
-    const handle = setTimeout(async () => {
-      const stamped = { ...state, updatedAt: Date.now() };
-      const result = await pushRemoteState(stamped, { ifMatch: remoteRevRef.current });
-      if (result.ok) {
-        remoteRevRef.current = result.newUpdatedAt ?? stamped.updatedAt;
+  // Sync bookkeeping lives in `useCloudSync` (see src/lib/useCloudSync.js).
+  // It used to be two effects right here, which is why a failed push could
+  // silently lose an edit: nothing in this file is covered by tests.
+  const notifySync = useCallback(
+    ({ kind }) => {
+      if (typeof window === "undefined") return;
+      if (kind === "conflict") {
+        notifications.show({
+          color: "yellow",
+          title: lang === "en" ? "Updated on another device" : "다른 기기에서 갱신됨",
+          message:
+            lang === "en"
+              ? "Reloading the latest state."
+              : "최신 상태를 다시 불러왔습니다.",
+        });
         return;
       }
-      if (result.conflict) {
-        // Visible conflict: another device wrote a newer revision. Surface a
-        // toast (Tier 2 contract), then refetch and overwrite local. The local
-        // unpushed edit is lost, but it is a *visible* loss, not silent.
-        const refetched = await fetchRemoteState();
-        remoteRevRef.current = refetched.updatedAt;
-        if (refetched.state) {
-          skipNextPush.current = true;
-          setState(normalizeState(applySampleSeed(refetched.state)));
-        }
-        if (typeof window !== "undefined") {
-          notifications.show({
-            color: "yellow",
-            title: lang === "en" ? "Updated on another device" : "다른 기기에서 갱신됨",
-            message:
-              lang === "en"
-                ? "Reloading the latest state."
-                : "최신 상태를 다시 불러왔습니다.",
-          });
-        }
-        return;
-      }
-      if (result.payloadTooLarge && typeof window !== "undefined") {
+      if (kind === "tooLarge") {
         notifications.show({
           color: "red",
           title: lang === "en" ? "Sync payload too large" : "동기화 데이터가 너무 큽니다",
@@ -2779,9 +2725,11 @@ function AppRoot() {
               : "이 기기에는 저장됐지만 원격 동기화는 건너뛰었습니다.",
         });
       }
-    }, 1500);
-    return () => clearTimeout(handle);
-  }, [state, lang]);
+    },
+    [lang]
+  );
+
+  useCloudSync({ state, setState, onNotify: notifySync });
 
   return (
     <I18nProvider lang={lang} currency={currency}>

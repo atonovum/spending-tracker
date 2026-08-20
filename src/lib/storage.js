@@ -1,5 +1,5 @@
 import defaultSeed from "../../samples/default-seed.json";
-import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, normalizeLabelIds, STORAGE_KEYS, safeJsonParse, uid, validDate } from "./finance.js";
+import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, normalizeLabelIds, PENDING_SYNC_KEY, STORAGE_KEYS, safeJsonParse, uid, validDate } from "./finance.js";
 import { migrateLegacyTemplates, normalizeSchedule, todayString } from "./schedules.js";
 import { withSampleData } from "./sampleData.js";
 
@@ -229,6 +229,39 @@ export function saveLastEntryDate(date) {
   if (!validDate(date)) return { ok: false };
   try {
     localStorage.setItem(LAST_ENTRY_DATE_KEY, date);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err };
+  }
+}
+
+/**
+ * Whether this device is holding edits the server has not confirmed.
+ *
+ * Kept beside the document rather than inside it, like `LAST_ENTRY_DATE_KEY`:
+ * it describes this device's relationship with the server, not the user's
+ * data, so it must stay out of CSV import/export and out of the KV payload.
+ *
+ * It exists because `state.updatedAt` cannot answer the question. That field
+ * only moves forward when a push is confirmed, so after a push that never
+ * landed the local document is ahead of the server in content while still
+ * carrying the server's old revision — and a comparison of the two hands the
+ * win to a stale server. This flag is the second, honest signal.
+ *
+ * @returns {boolean} true when a push is still owed.
+ */
+export function loadPendingSync() {
+  try {
+    return localStorage.getItem(PENDING_SYNC_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function savePendingSync(pending) {
+  try {
+    if (pending) localStorage.setItem(PENDING_SYNC_KEY, "1");
+    else localStorage.removeItem(PENDING_SYNC_KEY);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err };

@@ -21,7 +21,9 @@
 | `src/lib/schedules.js` | 예약 거래 템플릿 정규화·실체화(materialisation)·v3 마이그레이션 |
 | `src/lib/storage.js` | 정규화 + localStorage 영속화 |
 | `src/lib/csv.js` | CSV 가져오기/내보내기 |
-| `src/lib/cloudSync.js` | Worker KV 동기화 |
+| `src/lib/cloudSync.js` | Worker KV HTTP 호출 (fetch/push, 계약만) |
+| `src/lib/syncEngine.js` | 동기화 판단 (누가 이기는가, 언제 재시도하는가) — 순수 함수 |
+| `src/lib/useCloudSync.js` | 동기화 루프 배선 (디바운스·flush·재시도·플래그) |
 | `src/lib/i18n.jsx` | 번역 (ko/en) |
 | `src/worker.js` | Cloudflare Worker (KV 바인딩 `STATE_KV`) |
 | `src/App.jsx` | 화면 전체 (2500줄 이상) |
@@ -149,5 +151,21 @@ npm run lint && npm run test:coverage && npm run build
   반복이 있거나 날짜가 미래면 `scheduled[]`, 아니면 `entries[]`. 원장 버킷은
   오늘에서 끊기므로 미래 날짜 entry는 화면에서 사라진다. `upsertEntry`가 양방향
   으로 이 규칙을 지킨다(미래로 고치면 schedule이 되고, 과거로 당기면 즉시 실체화).
+- **`state.updatedAt`만으로 로컬과 원격의 승자를 정하지 말 것.** `updatedAt`은
+  서버가 푸시를 확인해줬을 때만 전진한다. 그래서 푸시가 실패한 기기는 내용은
+  앞서 있으면서 리비전은 서버의 옛 값을 그대로 들고 있고, 리비전만 비교하면
+  낡은 서버가 이겨서 편집분이 조용히 사라진다. 실제로 이렇게 잃었다.
+  판정은 `decideInitialSync`가 하고, `PENDING_SYNC_KEY`(기기 로컬 플래그,
+  문서 밖)가 리비전 비교보다 우선한다. 이 플래그는 CSV·KV 페이로드에 절대
+  넣지 말 것 — `LAST_ENTRY_DATE_KEY`와 같은 규칙이다.
+- **푸시 실패는 최종이 아니라 일시적인 것으로 다룬다.** 백오프 재시도 +
+  `online` 재시도가 있고, `pagehide`/`visibilitychange(hidden)`에서
+  `keepalive: true`로 마지막 flush를 한다. iOS는 백그라운드로 넘어간
+  standalone 웹앱을 즉시 동결하므로 아직 안 터진 디바운스 타이머는 영영 안
+  터진다. 이 flush 경로를 제거하지 말 것.
+- `fetchRemoteState`의 `ok`는 "서버가 응답했는가"다. **빈 서버와 못 닿는
+  서버는 다르게 다뤄야 한다** — 빈 서버는 로컬로 채우고, 못 닿는 서버는
+  건드리지 않는다. 후자에 푸시하면 `If-Match` 없이 나가서 읽어본 적 없는
+  리비전을 덮어쓴다.
 - 예약 거래를 지우는 UI는 확인 하나뿐이다. "반복만 중단"은 템플릿을 살려둬야
   과거 행이 계속 계산되던 옛 모델의 잔재이므로 되살리지 말 것.
