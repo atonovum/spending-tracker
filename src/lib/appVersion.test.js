@@ -58,6 +58,7 @@ describe('fetchDeployedVersion', () => {
     await expect(fetchDeployedVersion()).resolves.toEqual({
       ok: true,
       reason: 'ok',
+      status: 200,
       version: '51818e3',
       builtAt: '2026-08-20T10:34:54.755Z',
     });
@@ -77,6 +78,7 @@ describe('fetchDeployedVersion', () => {
     await expect(fetchDeployedVersion()).resolves.toEqual({
       ok: true,
       reason: 'ok',
+      status: 200,
       version: '51818e3',
       builtAt: null,
     });
@@ -98,6 +100,7 @@ describe('fetchDeployedVersion', () => {
     await expect(fetchDeployedVersion()).resolves.toEqual({
       ok: false,
       reason: 'auth',
+      status: 200,
       version: null,
       builtAt: null,
     });
@@ -118,6 +121,7 @@ describe('fetchDeployedVersion', () => {
     await expect(fetchDeployedVersion()).resolves.toEqual({
       ok: false,
       reason: 'missing',
+      status: 200,
       version: null,
       builtAt: null,
     });
@@ -126,13 +130,23 @@ describe('fetchDeployedVersion', () => {
   it('names an unreachable server on a non-2xx response', async () => {
     globalThis.fetch = vi.fn(() => Promise.resolve(jsonResponse({}, { status: 404 })));
 
-    await expect(fetchDeployedVersion()).resolves.toMatchObject({ ok: false, reason: 'unreachable' });
+    // The code is what separates a missing asset from a dead network.
+    await expect(fetchDeployedVersion()).resolves.toMatchObject({
+      ok: false,
+      reason: 'unreachable',
+      status: 404,
+    });
   });
 
   it('names an unreachable server on a network error', async () => {
     globalThis.fetch = vi.fn(() => Promise.reject(new Error('offline')));
 
-    await expect(fetchDeployedVersion()).resolves.toMatchObject({ ok: false, reason: 'unreachable' });
+    // No response at all, so there is no code to report.
+    await expect(fetchDeployedVersion()).resolves.toMatchObject({
+      ok: false,
+      reason: 'unreachable',
+      status: 0,
+    });
   });
 
   it('names a malformed payload when the JSON carries no version', async () => {

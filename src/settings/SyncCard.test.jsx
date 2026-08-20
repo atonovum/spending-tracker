@@ -32,7 +32,7 @@ function render(props = {}) {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  fetchDeployedVersion.mockResolvedValue({ ok: true, reason: 'ok', version: 'aaaaaaa', builtAt: null });
+  fetchDeployedVersion.mockResolvedValue({ ok: true, reason: 'ok', status: 200, version: 'aaaaaaa', builtAt: null });
 });
 
 describe('version reporting', () => {
@@ -43,7 +43,7 @@ describe('version reporting', () => {
   });
 
   it('shows what the server is serving once it answers', async () => {
-    fetchDeployedVersion.mockResolvedValue({ ok: true, reason: 'ok', version: 'bbbbbbb', builtAt: null });
+    fetchDeployedVersion.mockResolvedValue({ ok: true, reason: 'ok', status: 200, version: 'bbbbbbb', builtAt: null });
     render();
 
     await waitFor(() => expect(screen.getByText('bbbbbbb')).toBeInTheDocument());
@@ -57,10 +57,25 @@ describe('version reporting', () => {
     ['unreachable', /서버 응답 없음/],
     ['malformed', /형식 오류/],
   ])('names why the deployed version could not be read: %s', async (reason, expected) => {
-    fetchDeployedVersion.mockResolvedValue({ ok: false, reason, version: null, builtAt: null });
+    fetchDeployedVersion.mockResolvedValue({ ok: false, reason, status: 0, version: null, builtAt: null });
     render();
 
     await waitFor(() => expect(screen.getByText(expected)).toBeInTheDocument());
+  });
+
+  // A 404 says the asset is not in the deployment; a request that never
+  // completed says nothing about the server at all. The code is the difference.
+  it('shows the status code when there was a response', async () => {
+    fetchDeployedVersion.mockResolvedValue({
+      ok: false,
+      reason: 'unreachable',
+      status: 404,
+      version: null,
+      builtAt: null,
+    });
+    render();
+
+    await waitFor(() => expect(screen.getByText(/서버 응답 없음 \(404\)/)).toBeInTheDocument());
   });
 
   it('offers no update when the versions match', async () => {
@@ -76,7 +91,7 @@ describe('applying an update', () => {
   // what actually finds the new build, so both calls have to happen.
   it('re-checks the worker and hands over to it', async () => {
     const user = userEvent.setup();
-    fetchDeployedVersion.mockResolvedValue({ ok: true, reason: 'ok', version: 'bbbbbbb', builtAt: null });
+    fetchDeployedVersion.mockResolvedValue({ ok: true, reason: 'ok', status: 200, version: 'bbbbbbb', builtAt: null });
     render();
 
     const button = await screen.findByRole('button', { name: /업데이트/ });

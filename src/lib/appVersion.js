@@ -31,41 +31,45 @@ const UNRELEASED = new Set(["dev", "test", ""]);
  *   - `missing` — HTML came back without a redirect, which is the Worker's
  *     single-page-application fallback answering for an asset that is not
  *     there. The deploy is missing `/version.json`.
- *   - `unreachable` — no answer, or a non-2xx one.
+ *   - `unreachable` — no answer, or a non-2xx one. `status` carries the code
+ *     when there was a response at all (0 when the request never completed),
+ *     because "no answer" covers a 404 and a dead network alike and the two
+ *     point at completely different places.
  *   - `malformed` — JSON, but nothing that names a version.
  *
- * @returns {Promise<{ ok: boolean, reason: string, version: string|null, builtAt: string|null }>}
+ * @returns {Promise<{ ok: boolean, reason: string, status: number, version: string|null, builtAt: string|null }>}
  */
 export async function fetchDeployedVersion() {
   let response;
   try {
     response = await fetch(VERSION_URL, { cache: "no-store" });
   } catch {
-    return failure("unreachable");
+    return failure("unreachable", 0);
   }
 
-  if (!response.ok) return failure("unreachable");
+  if (!response.ok) return failure("unreachable", response.status);
   if (isAuthWall(response)) {
-    return failure(response.redirected ? "auth" : "missing");
+    return failure(response.redirected ? "auth" : "missing", response.status);
   }
 
   try {
     const data = await response.json();
     const version = data && typeof data.version === "string" ? data.version : null;
-    if (!version) return failure("malformed");
+    if (!version) return failure("malformed", response.status);
     return {
       ok: true,
       reason: "ok",
+      status: response.status,
       version,
       builtAt: data && typeof data.builtAt === "string" ? data.builtAt : null,
     };
   } catch {
-    return failure("malformed");
+    return failure("malformed", response.status);
   }
 }
 
-function failure(reason) {
-  return { ok: false, reason, version: null, builtAt: null };
+function failure(reason, status) {
+  return { ok: false, reason, status: status || 0, version: null, builtAt: null };
 }
 
 /**

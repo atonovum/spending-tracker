@@ -18,15 +18,15 @@ import { useT } from "../lib/i18n.jsx";
  */
 export function SyncCard({ pendingSync, onSyncNow }) {
   const t = useT();
-  const [deployed, setDeployed] = useState({ state: "checking", version: null, reason: "ok" });
+  const [deployed, setDeployed] = useState({ state: "checking", version: null, reason: "ok", status: 0 });
   const [busy, setBusy] = useState(false);
 
   const checkVersion = useCallback(async () => {
     const result = await fetchDeployedVersion();
     setDeployed(
       result.ok
-        ? { state: "known", version: result.version, reason: "ok" }
-        : { state: "unknown", version: null, reason: result.reason }
+        ? { state: "known", version: result.version, reason: "ok", status: 0 }
+        : { state: "unknown", version: null, reason: result.reason, status: result.status }
     );
   }, []);
 
@@ -62,7 +62,9 @@ export function SyncCard({ pendingSync, onSyncNow }) {
     deployed.state === "checking"
       ? t("settings.sync.checking")
       : deployed.state === "unknown"
-        ? t(`settings.sync.reason.${deployed.reason}`)
+        // The status code separates a 404 (asset is not in the deployment)
+        // from a request that never completed at all.
+        ? `${t(`settings.sync.reason.${deployed.reason}`)}${deployed.status ? ` (${deployed.status})` : ""}`
         : deployed.version;
 
   return (
