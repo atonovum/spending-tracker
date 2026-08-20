@@ -45,19 +45,59 @@ export async function checkForServiceWorkerUpdate() {
 }
 
 /**
+ * Wait for a newly-found worker to finish installing.
+ *
+ * `registration.update()` resolves when the *check* is done, which is well
+ * before the new worker is ready to take over. Skipping this wait was why the
+ * update button needed a manual refresh after it: `updateSW(true)` posts
+ * SKIP_WAITING to `registration.waiting`, and with nothing waiting yet it had
+ * nobody to talk to and returned having done nothing at all.
+ *
+ * Resolves either way — the caller reloads regardless, and a reload with no new
+ * worker just costs one page load.
+ */
+function waitForWaitingWorker(registration, timeoutMs) {
+  if (registration.waiting) return Promise.resolve(true);
+  const pending = registration.installing;
+  if (!pending || typeof pending.addEventListener !== "function") {
+    return Promise.resolve(false);
+  }
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      pending.removeEventListener("statechange", onStateChange);
+      resolve(value);
+    };
+    function onStateChange() {
+      // `installed` is the point at which it becomes `registration.waiting`;
+      // `activated` means it already took over and there is nothing to wait for.
+      if (pending.state === "installed" || pending.state === "activated") finish(true);
+      if (pending.state === "redundant") finish(false);
+    }
+    pending.addEventListener("statechange", onStateChange);
+    setTimeout(() => finish(false), timeoutMs);
+  });
+}
+
+/**
  * Swap in the waiting build and reload.
  *
  * `updateSW(true)` is the PWA plugin's path — it calls `skipWaiting` and
- * reloads once the new worker takes control. The plain reload is the fallback
- * for a page with no worker registered (a dev server, a browser that refused
- * registration), where reloading is the whole of the job anyway.
+ * reloads once the new worker takes control. The reload here is the backstop:
+ * it fires only if the page is still around afterwards (the plugin's own
+ * reload takes the timer with it), and it is the whole of the job on a page
+ * with no worker registered at all.
  */
-export async function applyServiceWorkerUpdate({ reload } = {}) {
+export async function applyServiceWorkerUpdate({ reload, timeoutMs = 8000 } = {}) {
   const doReload = reload || (() => window.location.reload());
-  const { updateSW } = controls;
+  const { registration, updateSW } = controls;
+
+  if (registration) await waitForWaitingWorker(registration, timeoutMs);
+
   if (updateSW) {
     await updateSW(true);
-    return;
   }
   doReload();
 }
