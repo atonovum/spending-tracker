@@ -2754,6 +2754,21 @@ function AppRoot() {
         });
         return;
       }
+      if (kind === "authRequired") {
+        // Not auto-dismissed: nothing syncs until the user acts, and on a phone
+        // the app shell still loads from the service worker cache, so there is
+        // no other sign that anything is wrong.
+        notifications.show({
+          color: "red",
+          autoClose: false,
+          title: lang === "en" ? "Sign-in required" : "다시 로그인이 필요합니다",
+          message:
+            lang === "en"
+              ? "Changes are saved on this device but cannot reach the server. Reload the page to sign in again."
+              : "이 기기에는 저장됐지만 서버까지 가지 못했습니다. 페이지를 새로고침해 다시 로그인해주세요.",
+        });
+        return;
+      }
       if (kind === "tooLarge") {
         notifications.show({
           color: "red",

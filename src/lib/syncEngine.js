@@ -93,5 +93,10 @@ export function decidePushOutcome(result) {
     return { type: "conflict", remoteRev: typeof current === "number" ? current : null };
   }
   if (result && result.payloadTooLarge) return { type: "tooLarge" };
+  // Kept apart from "retry" because this failure has an owner: the Access
+  // session expired, so the request never reached the Worker at all. Retrying
+  // still makes sense (signing in fixes it without reopening the app), but the
+  // user has to be told, and the document must stay marked unsynced.
+  if (result && result.authRequired) return { type: "authRequired" };
   return { type: "retry" };
 }

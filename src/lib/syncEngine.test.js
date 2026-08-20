@@ -113,6 +113,19 @@ describe('decidePushOutcome', () => {
     expect(decidePushOutcome({ ok: false, payloadTooLarge: true })).toEqual({ type: 'tooLarge' });
   });
 
+  // Separate from a plain retry because this one is the user's to fix: the
+  // Access session expired and no amount of retrying alone will land the write.
+  it('reports an expired session for an auth wall', () => {
+    expect(decidePushOutcome({ ok: false, authRequired: true })).toEqual({ type: 'authRequired' });
+  });
+
+  it('prefers the conflict verdict over the auth signal', () => {
+    expect(decidePushOutcome({ ok: false, conflict: true, current: 3, authRequired: true })).toEqual({
+      type: 'conflict',
+      remoteRev: 3,
+    });
+  });
+
   // Everything else is transient by assumption: a phone loses its connection
   // far more often than a single-user server rejects a well-formed document.
   it('asks for a retry on any other failure', () => {

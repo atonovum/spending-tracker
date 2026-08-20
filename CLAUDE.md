@@ -163,6 +163,12 @@ npm run lint && npm run test:coverage && npm run build
   `keepalive: true`로 마지막 flush를 한다. iOS는 백그라운드로 넘어간
   standalone 웹앱을 즉시 동결하므로 아직 안 터진 디바운스 타이머는 영영 안
   터진다. 이 flush 경로를 제거하지 말 것.
+- **인증 벽은 200으로 온다.** Cloudflare Access는 인증 없는 요청에 로그인
+  페이지로 302를 주고, `fetch`가 이를 따라가므로 최종 응답이 200 text/html이
+  된다. `response.ok`가 true라 상태 코드 검사를 전부 통과한다. 실제로 쓰기
+  경로가 이걸 성공으로 보고해서, 저장되지 않은 편집을 동기화됨으로 표시하고
+  지웠다. `cloudSync.js`의 `isAuthWall`이 리다이렉트와 content-type 둘 다
+  보고 걸러낸다. **상태 코드만으로 성공을 판정하지 말 것.**
 - `fetchRemoteState`의 `ok`는 "서버가 응답했는가"다. **빈 서버와 못 닿는
   서버는 다르게 다뤄야 한다** — 빈 서버는 로컬로 채우고, 못 닿는 서버는
   건드리지 않는다. 후자에 푸시하면 `If-Match` 없이 나가서 읽어본 적 없는

@@ -68,7 +68,7 @@ beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
   vi.useFakeTimers({ shouldAdvanceTime: true });
-  fetchRemoteState.mockResolvedValue({ ok: true, state: null, updatedAt: null });
+  fetchRemoteState.mockResolvedValue({ ok: true, authRequired: false, state: null, updatedAt: null });
   pushRemoteState.mockResolvedValue({ ok: true, newUpdatedAt: 2000 });
 });
 
@@ -330,6 +330,85 @@ describe('failure handling', () => {
     // forever would just burn the phone's battery.
     expect(pushRemoteState).toHaveBeenCalledTimes(1);
     expect(localStorage.getItem(PENDING_SYNC_KEY)).toBe('1');
+  });
+});
+
+describe('expired access session', () => {
+  // Cloudflare Access answers an unauthenticated request with a login page that
+  // arrives as a 200, so the old code recorded a successful write for it: flag
+  // cleared, revision advanced, edit gone. On a phone whose app shell still
+  // loads from the service worker cache, this is invisible — the app works and
+  // nothing ever syncs.
+  it('keeps the document unsynced and warns when a push hits the login page', async () => {
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 });
+    pushRemoteState.mockResolvedValue({ ok: false, authRequired: true });
+
+    const { result, onNotify } = setup(docWith(['local-1'], 1000));
+    await settle();
+
+    act(() => result.current.setState(docWith(['local-1', 'local-2'], 1000)));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(PUSH_DEBOUNCE_MS + 50);
+    });
+
+    expect(localStorage.getItem(PENDING_SYNC_KEY)).toBe('1');
+    expect(result.current.state.updatedAt).toBe(1000);
+    expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'authRequired' }));
+  });
+
+  // Signing in again fixes it without reopening the app, so the retry stands.
+  it('keeps retrying so a fresh sign-in lands the write', async () => {
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 });
+    pushRemoteState.mockResolvedValue({ ok: false, authRequired: true });
+
+    const { result } = setup(docWith(['local-1'], 1000));
+    await settle();
+
+    act(() => result.current.setState(docWith(['local-1', 'local-2'], 1000)));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(PUSH_DEBOUNCE_MS + 50);
+    });
+    expect(pushRemoteState).toHaveBeenCalledTimes(1);
+
+    pushRemoteState.mockResolvedValue({ ok: true, newUpdatedAt: 3000 });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(RETRY_DELAYS_MS[0] + 50);
+    });
+
+    expect(pushRemoteState).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(result.current.state.updatedAt).toBe(3000));
+    expect(localStorage.getItem(PENDING_SYNC_KEY)).not.toBe('1');
+  });
+
+  it('warns only once while the session stays expired', async () => {
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 });
+    pushRemoteState.mockResolvedValue({ ok: false, authRequired: true });
+
+    const { result, onNotify } = setup(docWith(['local-1'], 1000));
+    await settle();
+
+    act(() => result.current.setState(docWith(['local-1', 'local-2'], 1000)));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(PUSH_DEBOUNCE_MS + 50);
+      await vi.advanceTimersByTimeAsync(RETRY_DELAYS_MS[0] + 50);
+      await vi.advanceTimersByTimeAsync(RETRY_DELAYS_MS[1] + 50);
+    });
+
+    expect(pushRemoteState.mock.calls.length).toBeGreaterThan(2);
+    const authWarnings = onNotify.mock.calls.filter(([event]) => event.kind === 'authRequired');
+    expect(authWarnings).toHaveLength(1);
+  });
+
+  it('warns when the startup read hits the login page', async () => {
+    fetchRemoteState.mockResolvedValue({ ok: false, authRequired: true, state: null, updatedAt: null });
+
+    const { result, onNotify } = setup(docWith(['local-1'], 1000));
+    await settle();
+
+    expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'authRequired' }));
+    // Nothing is adopted and nothing is pushed: the server was never reached.
+    expect(entryIdsOf(result.current.state)).toEqual(['local-1']);
+    expect(pushRemoteState).not.toHaveBeenCalled();
   });
 });
 

@@ -16,6 +16,22 @@ describe("cloudSync (Tier 2 contract, EUN-4)", () => {
     globalThis.fetch = vi.fn(() => Promise.resolve(response));
   }
 
+  /**
+   * What Cloudflare Access actually returns to an unauthenticated request: a
+   * 302 to the login page, which `fetch` follows, so the final response is a
+   * 200 carrying HTML. `response.ok` is true — the trap this suite guards.
+   */
+  function accessLoginResponse({ redirected = true } = {}) {
+    return {
+      ok: true,
+      status: 200,
+      redirected,
+      headers: new Headers({ "content-type": "text/html; charset=UTF-8" }),
+      json: () => Promise.reject(new SyntaxError("Unexpected token '<'")),
+      text: () => Promise.resolve("<html><body>login</body></html>"),
+    };
+  }
+
   function jsonResponse({ status = 200, body, etag } = {}) {
     const headers = new Headers({ "content-type": "application/json" });
     if (etag !== undefined) headers.set("etag", etag);
@@ -29,6 +45,7 @@ describe("cloudSync (Tier 2 contract, EUN-4)", () => {
       const result = await fetchRemoteState();
       expect(result).toEqual({
         ok: true,
+        authRequired: false,
         state: { foo: "bar" },
         updatedAt: 1717000000000,
       });
@@ -46,14 +63,36 @@ describe("cloudSync (Tier 2 contract, EUN-4)", () => {
       mockFetch(jsonResponse({ status: 500, body: { error: "boom" } }));
 
       const result = await fetchRemoteState();
-      expect(result).toEqual({ ok: false, state: null, updatedAt: null });
+      expect(result).toEqual({ ok: false, authRequired: false, state: null, updatedAt: null });
     });
 
     it("returns ok=false on network failure", async () => {
       globalThis.fetch = vi.fn(() => Promise.reject(new Error("offline")));
 
       const result = await fetchRemoteState();
-      expect(result).toEqual({ ok: false, state: null, updatedAt: null });
+      expect(result).toEqual({ ok: false, authRequired: false, state: null, updatedAt: null });
+    });
+
+    // An expired Access session is not a missing document. Falling through on
+    // the JSON parse error happened to give the right answer, but only by
+    // accident — nothing said so, and the push path made the opposite guess.
+    it("reports authRequired when the response is an auth redirect", async () => {
+      mockFetch(accessLoginResponse());
+
+      const result = await fetchRemoteState();
+
+      expect(result).toEqual({ ok: false, authRequired: true, state: null, updatedAt: null });
+    });
+
+    it("reports authRequired when a 200 carries HTML instead of JSON", async () => {
+      mockFetch(new Response("<html></html>", {
+        status: 200,
+        headers: new Headers({ "content-type": "text/html" }),
+      }));
+
+      const result = await fetchRemoteState();
+
+      expect(result).toEqual({ ok: false, authRequired: true, state: null, updatedAt: null });
     });
 
     // The caller has to tell these two apart: an empty server should be seeded
@@ -126,6 +165,30 @@ describe("cloudSync (Tier 2 contract, EUN-4)", () => {
 
       const result = await pushRemoteState({ foo: 1 });
       expect(result).toEqual({ ok: false, payloadTooLarge: true });
+    });
+
+    // The defect this suite exists for. A login page is a 200, so every status
+    // check below passed and the client recorded a write that never happened —
+    // the flag cleared, the revision advanced, the edit gone.
+    it("does not report success for an Access login page", async () => {
+      mockFetch(accessLoginResponse());
+
+      const result = await pushRemoteState({ a: 1 }, { ifMatch: 5 });
+
+      expect(result.ok).toBe(false);
+      expect(result.authRequired).toBe(true);
+    });
+
+    it("does not report success for a 200 that carries HTML instead of JSON", async () => {
+      mockFetch(new Response("<html></html>", {
+        status: 200,
+        headers: new Headers({ "content-type": "text/html" }),
+      }));
+
+      const result = await pushRemoteState({ a: 1 });
+
+      expect(result.ok).toBe(false);
+      expect(result.authRequired).toBe(true);
     });
 
     // `keepalive` is what lets a flush on `pagehide` survive the page being

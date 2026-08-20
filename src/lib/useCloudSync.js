@@ -36,7 +36,7 @@ import {
  * @param {object} input
  * @param {object} input.state the live document.
  * @param {(next: object) => void} input.setState React setter for it.
- * @param {(event: { kind: "conflict"|"tooLarge" }) => void} [input.onNotify]
+ * @param {(event: { kind: "conflict"|"tooLarge"|"authRequired" }) => void} [input.onNotify]
  *   called for the two outcomes the user has to be told about. Message text is
  *   the caller's job — this module holds no translations.
  * @returns {{ pendingSync: boolean }} whether a push is still owed.
@@ -56,6 +56,9 @@ export function useCloudSync({ state, setState, onNotify }) {
   const skipNextPushRef = useRef(true);
   const dirtyRef = useRef(false);
   const attemptRef = useRef(0);
+  // One warning per expired session, not one per retry. Cleared on the next
+  // push that actually reaches the Worker.
+  const authNotifiedRef = useRef(false);
   const inFlightRef = useRef(false);
   const timerRef = useRef(null);
   const [pendingSync, setPendingSync] = useState(false);
@@ -119,6 +122,7 @@ export function useCloudSync({ state, setState, onNotify }) {
       if (outcome.type === "confirmed") {
         remoteRevRef.current = outcome.remoteRev ?? stamped.updatedAt;
         attemptRef.current = 0;
+        authNotifiedRef.current = false;
         if (stateRef.current !== snapshot) {
           // The document moved while the request was in flight, so what the
           // server now holds is already behind. Stay dirty and send again.
@@ -158,6 +162,20 @@ export function useCloudSync({ state, setState, onNotify }) {
         return;
       }
 
+      if (outcome.type === "authRequired") {
+        // The login page comes back as a 200, so this used to read as a
+        // successful write. The document stays flagged, and the retry stands:
+        // signing in again lands it without reopening the app.
+        if (!authNotifiedRef.current && onNotifyRef.current) {
+          authNotifiedRef.current = true;
+          onNotifyRef.current({ kind: "authRequired" });
+        }
+        attemptRef.current += 1;
+        markDirty(true);
+        schedulePush(nextRetryDelay(attemptRef.current));
+        return;
+      }
+
       attemptRef.current += 1;
       markDirty(true);
       schedulePush(nextRetryDelay(attemptRef.current));
@@ -179,6 +197,10 @@ export function useCloudSync({ state, setState, onNotify }) {
     fetchRemoteState().then((remote) => {
       if (cancelled) return;
       if (remote.ok) remoteRevRef.current = remote.updatedAt;
+      if (remote.authRequired && !authNotifiedRef.current && onNotifyRef.current) {
+        authNotifiedRef.current = true;
+        onNotifyRef.current({ kind: "authRequired" });
+      }
 
       const decision = decideInitialSync({
         remoteFetchOk: remote.ok,
