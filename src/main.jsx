@@ -7,8 +7,24 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "./index.css";
 import App from "./App.jsx";
+import { checkForServiceWorkerUpdate, setServiceWorkerControls } from "./lib/swUpdate.js";
 
-registerSW({ immediate: true });
+const updateSW = registerSW({
+  immediate: true,
+  onRegisteredSW(_url, registration) {
+    setServiceWorkerControls({ registration, updateSW });
+  },
+});
+
+// A home-screen web app on iOS is resumed, not reloaded: no navigation happens,
+// so the browser never re-fetches `sw.js` and a deploy stays invisible however
+// often the app is reopened. Coming back to the foreground is the moment to ask.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") checkForServiceWorkerUpdate();
+});
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) checkForServiceWorkerUpdate();
+});
 
 // Design tokens (mirrors the CSS variables declared in index.css).
 const theme = createTheme({

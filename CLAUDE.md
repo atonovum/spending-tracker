@@ -24,6 +24,9 @@
 | `src/lib/cloudSync.js` | Worker KV HTTP 호출 (fetch/push, 계약만) |
 | `src/lib/syncEngine.js` | 동기화 판단 (누가 이기는가, 언제 재시도하는가) — 순수 함수 |
 | `src/lib/useCloudSync.js` | 동기화 루프 배선 (디바운스·flush·재시도·플래그) |
+| `src/lib/authWall.js` | Access 로그인 페이지 판별 (200 HTML 함정) |
+| `src/lib/appVersion.js` | 빌드 식별자 + 배포본 버전 조회 |
+| `src/lib/swUpdate.js` | 서비스 워커 갱신 확인·적용 |
 | `src/lib/i18n.jsx` | 번역 (ko/en) |
 | `src/worker.js` | Cloudflare Worker (KV 바인딩 `STATE_KV`) |
 | `src/App.jsx` | 화면 전체 (2500줄 이상) |
@@ -74,6 +77,18 @@ label    { id, name }
   마이그레이션이 다시 돈다. 일정 이관 게이트는 `SCHEDULE_MIGRATION_VERSION`
   처럼 고정 상수로 둔다.
 - 지갑 상한 `MAX_WALLETS` = 5.
+- **빌드 식별자는 커밋 해시다.** `vite.config.js`의 `define`이
+  `__APP_VERSION__`을 박고(`WORKERS_CI_COMMIT_SHA` → `git rev-parse` →
+  `"dev"` 순), 같은 값을 `/version.json`으로도 내보낸다. `vitest.config.js`가
+  같은 `define`을 다시 선언한다 — vite 설정을 안 읽으므로 빠뜨리면 그 상수를
+  읽는 모듈이 전부 파싱에서 죽는다.
+- **배포 버전은 KV가 아니라 정적 자산에서 읽는다.** KV는 "마지막으로 쓴
+  기기의 버전"을 기록할 뿐이라 배포본 버전과 무관하다. `/version.json`은
+  VitePWA 기본 `globPatterns`(js,css,html,ico,png,svg) 밖이라 precache되지
+  않고 네트워크로 나간다 — 그래서 답이 신선하다.
+- JSON 내보내기의 `appVersion`은 **추적용이다. 마이그레이션 게이트로 쓰지
+  말 것.** 배포마다 바뀌므로 게이팅하면 과거 마이그레이션이 매번 다시 돈다.
+  판정은 `version`(= `SCHEMA_VERSION`)만 본다.
 
 ## 코드베이스에서 안 드러나는 것
 
@@ -165,6 +180,11 @@ npm run lint && npm run test:coverage && npm run build
   (bfcache 복원), `online`에서 다시 읽고, `PULL_MIN_INTERVAL_MS`가 탭 전환
   때마다 요청이 나가는 것을 막는다. 판정은 시작할 때와 같은
   `decideInitialSync`이므로 미전송 편집이 있으면 재개해도 로컬이 이긴다.
+- **서비스 워커 갱신도 복귀 때 직접 물어봐야 한다.** 브라우저는 `sw.js`를
+  다시 받아 바이트로 비교해 새 버전을 판정하는데, 그 재요청은 등록·내비게이션·
+  `registration.update()` 때만 일어난다. 재개는 그 셋 중 아무것도 아니라
+  배포가 영영 안 보인다. `main.jsx`가 `visibilitychange`/`pageshow`에서
+  `checkForServiceWorkerUpdate()`를 부른다 — 원격 읽기와 같은 이유, 같은 자리.
 - **푸시 실패는 최종이 아니라 일시적인 것으로 다룬다.** 백오프 재시도 +
   `online` 재시도가 있고, `pagehide`/`visibilitychange(hidden)`에서
   `keepalive: true`로 마지막 flush를 한다. iOS는 백그라운드로 넘어간

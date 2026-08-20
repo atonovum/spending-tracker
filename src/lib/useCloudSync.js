@@ -46,7 +46,10 @@ import {
  * @param {(event: { kind: "conflict"|"tooLarge"|"authRequired" }) => void} [input.onNotify]
  *   called for the two outcomes the user has to be told about. Message text is
  *   the caller's job — this module holds no translations.
- * @returns {{ pendingSync: boolean }} whether a push is still owed.
+ * @returns {{ pendingSync: boolean, syncNow: () => Promise<void> }}
+ *   `pendingSync` is whether a push is still owed; `syncNow` re-reads the
+ *   server on demand, for the case where the user does not want to background
+ *   the app to find out what another device wrote.
  */
 export function useCloudSync({ state, setState, onNotify }) {
   const stateRef = useRef(state);
@@ -321,7 +324,9 @@ export function useCloudSync({ state, setState, onNotify }) {
     };
   }, [clearTimer, pullFromRemote, runPush, schedulePush]);
 
-  return { pendingSync };
+  const syncNow = useCallback(() => pullFromRemote({ force: true }), [pullFromRemote]);
+
+  return { pendingSync, syncNow };
 }
 
 function revisionIsSet(value) {

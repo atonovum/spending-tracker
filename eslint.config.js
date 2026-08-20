@@ -64,6 +64,10 @@ export default [
     languageOptions: {
       globals: {
         ...globals.browser,
+        // Substituted at transform time by the `define` block in
+        // `vite.config.js` (and mirrored in `vitest.config.js`).
+        __APP_VERSION__: 'readonly',
+        __BUILD_TIME__: 'readonly',
       },
     },
     plugins: {

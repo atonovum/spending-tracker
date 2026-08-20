@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { loadLastEntryDate, loadState, normalizeCurrency, saveLastEntryDate, saveState, SCHEMA_VERSION } from "./lib/storage.js";
 import { useCloudSync } from "./lib/useCloudSync.js";
+import { APP_VERSION } from "./lib/appVersion.js";
 import { materializeState, migrateLegacyTemplates, normalizeSchedule, todayString, upcomingDate } from "./lib/schedules.js";
 import { serializeWalletCsv } from "./lib/csv.js";
 import {
@@ -1037,7 +1038,7 @@ function SearchFacetMenu({ label, options, selectedIds, onChange }) {
   );
 }
 
-function App({ state, setState }) {
+function App({ state, setState, pendingSync = false, syncNow }) {
   const { t, formatMoney, currency } = useI18n();
   const [activeTab, setActiveTab] = useState("ledger");
   const [ledgerMode, setLedgerMode] = useState("month");
@@ -1818,6 +1819,10 @@ function App({ state, setState }) {
         // Carries `wallet.scheduled` with it; the version tells an importer
         // whether the entries still need the v3 → v4 template migration.
         version: SCHEMA_VERSION,
+        // Which build wrote the file. Traceability only — never a migration
+        // gate. It changes on every deploy, so gating on it would re-run past
+        // migrations forever; `version` above is the one that decides.
+        appVersion: APP_VERSION,
         exportedAt: new Date().toISOString(),
         wallet,
         categories: state.categories,
@@ -2275,6 +2280,8 @@ function App({ state, setState }) {
           <Tabs.Panel value="settings" pt="md">
             <Settings
               state={state}
+              pendingSync={pendingSync}
+              onSyncNow={syncNow}
               scheduledEntries={scheduledEntriesForSettings}
               walletTotals={walletTotals}
               language={state.language || "ko"}
@@ -2783,11 +2790,11 @@ function AppRoot() {
     [lang]
   );
 
-  useCloudSync({ state, setState, onNotify: notifySync });
+  const { pendingSync, syncNow } = useCloudSync({ state, setState, onNotify: notifySync });
 
   return (
     <I18nProvider lang={lang} currency={currency}>
-      <App state={state} setState={setState} />
+      <App state={state} setState={setState} pendingSync={pendingSync} syncNow={syncNow} />
     </I18nProvider>
   );
 }

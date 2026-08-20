@@ -5,12 +5,15 @@ import { CategoriesCard } from "./CategoriesCard.jsx";
 import { LabelsCard } from "./LabelsCard.jsx";
 import { ScheduledCard } from "./ScheduledCard.jsx";
 import { PreferencesCard } from "./PreferencesCard.jsx";
+import { SyncCard } from "./SyncCard.jsx";
 import { ConfirmModal } from "./shared.jsx";
 
 const EMPTY_CONFIRM = { open: false, title: "", message: "", action: null, confirmLabel: "삭제", confirmColor: "red" };
 
 function Settings({
   state,
+  pendingSync,
+  onSyncNow,
   scheduledEntries,
   walletTotals,
   language,
@@ -97,6 +100,12 @@ function Settings({
       <PreferencesCard
         language={language}
         onLanguageChange={onLanguageChange}
+      />
+
+      <SyncCard
+        pendingSync={pendingSync}
+        onSyncNow={onSyncNow}
+        onConfirm={requestConfirm}
       />
 
       <ConfirmModal
