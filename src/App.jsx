@@ -126,6 +126,35 @@ export function formatTransactionMoney(value, currency = "KRW") {
   return `${sign}${symbol}${valueStr}`;
 }
 
+/**
+ * Axis metrics for the two cash-flow charts (Ledger and Stats).
+ *
+ * Both draw into a fixed 640×210 viewBox that is scaled down to the card's
+ * width, so every number here is a viewBox unit, not a pixel: a 375px phone
+ * renders the chart at roughly half scale, which turned the desktop axis type
+ * into ~6px on screen — legible only if you already knew what it said.
+ *
+ * `padX` grows with the type because the y-axis tick sits in the gutter to its
+ * left; leaving it at the desktop value would push a widened `1234k` under the
+ * plot. The x-axis has room to spare either way — at most six buckets are on
+ * screen at once (`visibleCountForMode`, and six on a phone in Stats).
+ */
+function chartAxisMetrics(isMobile) {
+  return {
+    padX: isMobile ? 54 : 42,
+    tickX: isMobile ? 6 : 8,
+    tickFont: isMobile ? 15 : 12,
+    labelFont: isMobile ? 15 : 11,
+    // The year caption and the two-line week range sit under the main label,
+    // so they stay a step smaller than it.
+    subLabelFont: isMobile ? 13 : 10,
+    // Distance from the bottom edge, not a y coordinate: the taller two-line
+    // week range has to start higher or its second line falls off the viewBox.
+    weekLabelUp: isMobile ? 24 : 16,
+    weekLineH: isMobile ? 15 : 12,
+  };
+}
+
 function visibleCountForMode(mode) {
   if (mode === "week") return 6;
   if (mode === "month") return 6;
@@ -171,9 +200,11 @@ function donutSlicePath(cx, cy, r, startAngle, endAngle) {
 
 function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSelectBar }) {
   const t = useT();
+  const isMobile = useMediaQuery("(max-width: 48em)");
+  const axis = chartAxisMetrics(isMobile);
   const width = 640;
   const height = 210;
-  const padX = 42;
+  const padX = axis.padX;
   const padTop = 14;
   const padBottom = 4;
   const labelArea = mode === "year" ? 22 : 32;
@@ -217,7 +248,7 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
           return (
             <g key={index}>
               <line x1={padX} x2={width - padX} y1={y} y2={y} stroke={CHART.grid} strokeWidth="1" />
-              <text x="8" y={y + 4} className="fill-muted text-[12px]">
+              <text x={axis.tickX} y={y + 4} className="fill-muted" style={{ fontSize: axis.tickFont }}>
                 {formatAxisTick(tick)}
               </text>
             </g>
@@ -269,19 +300,25 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
               style={{ cursor: "pointer" }}
             />
             {mode === "week" ? (
-              <text x={point.x} y={height - 16} textAnchor="middle" className="fill-muted text-[10px]">
+              <text
+                x={point.x}
+                y={height - axis.weekLabelUp}
+                textAnchor="middle"
+                className="fill-muted"
+                style={{ fontSize: axis.subLabelFont }}
+              >
                 <tspan x={point.x} dy="0">{formatShortDate(point.start)}</tspan>
-                <tspan x={point.x} dy="12">{formatShortDate(point.end)}</tspan>
+                <tspan x={point.x} dy={axis.weekLineH}>{formatShortDate(point.end)}</tspan>
               </text>
             ) : (
-              <text x={point.x} y={height - 10} textAnchor="middle" className="fill-muted text-[11px]">
+              <text x={point.x} y={height - 10} textAnchor="middle" className="fill-muted" style={{ fontSize: axis.labelFont }}>
                 {point.label}
               </text>
             )}
           </g>
         ))}
         {mode !== "week" && points.map((point) => (
-          <text key={`${point.key}-label`} x={point.x} y={height - 22} textAnchor="middle" className="fill-muted text-[10px]">
+          <text key={`${point.key}-label`} x={point.x} y={height - 22} textAnchor="middle" className="fill-muted" style={{ fontSize: axis.subLabelFont }}>
             {mode === "year" ? point.label : ""}
           </text>
         ))}
@@ -311,7 +348,7 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
               stroke={tick === 0 ? CHART.baseline : CHART.grid}
               strokeWidth="1"
             />
-            <text x="8" y={y + 4} className="fill-muted text-[12px]">
+            <text x={axis.tickX} y={y + 4} className="fill-muted" style={{ fontSize: axis.tickFont }}>
               {formatAxisTick(tick)}
             </text>
           </g>
@@ -352,7 +389,7 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
               onClick={() => onSelectBar(bucket, "expense")}
               style={{ cursor: "pointer" }}
             />
-            <text x={centerX} y={height - 10} textAnchor="middle" className="fill-muted text-[11px]">
+            <text x={centerX} y={height - 10} textAnchor="middle" className="fill-muted" style={{ fontSize: axis.labelFont }}>
               {bucket.label}
             </text>
           </g>
@@ -652,9 +689,11 @@ function PieChart({ items, type }) {
 export function StatsCurveChart(props) {
   const { page, selectedKey, onSelectBucket, activeLegend, setActiveLegend } = props;
   const t = useT();
+  const isMobile = useMediaQuery("(max-width: 48em)");
+  const axis = chartAxisMetrics(isMobile);
   const width = 640;
   const height = 210;
-  const padX = 42;
+  const padX = axis.padX;
   const padTop = 20;
   const padBottom = 10;
   const labelArea = 25;
@@ -709,7 +748,7 @@ export function StatsCurveChart(props) {
         return (
           <g key={index}>
             <line x1={padX} x2={width - padX} y1={y} y2={y} stroke={CHART.grid} strokeWidth="1" />
-            <text x="8" y={y + 4} className="fill-muted text-[12px]">
+            <text x={axis.tickX} y={y + 4} className="fill-muted" style={{ fontSize: axis.tickFont }}>
               {formatAxisTick(tick)}
             </text>
           </g>
@@ -775,7 +814,7 @@ export function StatsCurveChart(props) {
               }}
               style={{ cursor: "pointer", transition: "all 150ms ease" }}
             />
-            <text x={point.x} y={height - 10} textAnchor="middle" className="fill-muted text-[11px]">
+            <text x={point.x} y={height - 10} textAnchor="middle" className="fill-muted" style={{ fontSize: axis.labelFont }}>
               {point.label}
             </text>
           </g>

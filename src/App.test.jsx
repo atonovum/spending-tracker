@@ -150,6 +150,57 @@ describe('StatsCurveChart', () => {
     expect(screen.getByText('2월')).toBeInTheDocument();
   });
 
+  // The chart is drawn in a fixed 640x210 viewBox scaled to the card's width,
+  // so a phone renders every number at roughly half size — the desktop axis
+  // type landed around 6px on screen. Phones get larger type, and the left
+  // gutter widens with it so a widened y-axis tick still clears the plot.
+  function axisFontsFor(matchesMobile) {
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = (query) => ({
+      matches: matchesMobile && query.includes('48em'),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => {},
+    });
+    try {
+      renderWithMantine(
+        <StatsCurveChart
+          page={mockPage}
+          selectedKey="jan"
+          onSelectBucket={vi.fn()}
+          activeLegend="income"
+          setActiveLegend={vi.fn()}
+        />
+      );
+      const label = screen.getByText('1월');
+      const gridLine = document.querySelector('line');
+      const tick = [...document.querySelectorAll('text')].find((node) => node !== label);
+      const result = {
+        label: Number.parseFloat(label.style.fontSize),
+        tick: Number.parseFloat(tick.style.fontSize),
+        plotLeft: Number(gridLine.getAttribute('x1')),
+      };
+      cleanup();
+      return result;
+    } finally {
+      window.matchMedia = originalMatchMedia;
+    }
+  }
+
+  it('enlarges the axis labels on mobile and widens the gutter to fit them', () => {
+    const desktop = axisFontsFor(false);
+    const mobile = axisFontsFor(true);
+
+    expect(mobile.label).toBeGreaterThan(desktop.label);
+    expect(mobile.tick).toBeGreaterThan(desktop.tick);
+    // Without this the larger tick runs under the first grid line.
+    expect(mobile.plotLeft).toBeGreaterThan(desktop.plotLeft);
+  });
+
   it('handles point selection and sets active legend', async () => {
     const user = userEvent.setup();
     const onSelectBucket = vi.fn();
