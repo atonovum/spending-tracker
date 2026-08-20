@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchRemoteState, pushRemoteState } from './cloudSync.js';
 import { PENDING_SYNC_KEY } from './finance.js';
 import { useCloudSync } from './useCloudSync.js';
-import { PUSH_DEBOUNCE_MS, RETRY_DELAYS_MS } from './syncEngine.js';
+import { PULL_MIN_INTERVAL_MS, PUSH_DEBOUNCE_MS, RETRY_DELAYS_MS } from './syncEngine.js';
 
 vi.mock('./cloudSync.js', () => ({
   fetchRemoteState: vi.fn(),
@@ -330,6 +330,116 @@ describe('failure handling', () => {
     // forever would just burn the phone's battery.
     expect(pushRemoteState).toHaveBeenCalledTimes(1);
     expect(localStorage.getItem(PENDING_SYNC_KEY)).toBe('1');
+  });
+});
+
+describe('re-reading on resume', () => {
+  /** Wake the app the way iOS does when a home-screen web app is reopened. */
+  async function resume(hidden = false) {
+    const spy = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue(hidden ? 'hidden' : 'visible');
+    await act(async () => {
+      document.dispatchEvent(new Event('visibilitychange'));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    spy.mockRestore();
+  }
+
+  // A home-screen web app on iOS is resumed, not reloaded: the page is thawed
+  // with its React tree intact, so a mount-only read never runs again and the
+  // app shows whatever it had when it was frozen — for days.
+  it('picks up a change another device made while the app was in the background', async () => {
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 });
+
+    const { result } = setup(docWith(['local-1'], 1000));
+    await settle();
+    expect(entryIdsOf(result.current.state)).toEqual(['local-1']);
+
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['from-desktop'], 9000), updatedAt: 9000 });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(PULL_MIN_INTERVAL_MS + 50);
+    });
+    await resume();
+
+    await waitFor(() => expect(entryIdsOf(result.current.state)).toEqual(['from-desktop']));
+  });
+
+  it('also re-reads when Safari restores the page from bfcache', async () => {
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 });
+
+    setup(docWith(['local-1'], 1000));
+    await settle();
+    expect(fetchRemoteState).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(PULL_MIN_INTERVAL_MS + 50);
+    });
+    await act(async () => {
+      const event = new Event('pageshow');
+      Object.defineProperty(event, 'persisted', { value: true });
+      window.dispatchEvent(event);
+      await Promise.resolve();
+    });
+
+    expect(fetchRemoteState).toHaveBeenCalledTimes(2);
+  });
+
+  // Resuming must never cost the user an edit that has not landed yet.
+  it('pushes instead of adopting when local edits are still unpushed', async () => {
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 });
+    pushRemoteState.mockResolvedValue({ ok: false });
+
+    const { result } = setup(docWith(['local-1'], 1000));
+    await settle();
+
+    act(() => result.current.setState(docWith(['local-1', 'local-2'], 1000)));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(PUSH_DEBOUNCE_MS + 50);
+    });
+    expect(localStorage.getItem(PENDING_SYNC_KEY)).toBe('1');
+
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['stale-remote'], 9000), updatedAt: 9000 });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(PULL_MIN_INTERVAL_MS + 50);
+    });
+    await resume();
+
+    expect(entryIdsOf(result.current.state)).toEqual(['local-1', 'local-2']);
+  });
+
+  it('ignores the event when the app is going away rather than arriving', async () => {
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 });
+
+    setup(docWith(['local-1'], 1000));
+    await settle();
+    expect(fetchRemoteState).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(PULL_MIN_INTERVAL_MS + 50);
+    });
+    await resume(true);
+
+    expect(fetchRemoteState).toHaveBeenCalledTimes(1);
+  });
+
+  // Tab switching on a desktop fires this constantly; one read per switch would
+  // be a request every few seconds for no new information.
+  it('does not re-read on every flip back to the foreground', async () => {
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 });
+
+    setup(docWith(['local-1'], 1000));
+    await settle();
+    expect(fetchRemoteState).toHaveBeenCalledTimes(1);
+
+    await resume();
+    await resume();
+    expect(fetchRemoteState).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(PULL_MIN_INTERVAL_MS + 50);
+    });
+    await resume();
+    expect(fetchRemoteState).toHaveBeenCalledTimes(2);
   });
 });
 

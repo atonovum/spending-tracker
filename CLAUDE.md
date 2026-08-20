@@ -158,6 +158,13 @@ npm run lint && npm run test:coverage && npm run build
   판정은 `decideInitialSync`가 하고, `PENDING_SYNC_KEY`(기기 로컬 플래그,
   문서 밖)가 리비전 비교보다 우선한다. 이 플래그는 CSV·KV 페이로드에 절대
   넣지 말 것 — `LAST_ENTRY_DATE_KEY`와 같은 규칙이다.
+- **원격 읽기는 마운트 때 한 번이 아니라 포그라운드로 돌아올 때마다 한다.**
+  iOS 홈 화면 웹앱은 다시 열어도 *재로드가 아니라 재개*다 — 얼려둔 페이지가
+  React 트리째 깨어나므로 마운트 효과가 다시 돌지 않는다. 마운트에서만 읽으면
+  며칠 전 문서를 계속 보여준다. `visibilitychange(visible)`, `pageshow`
+  (bfcache 복원), `online`에서 다시 읽고, `PULL_MIN_INTERVAL_MS`가 탭 전환
+  때마다 요청이 나가는 것을 막는다. 판정은 시작할 때와 같은
+  `decideInitialSync`이므로 미전송 편집이 있으면 재개해도 로컬이 이긴다.
 - **푸시 실패는 최종이 아니라 일시적인 것으로 다룬다.** 백오프 재시도 +
   `online` 재시도가 있고, `pagehide`/`visibilitychange(hidden)`에서
   `keepalive: true`로 마지막 flush를 한다. iOS는 백그라운드로 넘어간

@@ -18,6 +18,15 @@
  */
 export const PUSH_DEBOUNCE_MS = 800;
 
+/**
+ * Floor between two reads of the server.
+ *
+ * The app re-reads whenever it comes back to the foreground, and on a desktop
+ * that fires on every tab switch. Without a floor those would be a request
+ * every few seconds carrying no new information.
+ */
+export const PULL_MIN_INTERVAL_MS = 5000;
+
 /** Backoff schedule for a push that failed for a transient-looking reason. */
 export const RETRY_DELAYS_MS = [2000, 5000, 15000, 60000];
 

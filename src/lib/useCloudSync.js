@@ -13,6 +13,7 @@ import {
   decideInitialSync,
   decidePushOutcome,
   nextRetryDelay,
+  PULL_MIN_INTERVAL_MS,
   PUSH_DEBOUNCE_MS,
 } from "./syncEngine.js";
 
@@ -32,6 +33,12 @@ import {
  *      backgrounded web app before a debounce timer can fire;
  *   3. backoff retries plus an `online` retry, so a failure is temporary
  *      rather than final.
+ *
+ * and one thing keeps the screen honest: the server is re-read every time the
+ * app returns to the foreground, not only when it mounts. A home-screen web
+ * app on iOS is *resumed*, not reloaded — the frozen page thaws with its React
+ * tree intact — so a mount-only read would show whatever the document held
+ * days ago, however many times the user reopened it.
  *
  * @param {object} input
  * @param {object} input.state the live document.
@@ -61,6 +68,8 @@ export function useCloudSync({ state, setState, onNotify }) {
   const authNotifiedRef = useRef(false);
   const inFlightRef = useRef(false);
   const timerRef = useRef(null);
+  const mountedRef = useRef(true);
+  const lastPullRef = useRef(0);
   const [pendingSync, setPendingSync] = useState(false);
 
   // Read once, on the client only: `loadPendingSync` touches localStorage.
@@ -185,17 +194,25 @@ export function useCloudSync({ state, setState, onNotify }) {
 
   runPushRef.current = runPush;
 
-  // Startup: read the server, then decide who wins.
-  useEffect(() => {
-    let cancelled = false;
-    const localUpdatedAt = stateRef.current?.updatedAt;
+  /**
+   * Read the server and decide who wins.
+   *
+   * Runs on mount and again on every return to the foreground. `force` is for
+   * the mount call, which must not be swallowed by the interval floor.
+   */
+  const pullFromRemote = useCallback(
+    async ({ force = false } = {}) => {
+      // A push in flight owns the conversation: reading now would race its
+      // `If-Match` and could adopt a document that is about to be superseded.
+      if (inFlightRef.current) return;
+      const now = Date.now();
+      if (!force && now - lastPullRef.current < PULL_MIN_INTERVAL_MS) return;
+      lastPullRef.current = now;
 
-    // Dev seed guard: a freshly seeded sample document (updatedAt 0) must not
-    // be replaced by whatever an old KV happens to hold.
-    if (SAMPLE_SEED_ENABLED && !revisionIsSet(localUpdatedAt) && !dirtyRef.current) return undefined;
+      const localUpdatedAt = stateRef.current?.updatedAt;
+      const remote = await fetchRemoteState();
+      if (!mountedRef.current) return;
 
-    fetchRemoteState().then((remote) => {
-      if (cancelled) return;
       if (remote.ok) remoteRevRef.current = remote.updatedAt;
       if (remote.authRequired && !authNotifiedRef.current && onNotifyRef.current) {
         authNotifiedRef.current = true;
@@ -219,15 +236,31 @@ export function useCloudSync({ state, setState, onNotify }) {
         return;
       }
       if (decision.type === "push") {
+        // Resuming with unpushed edits is the same situation as launching with
+        // them: local wins, and this is the moment to try sending it again.
         markDirty(true);
         schedulePush(0);
       }
-    });
+    },
+    [markDirty, schedulePush, setState]
+  );
 
+  useEffect(() => {
+    mountedRef.current = true;
     return () => {
-      cancelled = true;
+      mountedRef.current = false;
     };
-    // Runs once: this is the moment the app takes ownership of a document.
+  }, []);
+
+  // Startup: the app takes ownership of a document here.
+  useEffect(() => {
+    // Dev seed guard: a freshly seeded sample document (updatedAt 0) must not
+    // be replaced by whatever an old KV happens to hold.
+    if (SAMPLE_SEED_ENABLED && !revisionIsSet(stateRef.current?.updatedAt) && !dirtyRef.current) {
+      return;
+    }
+    pullFromRemote({ force: true });
+    // Runs once; later reads come from the foreground handler below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -257,23 +290,36 @@ export function useCloudSync({ state, setState, onNotify }) {
       runPush({ keepalive: true });
     };
     const onVisibility = () => {
-      if (document.visibilityState === "hidden") flushNow();
+      if (document.visibilityState === "hidden") {
+        flushNow();
+        return;
+      }
+      // Coming back: whatever another device wrote while this one slept is the
+      // reason the screen may be stale.
+      pullFromRemote();
+    };
+    const onPageShow = (event) => {
+      // Safari restores a page from bfcache without remounting anything.
+      if (event.persisted) pullFromRemote();
     };
     const onOnline = () => {
+      pullFromRemote();
       if (!dirtyRef.current) return;
       attemptRef.current = 0;
       schedulePush(0);
     };
 
     window.addEventListener("pagehide", flushNow);
+    window.addEventListener("pageshow", onPageShow);
     window.addEventListener("online", onOnline);
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       window.removeEventListener("pagehide", flushNow);
+      window.removeEventListener("pageshow", onPageShow);
       window.removeEventListener("online", onOnline);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [clearTimer, runPush, schedulePush]);
+  }, [clearTimer, pullFromRemote, runPush, schedulePush]);
 
   return { pendingSync };
 }
