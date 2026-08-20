@@ -364,6 +364,7 @@ function LedgerChart({ mode, chartMode, page, selectedKey, onSelectBucket, onSel
 
 export function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, categoryId, color, categories }) {
   const { t, formatMoney } = useI18n();
+  const isMobile = useMediaQuery("(max-width: 48em)");
   const [activeIndex, setActiveIndex] = useState(null);
   const series = useMemo(
     () => aggregateCategoryBySubBucket(items, ledgerMode, periodStart, periodEnd, categoryId, categories),
@@ -397,11 +398,27 @@ export function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, 
   const activeBarTop = active != null ? baseY - (active.total / maxTick) * graphH : 0;
   // Selecting a bar is a question about money first — the amount leads, the
   // entry count stays as secondary context.
-  const tipText = active
-    ? `${formatMoney(active.total)} · ${t("stats.subBucket.count", { count: active.count })}`
-    : "";
-  const tipW = Math.max(44, tipText.length * 7 + 14);
-  const tipH = 18;
+  //
+  // Phones stack the two: 건수 goes on its own line under 금액. The 건수 column
+  // of the 카테고리별 통계 table is hidden below 30em, so this tip is where the
+  // count is read on a phone, and one line of `금액 · 건수` at this viewBox's
+  // scale is wide enough to be pushed against the chart edge.
+  const tipLines = active
+    ? (isMobile
+      ? [formatMoney(active.total), t("stats.subBucket.count", { count: active.count })]
+      : [`${formatMoney(active.total)} · ${t("stats.subBucket.count", { count: active.count })}`])
+    : [];
+  // Phones read this tip at arm's length on a small screen, so it carries a
+  // slightly larger face than the desktop one. The box has to grow with it:
+  // every number here is in viewBox units, so a font bump that leaves the
+  // geometry alone would push the text out of its own background.
+  const tipFontSize = isMobile ? 13 : 11;
+  const tipCharW = isMobile ? 7.6 : 7;
+  const tipLineH = isMobile ? 16 : 14;
+  const tipFirstBaseline = isMobile ? 15 : 13;
+  const tipSingleH = isMobile ? 21 : 18;
+  const tipW = Math.max(44, Math.max(0, ...tipLines.map((line) => line.length)) * tipCharW + 14);
+  const tipH = tipSingleH + Math.max(0, tipLines.length - 1) * tipLineH;
   const tipY = Math.max(padTop + tipH, activeBarTop - 6);
   const tipX = Math.max(padX, Math.min(width - padX - tipW, activeCenterX - tipW / 2));
 
@@ -463,9 +480,19 @@ export function CategoryStatsChart({ items, ledgerMode, periodStart, periodEnd, 
       {active ? (
         <g pointerEvents="none">
           <rect x={tipX} y={tipY - tipH} width={tipW} height={tipH} rx={9} fill={CHART.ink} opacity={0.92} />
-          <text x={tipX + tipW / 2} y={tipY - 5} textAnchor="middle" fill={CHART.surface} fontWeight="600" className="text-[11px]">
-            {tipText}
-          </text>
+          {tipLines.map((line, index) => (
+            <text
+              key={line}
+              x={tipX + tipW / 2}
+              y={tipY - tipH + tipFirstBaseline + index * tipLineH}
+              textAnchor="middle"
+              fill={CHART.surface}
+              fontWeight="600"
+              style={{ fontSize: tipFontSize }}
+            >
+              {line}
+            </text>
+          ))}
         </g>
       ) : null}
     </svg>
@@ -477,10 +504,12 @@ function CategoryLabelTotals({ items, categoryId, getLabel, categories }) {
   const rows = useMemo(() => aggregateCategoryByLabel(items, categoryId, categories), [items, categoryId, categories]);
   if (!rows.length) return null;
   return (
-    // Narrow viewports: the table scrolls inside its own box rather than
-    // pushing the page body sideways.
-    <Table.ScrollContainer minWidth={320} type="native">
-      <Table withTableBorder={false} withColumnBorders={false} verticalSpacing={4}>
+    // Fit first, scroll only as a fallback — same rule as the 레이블 and
+    // 카테고리별 통계 tables on the stats page. Its old 320px ScrollContainer
+    // floor was wider than the modal's content column on a phone, so it
+    // scrolled sideways even when three columns had room to spare.
+    <div className="stats-label-scroll">
+      <Table withTableBorder={false} withColumnBorders={false} verticalSpacing={4} className="stats-label-totals-table">
         <Table.Thead>
           <Table.Tr>
             <Table.Th>{t("stats.column.label")}</Table.Th>
@@ -489,16 +518,19 @@ function CategoryLabelTotals({ items, categoryId, getLabel, categories }) {
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {rows.map((row) => (
-            <Table.Tr key={row.labelId ?? "no-label"}>
-              <Table.Td>{row.labelId ? getLabel(row.labelId)?.name || row.labelId : t("stats.label.none")}</Table.Td>
-              <Table.Td className="text-center">{row.count}</Table.Td>
-              <Table.Td className="text-right">{formatMoney(row.amount)}</Table.Td>
-            </Table.Tr>
-          ))}
+          {rows.map((row) => {
+            const name = row.labelId ? getLabel(row.labelId)?.name || row.labelId : t("stats.label.none");
+            return (
+              <Table.Tr key={row.labelId ?? "no-label"}>
+                <Table.Td><span className="stats-label-name" title={name}>{name}</span></Table.Td>
+                <Table.Td className="text-center">{row.count}</Table.Td>
+                <Table.Td className="text-right">{formatMoney(row.amount)}</Table.Td>
+              </Table.Tr>
+            );
+          })}
         </Table.Tbody>
       </Table>
-    </Table.ScrollContainer>
+    </div>
   );
 }
 
@@ -1418,10 +1450,17 @@ function App({ state, setState }) {
 
           <Divider my="sm" />
           <Title order={4} mb="xs">{t("settings.labels")}</Title>
-          {/* Narrow viewports: the table scrolls inside its own box rather
-              than pushing the page body sideways. */}
-          <Table.ScrollContainer minWidth={340} type="native">
-            <Table striped highlightOnHover verticalSpacing="xs" className="text-center">
+          {/*
+            Fit first, scroll only as a fallback — the same rule the 카테고리별
+            통계 table below follows. The old ScrollContainer floor (340px) was
+            wider than the content column of any phone (a 360px viewport leaves
+            ~296px once page and card padding are out), so it scrolled on every
+            phone even though three columns fit comfortably. The two money
+            columns are bounded and take fixed shares; the label name is the one
+            unbounded cell and truncates.
+          */}
+          <div className="stats-label-scroll">
+            <Table striped highlightOnHover verticalSpacing="xs" className="text-center stats-label-table">
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th className="text-center">{t("stats.column.label")}</Table.Th>
@@ -1435,7 +1474,9 @@ function App({ state, setState }) {
                   const expenseActive = statsLabelFilterId === label.id && statsCategoryType === "expense";
                   return (
                     <Table.Tr key={label.id}>
-                      <Table.Td className="text-center">{label.name}</Table.Td>
+                      <Table.Td className="text-center">
+                        <span className="stats-label-name" title={label.name}>{label.name}</span>
+                      </Table.Td>
                       <Table.Td className="text-center">
                         <Button
                           size="xs"
@@ -1463,7 +1504,7 @@ function App({ state, setState }) {
                 })}
               </Table.Tbody>
             </Table>
-          </Table.ScrollContainer>
+          </div>
 
           <Divider my="sm" />
           <Group justify="space-between" className="mb-2">
@@ -2473,6 +2514,12 @@ function EntryEditor({ kind = "entry", categories, labels, entry, defaultDate, o
         is what keeps a label vertically centred against its own input; the
         components keep rendering their real <label for>, so the accessible name
         is unchanged.
+
+        On phones the grid drops to two columns and the 어제·오늘 buttons move to
+        their own row under the date input (see `.entry-date-quick` in
+        index.css) — beside the input they left the date field too narrow to
+        read. The breakpoint work lives in CSS, not here, so the markup stays
+        one tree.
       */}
       <div className="entry-field-grid">
         <TextInput
@@ -2487,7 +2534,7 @@ function EntryEditor({ kind = "entry", categories, labels, entry, defaultDate, o
             input: { textAlign: "center" },
           }}
         />
-        <Group gap={6} wrap="nowrap">
+        <Group gap={6} wrap="nowrap" className="entry-date-quick">
           <Button
             size="compact-xs"
             variant={date === yesterday ? "filled" : "default"}

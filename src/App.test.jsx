@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it, vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { cleanup, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App, { filterEntriesByFacets, resolveFacetFilter, sortEntriesForDisplay, summarizeEntries, CategoryStatsChart, StatsCurveChart } from './App.jsx';
 import { createMockState, renderWithMantine } from './settings/testUtils.jsx';
@@ -212,6 +212,57 @@ describe('CategoryStatsChart', () => {
     expect(tip.textContent).toContain('2건');
   });
 
+  // Phones hide the 건수 column of the 카테고리별 통계 table, so this tip is
+  // where the count is read there. It gets its own line under the amount
+  // instead of trailing it on one long line.
+  it('stacks 건수 under 금액 in the bar tip on mobile', async () => {
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = (query) => ({
+      matches: query.includes('48em'),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => {},
+    });
+    try {
+      const user = userEvent.setup();
+      renderChart();
+
+      const hitTargets = document.querySelectorAll('rect[fill="transparent"]');
+      await user.click(hitTargets[0]);
+
+      // Two separate <text> nodes, not one "금액 · 건수" string.
+      const amount = screen.getByText('20,000원');
+      const count = screen.getByText('2건');
+      expect(amount).not.toBe(count);
+      expect(Number(count.getAttribute('y'))).toBeGreaterThan(Number(amount.getAttribute('y')));
+
+      // Both lines carry the larger phone face, and the tip background has to
+      // have grown with them — a font bump alone would spill the text out of
+      // its own rect, since every number in this chart is in viewBox units.
+      const mobileFont = Number.parseFloat(amount.style.fontSize);
+      expect(Number.parseFloat(count.style.fontSize)).toBe(mobileFont);
+      const rect = amount.closest('g').querySelector('rect');
+      const rectTop = Number(rect.getAttribute('y'));
+      const rectBottom = rectTop + Number(rect.getAttribute('height'));
+      expect(Number(amount.getAttribute('y'))).toBeGreaterThan(rectTop);
+      expect(Number(count.getAttribute('y'))).toBeLessThan(rectBottom);
+
+      window.matchMedia = originalMatchMedia;
+      cleanup();
+      renderChart();
+      const desktopUser = userEvent.setup();
+      await desktopUser.click(document.querySelectorAll('rect[fill="transparent"]')[0]);
+      const desktopTip = screen.getByText(/20,000원/);
+      expect(Number.parseFloat(desktopTip.style.fontSize)).toBeLessThan(mobileFont);
+    } finally {
+      window.matchMedia = originalMatchMedia;
+    }
+  });
+
   it('clears the selection when the same bar is clicked again', async () => {
     const user = userEvent.setup();
     renderChart();
@@ -281,16 +332,26 @@ describe('stats tables horizontal overflow', () => {
     expect(name.getAttribute('title')).toBe(name.textContent);
   });
 
-  it('wraps the 레이블 stats table in a horizontal scroll container', async () => {
+  // The 레이블 table is fitted the same way. Its old Mantine ScrollContainer
+  // pinned a 340px floor — wider than the content column of any phone — so it
+  // scrolled sideways on every mobile viewport even though three columns fit.
+  it('fits the 레이블 stats table instead of scrolling it sideways', async () => {
     const user = userEvent.setup();
     await openStatsTab(user);
 
     // The label table is the one with income/expense columns.
-    const container = screen.getAllByText('레이블')
+    const table = screen.getAllByText('레이블')
       .map((node) => node.closest('table'))
-      .filter(Boolean)[0]
-      .closest('.mantine-TableScrollContainer-scrollContainer');
-    expect(container).not.toBeNull();
-    expect(container.getAttribute('style')).toContain('--table-overflow: auto');
+      .filter(Boolean)[0];
+    expect(table).not.toBeNull();
+    expect(table.className).toContain('stats-label-table');
+    expect(table.closest('.mantine-TableScrollContainer-scrollContainer')).toBeNull();
+    // The wrapper stays as a fallback for viewports under the readable floor.
+    expect(table.closest('.stats-label-scroll')).not.toBeNull();
+
+    const name = table.querySelector('.stats-label-name');
+    expect(name).not.toBeNull();
+    // Full text stays reachable even when the rendered name is clipped.
+    expect(name.getAttribute('title')).toBe(name.textContent);
   });
 });

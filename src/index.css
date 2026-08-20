@@ -99,6 +99,28 @@
   }
 
   /*
+   * Phones: two columns, and the 어제·오늘 shortcuts take a row of their own
+   * under the date input. Sharing the date row cost the input the width it
+   * needs — a native date field renders `YYYY-MM-DD` plus a picker icon, and
+   * below ~180px it starts clipping. `grid-column: 2` keeps the buttons under
+   * the input rather than under the label; the 금액 input's `2 / -1` span
+   * resolves to the same single content column, so its row is unaffected.
+   *
+   * `justify-self: end` pins them to the input's right edge. Left-aligned they
+   * sat directly under the date text with no edge to line up against, which
+   * read as an accident rather than a pair of shortcuts.
+   */
+  @media (max-width: 48em) {
+    .entry-field-grid {
+      grid-template-columns: max-content minmax(0, 1fr);
+    }
+    .entry-date-quick {
+      grid-column: 2;
+      justify-self: end;
+    }
+  }
+
+  /*
    * 카테고리별 통계: fits the viewport instead of scrolling sideways.
    *
    * The viewport width is perfectly knowable; what is not is how wide a row
@@ -178,6 +200,88 @@
     .stats-category-table th:nth-child(4),
     .stats-category-table td:nth-child(4) {
       width: 38%;
+    }
+  }
+
+  /*
+   * 레이블 통계 (stats page) and 라벨별 합계 (category modal): the same
+   * fit-first / scroll-as-fallback rule as 카테고리별 통계 above.
+   *
+   * Both used to sit in a Mantine ScrollContainer whose floor (340px / 320px)
+   * was *wider* than the content column they live in on a phone — a 360px
+   * viewport leaves ~296px after page and card padding, less inside a modal —
+   * so the wrapper scrolled on every phone even though the columns fit. The
+   * numeric columns have a bounded width (a formatted amount has a ceiling),
+   * so they take fixed shares and the label name absorbs the rest, truncating.
+   */
+  .stats-label-scroll {
+    overflow-x: auto;
+  }
+  .stats-label-table,
+  .stats-label-totals-table {
+    table-layout: fixed;
+    width: 100%;
+    /*
+     * The floor, below which scrolling beats squeezing: ~90px for a still
+     * recognisable label name plus the numeric shares at 12px text. It clears
+     * the narrowest common viewport (320px) with padding removed, so a real
+     * phone never reaches it.
+     */
+    min-width: 240px;
+  }
+  .stats-label-table th,
+  .stats-label-table td,
+  .stats-label-totals-table th,
+  .stats-label-totals-table td {
+    padding-inline: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* 레이블 / 수입 / 지출 — the two money columns are the bounded ones. */
+  .stats-label-table th:nth-child(2),
+  .stats-label-table td:nth-child(2),
+  .stats-label-table th:nth-child(3),
+  .stats-label-table td:nth-child(3) {
+    width: 34%;
+  }
+  /* 라벨 / 건수 / 금액 — 건수 is a small integer, so it needs far less. */
+  .stats-label-totals-table th:nth-child(2),
+  .stats-label-totals-table td:nth-child(2) {
+    width: 18%;
+  }
+  .stats-label-totals-table th:nth-child(3),
+  .stats-label-totals-table td:nth-child(3) {
+    width: 38%;
+  }
+  .stats-label-name {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  /*
+   * The money cells are buttons; their default inline padding is what would
+   * push a fixed column past its share and start clipping the amount itself.
+   */
+  .stats-label-table td button {
+    padding-inline: 6px;
+  }
+  @media (max-width: 30em) {
+    .stats-label-table,
+    .stats-label-totals-table {
+      font-size: 12px;
+      min-width: 216px;
+    }
+    .stats-label-table th,
+    .stats-label-table td,
+    .stats-label-totals-table th,
+    .stats-label-totals-table td {
+      padding-inline: 4px;
+    }
+    .stats-label-table td button {
+      padding-inline: 2px;
     }
   }
 

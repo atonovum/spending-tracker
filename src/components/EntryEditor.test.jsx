@@ -449,6 +449,25 @@ describe('EntryEditor - default date and date shortcuts', () => {
     expect(dateInput).toHaveValue(todayStr);
   });
 
+  // Mobile regression: beside the date input the shortcuts left the field too
+  // narrow to read, so below 48em they drop to a row of their own. jsdom does
+  // not lay out or evaluate media queries, so what is pinned here is the
+  // structure that rule targets — the shortcuts are a direct grid item of the
+  // editor grid, carrying the class the breakpoint moves.
+  it('keeps the 어제·오늘 shortcuts in the grid cell the mobile rule moves', async () => {
+    const user = userEvent.setup();
+    renderWithMantine(<App />);
+
+    const dialog = await openAddEntry(user);
+    const quick = within(dialog).getByRole('button', { name: '어제' }).closest('.entry-date-quick');
+    expect(quick).not.toBeNull();
+    expect(quick.parentElement.className).toContain('entry-field-grid');
+    // Both shortcuts share the cell, so they move together.
+    expect(within(quick).getByRole('button', { name: '오늘' })).toBeInTheDocument();
+    // The date input stays in the same grid, in its own cell.
+    expect(within(dialog).getByLabelText('날짜').closest('.entry-field-grid')).toBe(quick.parentElement);
+  });
+
   it('remembers the date after an entry is added, without touching the state schema', async () => {
     const user = userEvent.setup();
     renderWithMantine(<App />);
