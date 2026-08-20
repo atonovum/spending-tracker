@@ -77,6 +77,19 @@ export default defineConfig({
   plugins: [react(), versionManifest(), VitePWA({
     registerType: "autoUpdate",
     includeAssets: ["icon-192.png", "icon-512.png"],
+    workbox: {
+      /**
+       * The SPA fallback answers *every* same-origin navigation with the cached
+       * `index.html`, which means paths the app does not own get swallowed
+       * before they reach the network. Signing out went nowhere for exactly
+       * this reason: `/cdn-cgi/access/logout` never left the device, so the app
+       * re-rendered itself and looked like a dead button.
+       *
+       * `/cdn-cgi/` is Cloudflare's edge (Access login and logout live there)
+       * and `/api/` is the Worker. Neither is ever an app route.
+       */
+      navigateFallbackDenylist: [/^\/cdn-cgi\//, /^\/api\//],
+    },
     manifest: {
       name: "Spending Tracker",
       short_name: "Spending",

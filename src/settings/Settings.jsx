@@ -6,6 +6,7 @@ import { LabelsCard } from "./LabelsCard.jsx";
 import { ScheduledCard } from "./ScheduledCard.jsx";
 import { PreferencesCard } from "./PreferencesCard.jsx";
 import { SyncCard } from "./SyncCard.jsx";
+import { SignOutButton } from "./SignOutButton.jsx";
 import { ConfirmModal } from "./shared.jsx";
 
 const EMPTY_CONFIRM = { open: false, title: "", message: "", action: null, confirmLabel: "삭제", confirmColor: "red" };
@@ -105,8 +106,9 @@ function Settings({
       <SyncCard
         pendingSync={pendingSync}
         onSyncNow={onSyncNow}
-        onConfirm={requestConfirm}
       />
+
+      <SignOutButton pendingSync={pendingSync} onConfirm={requestConfirm} />
 
       <ConfirmModal
         opened={confirm.open}

@@ -1,24 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import { Badge, Button, Card, Group, Stack, Text, Title } from "@mantine/core";
-import { Download, LogOut, RefreshCw } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 
 import { APP_VERSION, fetchDeployedVersion, isUpdateAvailable } from "../lib/appVersion.js";
 import { applyServiceWorkerUpdate, checkForServiceWorkerUpdate } from "../lib/swUpdate.js";
 import { useT } from "../lib/i18n.jsx";
 
-/** Where Cloudflare Access ends a session. Same origin, so a plain navigation. */
-const LOGOUT_URL = "/cdn-cgi/access/logout";
-
 /**
- * Everything about this device's relationship with the server: which build it
- * is running, whether its edits have landed, and how to end the session.
+ * This device's relationship with the server: which build it is running and
+ * whether its edits have landed. Signing out sits below the card, in
+ * `SignOutButton` — it ends a session rather than reporting on one.
  *
  * It is one card rather than a control per wallet because the unit of sync is
  * the whole document — KV holds a single key containing every wallet, category
  * and label (`KV_KEY` in `src/worker.js`). A per-wallet button would be five
  * buttons doing the same global thing, teaching a model that does not exist.
  */
-export function SyncCard({ pendingSync, onSyncNow, onConfirm }) {
+export function SyncCard({ pendingSync, onSyncNow }) {
   const t = useT();
   const [deployed, setDeployed] = useState({ state: "checking", version: null });
   const [busy, setBusy] = useState(false);
@@ -55,18 +53,6 @@ export function SyncCard({ pendingSync, onSyncNow, onConfirm }) {
     } finally {
       setBusy(false);
     }
-  }
-
-  function handleLogout() {
-    onConfirm({
-      title: t("settings.sync.logoutTitle"),
-      message: pendingSync ? t("settings.sync.logoutBlocked") : t("settings.sync.logoutMessage"),
-      confirmLabel: t("settings.sync.logout"),
-      confirmColor: "red",
-      action: () => {
-        window.location.href = LOGOUT_URL;
-      },
-    });
   }
 
   const deployedLabel =
@@ -121,15 +107,6 @@ export function SyncCard({ pendingSync, onSyncNow, onConfirm }) {
             onClick={handleSyncNow}
           >
             {t("settings.sync.now")}
-          </Button>
-          <Button
-            size="xs"
-            variant="subtle"
-            color="red"
-            leftSection={<LogOut size={14} />}
-            onClick={handleLogout}
-          >
-            {t("settings.sync.logout")}
           </Button>
         </Group>
       </Stack>

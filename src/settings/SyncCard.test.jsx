@@ -25,7 +25,6 @@ function render(props = {}) {
     <SyncCard
       pendingSync={false}
       onSyncNow={vi.fn()}
-      onConfirm={vi.fn()}
       {...props}
     />
   );
@@ -102,31 +101,5 @@ describe('manual sync', () => {
     render({ pendingSync: false });
 
     expect(screen.getByText(/서버와 동기화됨/)).toBeInTheDocument();
-  });
-});
-
-describe('signing out', () => {
-  it('asks before ending the session', async () => {
-    const user = userEvent.setup();
-    const onConfirm = vi.fn();
-    render({ onConfirm });
-
-    await user.click(screen.getByRole('button', { name: /로그아웃/ }));
-
-    expect(onConfirm).toHaveBeenCalledWith(
-      expect.objectContaining({ confirmColor: 'red', action: expect.any(Function) })
-    );
-  });
-
-  // Signing out with unsent edits risks the only copy of them, so the warning
-  // has to say that rather than the routine message.
-  it('warns about unsent changes in the confirmation', async () => {
-    const user = userEvent.setup();
-    const onConfirm = vi.fn();
-    render({ onConfirm, pendingSync: true });
-
-    await user.click(screen.getByRole('button', { name: /로그아웃/ }));
-
-    expect(onConfirm.mock.calls[0][0].message).toMatch(/서버로 못 보낸 변경/);
   });
 });

@@ -77,6 +77,14 @@ label    { id, name }
   마이그레이션이 다시 돈다. 일정 이관 게이트는 `SCHEDULE_MIGRATION_VERSION`
   처럼 고정 상수로 둔다.
 - 지갑 상한 `MAX_WALLETS` = 5.
+- **서비스 워커의 SPA 폴백이 같은 출처 내비게이션을 전부 삼킨다.** VitePWA가
+  등록하는 `NavigationRoute`는 확장자 없는 같은 출처 경로면 무조건 캐시된
+  `index.html`을 내주므로, 앱이 소유하지 않은 경로가 네트워크에 도달하지
+  못한다. 실제로 Access 로그아웃(`/cdn-cgi/access/logout`)이 이래서 죽은
+  버튼이었다. `vite.config.js`의 `workbox.navigateFallbackDenylist`에
+  `/cdn-cgi/`(Cloudflare 엣지)와 `/api/`(Worker)가 들어 있다. **앱 라우트가
+  아닌 경로를 추가하면 여기에도 넣을 것.** 확인은 빌드 후
+  `grep -o "NavigationRoute([^;]*" dist/client/sw.js`.
 - **빌드 식별자는 커밋 해시다.** `vite.config.js`의 `define`이
   `__APP_VERSION__`을 박고(`WORKERS_CI_COMMIT_SHA` → `git rev-parse` →
   `"dev"` 순), 같은 값을 `/version.json`으로도 내보낸다. `vitest.config.js`가
