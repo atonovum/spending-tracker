@@ -68,6 +68,7 @@ export default [
         // `vite.config.js` (and mirrored in `vitest.config.js`).
         __APP_VERSION__: 'readonly',
         __BUILD_TIME__: 'readonly',
+        __ACCESS_LOGOUT_URL__: 'readonly',
       },
     },
     plugins: {

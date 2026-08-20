@@ -18,15 +18,15 @@ import { useT } from "../lib/i18n.jsx";
  */
 export function SyncCard({ pendingSync, onSyncNow }) {
   const t = useT();
-  const [deployed, setDeployed] = useState({ state: "checking", version: null });
+  const [deployed, setDeployed] = useState({ state: "checking", version: null, reason: "ok" });
   const [busy, setBusy] = useState(false);
 
   const checkVersion = useCallback(async () => {
     const result = await fetchDeployedVersion();
     setDeployed(
       result.ok
-        ? { state: "known", version: result.version }
-        : { state: "unknown", version: null }
+        ? { state: "known", version: result.version, reason: "ok" }
+        : { state: "unknown", version: null, reason: result.reason }
     );
   }, []);
 
@@ -55,11 +55,14 @@ export function SyncCard({ pendingSync, onSyncNow }) {
     }
   }
 
+  // Naming the failure is the whole point: "unavailable" covered a missing
+  // asset, an expired session and a dead network alike, and each needs
+  // something different from the user.
   const deployedLabel =
     deployed.state === "checking"
       ? t("settings.sync.checking")
       : deployed.state === "unknown"
-        ? t("settings.sync.unknown")
+        ? t(`settings.sync.reason.${deployed.reason}`)
         : deployed.version;
 
   return (

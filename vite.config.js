@@ -29,6 +29,22 @@ function resolveAppVersion() {
   }
 }
 
+/**
+ * Where "sign out" sends the browser.
+ *
+ * The per-application endpoint (`/cdn-cgi/access/logout`, the default) clears
+ * only this app's cookie. Cloudflare Access keeps a second, team-wide session
+ * on `<team>.cloudflareaccess.com`, so the next visit bounces there, finds that
+ * session still valid and signs the user straight back in — which reads as
+ * "logout did nothing". Ending the session for real means the team endpoint:
+ *
+ *   ACCESS_LOGOUT_URL=https://<team>.cloudflareaccess.com/logout
+ *
+ * It lives in an environment variable rather than in source because it is
+ * deployment configuration, not application logic.
+ */
+const ACCESS_LOGOUT_URL = process.env.ACCESS_LOGOUT_URL || "/cdn-cgi/access/logout";
+
 const APP_VERSION = resolveAppVersion();
 const BUILD_TIME = new Date().toISOString();
 const VERSION_PATH = "/version.json";
@@ -73,6 +89,7 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(APP_VERSION),
     __BUILD_TIME__: JSON.stringify(BUILD_TIME),
+    __ACCESS_LOGOUT_URL__: JSON.stringify(ACCESS_LOGOUT_URL),
   },
   plugins: [react(), versionManifest(), VitePWA({
     registerType: "autoUpdate",

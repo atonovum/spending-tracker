@@ -359,6 +359,10 @@ const DICT = {
     "settings.sync.logoutTitle": "로그아웃할까요?",
     "settings.sync.logoutMessage": "이 기기의 로그인 세션을 끝냅니다. 다시 쓰려면 인증이 필요합니다.",
     "settings.sync.logoutBlocked": "아직 서버로 못 보낸 변경이 있습니다. 먼저 동기화하거나, 내보내기로 백업한 뒤 로그아웃하세요.",
+    "settings.sync.reason.auth": "로그인 필요",
+    "settings.sync.reason.missing": "배포본에 없음",
+    "settings.sync.reason.unreachable": "서버 응답 없음",
+    "settings.sync.reason.malformed": "형식 오류",
   },
   en: {
     "tab.ledger": "Ledger",
@@ -705,6 +709,10 @@ const DICT = {
     "settings.sync.logoutTitle": "Sign out?",
     "settings.sync.logoutMessage": "Ends this device's session. You will have to authenticate again.",
     "settings.sync.logoutBlocked": "Changes here have not reached the server yet. Sync first, or export a backup before signing out.",
+    "settings.sync.reason.auth": "Sign-in required",
+    "settings.sync.reason.missing": "Not in this deployment",
+    "settings.sync.reason.unreachable": "No answer from server",
+    "settings.sync.reason.malformed": "Malformed response",
   },
 };
 

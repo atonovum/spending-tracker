@@ -57,6 +57,7 @@ describe('fetchDeployedVersion', () => {
 
     await expect(fetchDeployedVersion()).resolves.toEqual({
       ok: true,
+      reason: 'ok',
       version: '51818e3',
       builtAt: '2026-08-20T10:34:54.755Z',
     });
@@ -75,14 +76,15 @@ describe('fetchDeployedVersion', () => {
 
     await expect(fetchDeployedVersion()).resolves.toEqual({
       ok: true,
+      reason: 'ok',
       version: '51818e3',
       builtAt: null,
     });
   });
 
-  // The same trap as the sync path: an Access login page is a 200, so a status
-  // check alone would hand back an HTML page as if it were the manifest.
-  it('does not mistake an auth login page for a version manifest', async () => {
+  // Four ways this fails, four different things the user has to do. Collapsing
+  // them into one "unavailable" made a real outage undiagnosable.
+  it('names an expired session when the request was redirected to a login page', async () => {
     globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
@@ -93,24 +95,49 @@ describe('fetchDeployedVersion', () => {
       })
     );
 
-    await expect(fetchDeployedVersion()).resolves.toEqual({ ok: false, version: null, builtAt: null });
+    await expect(fetchDeployedVersion()).resolves.toEqual({
+      ok: false,
+      reason: 'auth',
+      version: null,
+      builtAt: null,
+    });
   });
 
-  it('reports failure on a non-2xx response', async () => {
+  // HTML with no redirect is the Worker's single-page-application fallback
+  // answering for an asset that is not in the deployment.
+  it('names a missing asset when HTML arrives without a redirect', async () => {
+    globalThis.fetch = vi.fn(() =>
+      Promise.resolve(
+        new Response('<!doctype html>', {
+          status: 200,
+          headers: new Headers({ 'content-type': 'text/html' }),
+        })
+      )
+    );
+
+    await expect(fetchDeployedVersion()).resolves.toEqual({
+      ok: false,
+      reason: 'missing',
+      version: null,
+      builtAt: null,
+    });
+  });
+
+  it('names an unreachable server on a non-2xx response', async () => {
     globalThis.fetch = vi.fn(() => Promise.resolve(jsonResponse({}, { status: 404 })));
 
-    await expect(fetchDeployedVersion()).resolves.toEqual({ ok: false, version: null, builtAt: null });
+    await expect(fetchDeployedVersion()).resolves.toMatchObject({ ok: false, reason: 'unreachable' });
   });
 
-  it('reports failure when the payload carries no version', async () => {
-    globalThis.fetch = vi.fn(() => Promise.resolve(jsonResponse({ builtAt: 'x' })));
-
-    await expect(fetchDeployedVersion()).resolves.toEqual({ ok: false, version: null, builtAt: null });
-  });
-
-  it('reports failure on a network error', async () => {
+  it('names an unreachable server on a network error', async () => {
     globalThis.fetch = vi.fn(() => Promise.reject(new Error('offline')));
 
-    await expect(fetchDeployedVersion()).resolves.toEqual({ ok: false, version: null, builtAt: null });
+    await expect(fetchDeployedVersion()).resolves.toMatchObject({ ok: false, reason: 'unreachable' });
+  });
+
+  it('names a malformed payload when the JSON carries no version', async () => {
+    globalThis.fetch = vi.fn(() => Promise.resolve(jsonResponse({ builtAt: 'x' })));
+
+    await expect(fetchDeployedVersion()).resolves.toMatchObject({ ok: false, reason: 'malformed' });
   });
 });

@@ -24,25 +24,48 @@ const UNRELEASED = new Set(["dev", "test", ""]);
  * a different question. `.json` sits outside VitePWA's `globPatterns`, so this
  * is not precached and the request actually reaches the network.
  *
- * @returns {Promise<{ ok: boolean, version: string|null, builtAt: string|null }>}
+ * `reason` exists because the four ways this fails need four different things
+ * from the user, and collapsing them into one "unavailable" made the failure
+ * undiagnosable:
+ *   - `auth` — the request was redirected to a login page. Sign in again.
+ *   - `missing` — HTML came back without a redirect, which is the Worker's
+ *     single-page-application fallback answering for an asset that is not
+ *     there. The deploy is missing `/version.json`.
+ *   - `unreachable` — no answer, or a non-2xx one.
+ *   - `malformed` — JSON, but nothing that names a version.
+ *
+ * @returns {Promise<{ ok: boolean, reason: string, version: string|null, builtAt: string|null }>}
  */
 export async function fetchDeployedVersion() {
+  let response;
   try {
-    const response = await fetch(VERSION_URL, { cache: "no-store" });
-    if (!response.ok || isAuthWall(response)) {
-      return { ok: false, version: null, builtAt: null };
-    }
+    response = await fetch(VERSION_URL, { cache: "no-store" });
+  } catch {
+    return failure("unreachable");
+  }
+
+  if (!response.ok) return failure("unreachable");
+  if (isAuthWall(response)) {
+    return failure(response.redirected ? "auth" : "missing");
+  }
+
+  try {
     const data = await response.json();
     const version = data && typeof data.version === "string" ? data.version : null;
-    if (!version) return { ok: false, version: null, builtAt: null };
+    if (!version) return failure("malformed");
     return {
       ok: true,
+      reason: "ok",
       version,
       builtAt: data && typeof data.builtAt === "string" ? data.builtAt : null,
     };
   } catch {
-    return { ok: false, version: null, builtAt: null };
+    return failure("malformed");
   }
+}
+
+function failure(reason) {
+  return { ok: false, reason, version: null, builtAt: null };
 }
 
 /**

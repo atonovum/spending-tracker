@@ -4,13 +4,20 @@ import { LogOut } from "lucide-react";
 import { useT } from "../lib/i18n.jsx";
 
 /**
- * Where Cloudflare Access ends a session. Same origin, so a plain navigation —
- * but the service worker's SPA fallback used to answer every same-origin
- * navigation with the cached `index.html`, which swallowed this request before
- * it reached the edge and made the button look dead. `/cdn-cgi/` is on the
- * `navigateFallbackDenylist` in `vite.config.js` for that reason.
+ * Where Cloudflare Access ends a session, from the `ACCESS_LOGOUT_URL` build
+ * variable (see `vite.config.js`).
+ *
+ * The default per-application endpoint clears only this app's cookie; the
+ * team-wide session outlives it and signs the user straight back in on the next
+ * visit. Pointing this at `https://<team>.cloudflareaccess.com/logout` is what
+ * ends the session for real.
+ *
+ * Same-origin by default, and the service worker's SPA fallback used to answer
+ * every same-origin navigation with the cached `index.html` — which swallowed
+ * this request before it reached the edge and made the button look dead.
+ * `/cdn-cgi/` is on the `navigateFallbackDenylist` for that reason.
  */
-const LOGOUT_URL = "/cdn-cgi/access/logout";
+const LOGOUT_URL = __ACCESS_LOGOUT_URL__;
 
 /**
  * Ends this device's Access session.

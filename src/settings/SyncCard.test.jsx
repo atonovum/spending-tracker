@@ -32,7 +32,7 @@ function render(props = {}) {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  fetchDeployedVersion.mockResolvedValue({ ok: true, version: 'aaaaaaa', builtAt: null });
+  fetchDeployedVersion.mockResolvedValue({ ok: true, reason: 'ok', version: 'aaaaaaa', builtAt: null });
 });
 
 describe('version reporting', () => {
@@ -43,17 +43,24 @@ describe('version reporting', () => {
   });
 
   it('shows what the server is serving once it answers', async () => {
-    fetchDeployedVersion.mockResolvedValue({ ok: true, version: 'bbbbbbb', builtAt: null });
+    fetchDeployedVersion.mockResolvedValue({ ok: true, reason: 'ok', version: 'bbbbbbb', builtAt: null });
     render();
 
     await waitFor(() => expect(screen.getByText('bbbbbbb')).toBeInTheDocument());
   });
 
-  it('says so when the server cannot be reached', async () => {
-    fetchDeployedVersion.mockResolvedValue({ ok: false, version: null, builtAt: null });
+  // Each failure asks something different of the user, so each gets its own
+  // wording rather than a shared "unavailable".
+  it.each([
+    ['auth', /로그인 필요/],
+    ['missing', /배포본에 없음/],
+    ['unreachable', /서버 응답 없음/],
+    ['malformed', /형식 오류/],
+  ])('names why the deployed version could not be read: %s', async (reason, expected) => {
+    fetchDeployedVersion.mockResolvedValue({ ok: false, reason, version: null, builtAt: null });
     render();
 
-    await waitFor(() => expect(screen.getByText(/확인 불가/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(expected)).toBeInTheDocument());
   });
 
   it('offers no update when the versions match', async () => {
@@ -69,7 +76,7 @@ describe('applying an update', () => {
   // what actually finds the new build, so both calls have to happen.
   it('re-checks the worker and hands over to it', async () => {
     const user = userEvent.setup();
-    fetchDeployedVersion.mockResolvedValue({ ok: true, version: 'bbbbbbb', builtAt: null });
+    fetchDeployedVersion.mockResolvedValue({ ok: true, reason: 'ok', version: 'bbbbbbb', builtAt: null });
     render();
 
     const button = await screen.findByRole('button', { name: /업데이트/ });
