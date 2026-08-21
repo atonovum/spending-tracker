@@ -2751,22 +2751,18 @@ function AppRoot() {
   // It used to be two effects right here, which is why a failed push could
   // silently lose an edit: nothing in this file is covered by tests.
   const notifySync = useCallback(
-    ({ kind, adopted }) => {
+    ({ kind }) => {
       if (typeof window === "undefined") return;
       if (kind === "conflict") {
-        // Not auto-dismissed: this reports an edit that was discarded, and a
-        // message that vanishes before it can be read is no report at all.
         notifications.show({
           color: "yellow",
           autoClose: false,
-          title: lang === "en" ? "Updated on another device" : "다른 기기에서 갱신됨",
-          message: adopted
-            ? lang === "en"
-              ? "Reloading the latest state."
-              : "최신 상태를 다시 불러왔습니다."
-            : lang === "en"
-              ? "Another device has newer data, but it could not be read. Retrying."
-              : "다른 기기의 최신 데이터를 읽지 못했습니다. 다시 시도합니다.",
+          title: lang === "en" ? "Sync conflict" : "동기화 충돌",
+          styles: { description: { wordBreak: "keep-all" } },
+          message:
+            lang === "en"
+              ? "The same data changed on both devices. This device's copy was kept. Review it, then sync again."
+              : "두 기기에서 같은 데이터가 바뀌었습니다. 이 기기 값은 유지됩니다. 확인 후 다시 시도하세요.",
         });
         return;
       }
@@ -2799,11 +2795,11 @@ function AppRoot() {
     [lang]
   );
 
-  const { pendingSync, adoptRemote } = useCloudSync({ state, setState, onNotify: notifySync });
+  const { pendingSync, syncNow } = useCloudSync({ state, setState, onNotify: notifySync });
 
   return (
     <I18nProvider lang={lang} currency={currency}>
-      <App state={state} setState={setState} pendingSync={pendingSync} syncNow={adoptRemote} />
+      <App state={state} setState={setState} pendingSync={pendingSync} syncNow={syncNow} />
     </I18nProvider>
   );
 }

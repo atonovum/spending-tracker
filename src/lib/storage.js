@@ -1,5 +1,5 @@
 import defaultSeed from "../../samples/default-seed.json";
-import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, normalizeLabelIds, PENDING_SYNC_KEY, STORAGE_KEYS, safeJsonParse, uid, validDate } from "./finance.js";
+import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, LAST_SYNCED_STATE_KEY, normalizeLabelIds, PENDING_SYNC_KEY, STORAGE_KEYS, safeJsonParse, uid, validDate } from "./finance.js";
 import { migrateLegacyTemplates, normalizeSchedule, todayString } from "./schedules.js";
 import { withSampleData } from "./sampleData.js";
 
@@ -262,6 +262,24 @@ export function savePendingSync(pending) {
   try {
     if (pending) localStorage.setItem(PENDING_SYNC_KEY, "1");
     else localStorage.removeItem(PENDING_SYNC_KEY);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err };
+  }
+}
+
+export function loadLastSyncedState() {
+  try {
+    const parsed = safeJsonParse(localStorage.getItem(LAST_SYNCED_STATE_KEY));
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveLastSyncedState(state) {
+  try {
+    localStorage.setItem(LAST_SYNCED_STATE_KEY, JSON.stringify(state));
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err };

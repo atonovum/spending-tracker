@@ -6,7 +6,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchRemoteState, pushRemoteState } from './cloudSync.js';
-import { PENDING_SYNC_KEY } from './finance.js';
+import { LAST_SYNCED_STATE_KEY, PENDING_SYNC_KEY } from './finance.js';
 import { useCloudSync } from './useCloudSync.js';
 import { PULL_MIN_INTERVAL_MS, PUSH_DEBOUNCE_MS, RETRY_DELAYS_MS } from './syncEngine.js';
 
@@ -50,8 +50,8 @@ function entryIdsOf(state) {
 function setup(initial, onNotify = vi.fn()) {
   const view = renderHook(() => {
     const [state, setState] = useState(initial);
-    useCloudSync({ state, setState, onNotify });
-    return { state, setState };
+    const sync = useCloudSync({ state, setState, onNotify });
+    return { state, setState, sync };
   });
   return { ...view, onNotify };
 }
@@ -91,19 +91,19 @@ describe('adoption on load', () => {
   // ahead of the server while `updatedAt` still reads the last adopted
   // revision — so the timestamp comparison alone hands the win to a stale
   // server and the edit is silently overwritten on the next launch.
-  it('keeps unpushed local edits instead of adopting a stale remote', async () => {
+  it('keeps unpushed local edits when the remote changed and no merge base exists', async () => {
     localStorage.setItem(PENDING_SYNC_KEY, '1');
     fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['stale-remote'], 9999), updatedAt: 9999 });
 
-    const { result } = setup(docWith(['unpushed-local'], 1000));
+    const { result, onNotify } = setup(docWith(['unpushed-local'], 1000));
     await settle();
     await act(async () => {
       await vi.advanceTimersByTimeAsync(PUSH_DEBOUNCE_MS + 50);
     });
 
     expect(entryIdsOf(result.current.state)).toEqual(['unpushed-local']);
-    expect(pushRemoteState).toHaveBeenCalledTimes(1);
-    expect(entryIdsOf(pushRemoteState.mock.calls[0][0])).toEqual(['unpushed-local']);
+    expect(pushRemoteState).not.toHaveBeenCalled();
+    expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'conflict', adopted: false }));
   });
 
   // An unreachable server is not an empty one: pushing here would send no
@@ -208,12 +208,17 @@ describe('push confirmation', () => {
 
     // Edit lands while the first request is still open, then it completes.
     act(() => result.current.setState(docWith(['local-1', 'local-2', 'local-3'], 1000)));
+    fetchRemoteState.mockResolvedValue({
+      ok: true,
+      state: docWith(['local-1', 'local-2'], 7777),
+      updatedAt: 7777,
+    });
     await act(async () => {
       release();
       await vi.advanceTimersByTimeAsync(PUSH_DEBOUNCE_MS + 50);
     });
 
-    expect(result.current.state.updatedAt).not.toBe(7777);
+    expect(result.current.state.updatedAt).toBe(7777);
     expect(localStorage.getItem(PENDING_SYNC_KEY)).toBe('1');
     expect(entryIdsOf(pushRemoteState.mock.calls[1][0])).toEqual(['local-1', 'local-2', 'local-3']);
   });
@@ -290,11 +295,13 @@ describe('failure handling', () => {
     expect(pushRemoteState).toHaveBeenCalledTimes(2);
   });
 
-  it('adopts the server document and notifies on a conflict', async () => {
+  it('merges the latest server document and retries after a write conflict', async () => {
     fetchRemoteState
       .mockResolvedValueOnce({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 })
       .mockResolvedValue({ ok: true, state: docWith(['other-device'], 8000), updatedAt: 8000 });
-    pushRemoteState.mockResolvedValue({ ok: false, conflict: true, current: 8000 });
+    pushRemoteState
+      .mockResolvedValueOnce({ ok: false, conflict: true, current: 8000 })
+      .mockResolvedValueOnce({ ok: true, newUpdatedAt: 9000 });
 
     const { result, onNotify } = setup(docWith(['local-1'], 1000));
     await settle();
@@ -304,8 +311,8 @@ describe('failure handling', () => {
       await vi.advanceTimersByTimeAsync(PUSH_DEBOUNCE_MS + 50);
     });
 
-    await waitFor(() => expect(entryIdsOf(result.current.state)).toEqual(['other-device']));
-    expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'conflict', adopted: true }));
+    await waitFor(() => expect(entryIdsOf(result.current.state)).toEqual(['local-2', 'other-device']));
+    expect(onNotify).not.toHaveBeenCalledWith(expect.objectContaining({ kind: 'conflict' }));
     expect(localStorage.getItem(PENDING_SYNC_KEY)).not.toBe('1');
   });
 
@@ -315,6 +322,7 @@ describe('failure handling', () => {
   // same conflict.
   it('says so and retries when the server document could not be read after a conflict', async () => {
     fetchRemoteState
+      .mockResolvedValueOnce({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 })
       .mockResolvedValueOnce({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 })
       .mockResolvedValue({ ok: false, authRequired: false, state: null, updatedAt: null });
     pushRemoteState.mockResolvedValue({ ok: false, conflict: true, current: 8000 });
@@ -331,11 +339,11 @@ describe('failure handling', () => {
     expect(entryIdsOf(result.current.state)).toEqual(['local-1', 'local-2']);
     expect(localStorage.getItem(PENDING_SYNC_KEY)).toBe('1');
 
-    const before = pushRemoteState.mock.calls.length;
+    const before = fetchRemoteState.mock.calls.length;
     await act(async () => {
       await vi.advanceTimersByTimeAsync(RETRY_DELAYS_MS[0] + 50);
     });
-    expect(pushRemoteState.mock.calls.length).toBeGreaterThan(before);
+    expect(fetchRemoteState.mock.calls.length).toBeGreaterThan(before);
   });
 
   it('notifies and stops retrying when the payload is too large', async () => {
@@ -362,25 +370,18 @@ describe('failure handling', () => {
   });
 });
 
-describe('adoptRemote', () => {
-  // The manual "sync now" direction. It is a pull and never a push: local ->
-  // server already happens on its own whenever a transaction changes.
-  it('takes the server document even while local edits are unsent', async () => {
-    localStorage.setItem(PENDING_SYNC_KEY, '1');
-    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['from-server'], 9000), updatedAt: 9000 });
-
-    const view = renderHook(() => {
-      const [state, setState] = useState(docWith(['stale-local'], 1000));
-      const sync = useCloudSync({ state, setState, onNotify: vi.fn() });
-      return { state, sync };
-    });
+describe('manual sync', () => {
+  it('takes a server-only change when the local document is clean', async () => {
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['local-1'], 1000), updatedAt: 1000 });
+    const view = setup(docWith(['local-1'], 1000));
     await settle();
+    fetchRemoteState.mockResolvedValue({ ok: true, state: docWith(['from-server', 'local-1'], 9000), updatedAt: 9000 });
 
     await act(async () => {
-      await view.result.current.sync.adoptRemote();
+      await view.result.current.sync.syncNow();
     });
 
-    expect(entryIdsOf(view.result.current.state)).toEqual(['from-server']);
+    expect(entryIdsOf(view.result.current.state)).toEqual(['from-server', 'local-1']);
     expect(localStorage.getItem(PENDING_SYNC_KEY)).not.toBe('1');
     expect(pushRemoteState).not.toHaveBeenCalled();
   });
@@ -397,7 +398,7 @@ describe('adoptRemote', () => {
 
     let adopted;
     await act(async () => {
-      adopted = await view.result.current.sync.adoptRemote();
+      adopted = await view.result.current.sync.syncNow();
     });
 
     expect(adopted).toBe(false);
@@ -417,7 +418,7 @@ describe('adoptRemote', () => {
     onNotify.mockClear();
 
     await act(async () => {
-      await view.result.current.sync.adoptRemote();
+      await view.result.current.sync.syncNow();
     });
 
     expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'authRequired' }));
@@ -666,5 +667,186 @@ describe('page lifecycle', () => {
     });
 
     expect(pushRemoteState).not.toHaveBeenCalled();
+  });
+});
+
+describe('three-way device reconciliation', () => {
+  function saveBase(state) {
+    localStorage.setItem(LAST_SYNCED_STATE_KEY, JSON.stringify(state));
+  }
+
+  it('combines different transactions added on the phone and laptop', async () => {
+    const base = docWith(['base'], 1000);
+    saveBase(base);
+    localStorage.setItem(PENDING_SYNC_KEY, '1');
+    fetchRemoteState.mockResolvedValue({ ok: true, authRequired: false, state: docWith(['laptop', 'base'], 2000), updatedAt: 2000 });
+
+    setup(docWith(['phone', 'base'], 1000));
+    await settle();
+
+    await waitFor(() => expect(pushRemoteState).toHaveBeenCalledTimes(1));
+    expect(entryIdsOf(pushRemoteState.mock.calls[0][0])).toEqual(['phone', 'base', 'laptop']);
+    expect(pushRemoteState.mock.calls[0][1]).toMatchObject({ ifMatch: 2000 });
+  });
+
+  it('keeps a same-field conflict on the phone instead of discarding it', async () => {
+    const base = docWith(['base'], 1000);
+    const local = structuredClone(base);
+    const remote = structuredClone(base);
+    local.wallets[0].entries[0].amount = 1200;
+    remote.wallets[0].entries[0].amount = 1500;
+    remote.updatedAt = 2000;
+    saveBase(base);
+    localStorage.setItem(PENDING_SYNC_KEY, '1');
+    fetchRemoteState.mockResolvedValue({ ok: true, authRequired: false, state: remote, updatedAt: 2000 });
+
+    const { result, onNotify } = setup(local);
+    await settle();
+
+    expect(result.current.state.wallets[0].entries[0].amount).toBe(1200);
+    expect(pushRemoteState).not.toHaveBeenCalled();
+    expect(localStorage.getItem(PENDING_SYNC_KEY)).toBe('1');
+    expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'conflict', adopted: false }));
+  });
+
+  it('re-fetches and merges after If-Match reports a newer server revision', async () => {
+    const base = docWith(['base'], 1000);
+    saveBase(base);
+    localStorage.setItem(PENDING_SYNC_KEY, '1');
+    fetchRemoteState
+      .mockResolvedValueOnce({ ok: true, authRequired: false, state: base, updatedAt: 1000 })
+      .mockResolvedValueOnce({ ok: true, authRequired: false, state: docWith(['laptop', 'base'], 2000), updatedAt: 2000 });
+    pushRemoteState
+      .mockResolvedValueOnce({ ok: false, conflict: true, current: 2000 })
+      .mockResolvedValueOnce({ ok: true, newUpdatedAt: 3000 });
+
+    setup(docWith(['phone', 'base'], 1000));
+    await settle();
+
+    await waitFor(() => expect(pushRemoteState).toHaveBeenCalledTimes(2));
+    expect(entryIdsOf(pushRemoteState.mock.calls[1][0])).toEqual(['phone', 'base', 'laptop']);
+    expect(pushRemoteState.mock.calls[1][1]).toMatchObject({ ifMatch: 2000 });
+  });
+
+  it('waits for the latest remote revision before uploading after reconnect', async () => {
+    const base = docWith(['base'], 1000);
+    saveBase(base);
+    fetchRemoteState.mockResolvedValueOnce({ ok: true, authRequired: false, state: base, updatedAt: 1000 });
+    const { result } = setup(base);
+    await settle();
+
+    pushRemoteState.mockClear();
+    act(() => result.current.setState(docWith(['phone', 'base'], 1000)));
+    let releaseFetch;
+    fetchRemoteState.mockImplementationOnce(() => new Promise((resolve) => {
+      releaseFetch = () => resolve({ ok: true, authRequired: false, state: docWith(['laptop', 'base'], 2000), updatedAt: 2000 });
+    }));
+
+    await act(async () => {
+      window.dispatchEvent(new Event('online'));
+      await Promise.resolve();
+    });
+    expect(pushRemoteState).not.toHaveBeenCalled();
+
+    await act(async () => {
+      releaseFetch();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(pushRemoteState).toHaveBeenCalledTimes(1));
+    expect(pushRemoteState.mock.calls[0][1]).toMatchObject({ ifMatch: 2000 });
+  });
+
+  it('makes manual Sync Now upload pending local additions', async () => {
+    const base = docWith(['base'], 1000);
+    saveBase(base);
+    fetchRemoteState.mockResolvedValue({ ok: true, authRequired: false, state: base, updatedAt: 1000 });
+    const { result } = setup(base);
+    await settle();
+
+    act(() => result.current.setState(docWith(['phone', 'base'], 1000)));
+    pushRemoteState.mockClear();
+    let synced;
+    await act(async () => {
+      synced = await result.current.sync.syncNow();
+    });
+
+    expect(synced).toBe(true);
+    expect(pushRemoteState).toHaveBeenCalledTimes(1);
+    expect(entryIdsOf(pushRemoteState.mock.calls[0][0])).toEqual(['phone', 'base']);
+  });
+
+  it('stores the confirmed snapshot and avoids a duplicate write on the next sync', async () => {
+    const base = docWith(['base'], 1000);
+    saveBase(base);
+    localStorage.setItem(PENDING_SYNC_KEY, '1');
+    fetchRemoteState.mockResolvedValue({ ok: true, authRequired: false, state: base, updatedAt: 1000 });
+    pushRemoteState.mockResolvedValue({ ok: true, newUpdatedAt: 3000 });
+    const { result } = setup(docWith(['phone', 'base'], 1000));
+    await settle();
+
+    await waitFor(() => expect(pushRemoteState).toHaveBeenCalledTimes(1));
+    const confirmed = JSON.parse(localStorage.getItem(LAST_SYNCED_STATE_KEY));
+    expect(entryIdsOf(confirmed)).toEqual(['phone', 'base']);
+    expect(confirmed.updatedAt).toBe(3000);
+
+    fetchRemoteState.mockResolvedValue({ ok: true, authRequired: false, state: confirmed, updatedAt: 3000 });
+    await act(async () => {
+      await result.current.sync.syncNow();
+    });
+    expect(pushRemoteState).toHaveBeenCalledTimes(1);
+  });
+
+  it('recovers an untracked legacy phone edit when its revision still matches the server', async () => {
+    fetchRemoteState.mockResolvedValue({ ok: true, authRequired: false, state: docWith(['base'], 1000), updatedAt: 1000 });
+
+    setup(docWith(['phone', 'base'], 1000));
+    await settle();
+
+    await waitFor(() => expect(pushRemoteState).toHaveBeenCalledTimes(1));
+    expect(entryIdsOf(pushRemoteState.mock.calls[0][0])).toEqual(['phone', 'base']);
+    expect(pushRemoteState.mock.calls[0][1]).toMatchObject({ ifMatch: 1000 });
+  });
+
+  it('uploads a phone deletion when the laptop copy is unchanged', async () => {
+    const base = docWith(['remove-me', 'keep'], 1000);
+    saveBase(base);
+    localStorage.setItem(PENDING_SYNC_KEY, '1');
+    fetchRemoteState.mockResolvedValue({ ok: true, authRequired: false, state: base, updatedAt: 1000 });
+
+    setup(docWith(['keep'], 1000));
+    await settle();
+
+    await waitFor(() => expect(pushRemoteState).toHaveBeenCalledTimes(1));
+    expect(entryIdsOf(pushRemoteState.mock.calls[0][0])).toEqual(['keep']);
+  });
+
+  it('downloads a laptop deletion when the phone copy is unchanged', async () => {
+    const base = docWith(['remove-me', 'keep'], 1000);
+    saveBase(base);
+    fetchRemoteState.mockResolvedValue({ ok: true, authRequired: false, state: docWith(['keep'], 2000), updatedAt: 2000 });
+
+    const { result } = setup(base);
+    await settle();
+
+    await waitFor(() => expect(entryIdsOf(result.current.state)).toEqual(['keep']));
+    expect(pushRemoteState).not.toHaveBeenCalled();
+  });
+
+  it('keeps a phone deletion pending when the laptop edited the same transaction', async () => {
+    const base = docWith(['same'], 1000);
+    const remote = docWith(['same'], 2000);
+    remote.wallets[0].entries[0].note = '노트북 수정';
+    saveBase(base);
+    localStorage.setItem(PENDING_SYNC_KEY, '1');
+    fetchRemoteState.mockResolvedValue({ ok: true, authRequired: false, state: remote, updatedAt: 2000 });
+
+    const { result, onNotify } = setup(docWith([], 1000));
+    await settle();
+
+    expect(entryIdsOf(result.current.state)).toEqual([]);
+    expect(pushRemoteState).not.toHaveBeenCalled();
+    expect(localStorage.getItem(PENDING_SYNC_KEY)).toBe('1');
+    expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'conflict' }));
   });
 });

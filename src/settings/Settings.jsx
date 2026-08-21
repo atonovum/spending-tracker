@@ -124,7 +124,6 @@ function Settings({
       <SyncCard
         pendingSync={pendingSync}
         onSyncNow={onSyncNow}
-        onConfirm={requestConfirm}
         onNotify={onNotify}
       />
 

@@ -25,7 +25,6 @@ function render(props = {}) {
     <SyncCard
       pendingSync={false}
       onSyncNow={vi.fn(() => Promise.resolve(true))}
-      onConfirm={vi.fn()}
       onNotify={vi.fn()}
       {...props}
     />
@@ -105,9 +104,7 @@ describe('applying an update', () => {
 });
 
 describe('manual sync', () => {
-  // The two directions are not symmetric on purpose: local -> server happens on
-  // its own when a transaction changes, server -> local is this button.
-  it('pulls the server document down', async () => {
+  it('runs the bidirectional reconciliation', async () => {
     const user = userEvent.setup();
     const onSyncNow = vi.fn(() => Promise.resolve(true));
     render({ onSyncNow });
@@ -117,9 +114,7 @@ describe('manual sync', () => {
     expect(onSyncNow).toHaveBeenCalledTimes(1);
   });
 
-  // Pressing the button is the expression of intent, so nothing is asked when
-  // there is nothing to lose.
-  it('does not ask first when everything has landed', async () => {
+  it('does not ask for destructive confirmation when everything has landed', async () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn();
     render({ onConfirm, pendingSync: false });
@@ -129,7 +124,7 @@ describe('manual sync', () => {
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-  it('asks first when this device is holding unsent changes', async () => {
+  it('uploads unsent changes without asking to discard them', async () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn();
     const onSyncNow = vi.fn(() => Promise.resolve(true));
@@ -137,14 +132,18 @@ describe('manual sync', () => {
 
     await user.click(screen.getByRole('button', { name: /지금 동기화/ }));
 
-    expect(onConfirm).toHaveBeenCalledWith(
-      expect.objectContaining({ confirmColor: 'red', action: expect.any(Function) })
-    );
-    // Nothing happens until the confirmation is taken.
-    expect(onSyncNow).not.toHaveBeenCalled();
-
-    await onConfirm.mock.calls[0][0].action();
+    expect(onConfirm).not.toHaveBeenCalled();
     expect(onSyncNow).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports a successful reconciliation', async () => {
+    const user = userEvent.setup();
+    const onNotify = vi.fn();
+    render({ onNotify, onSyncNow: vi.fn(() => Promise.resolve(true)) });
+
+    await user.click(screen.getByRole('button', { name: /지금 동기화/ }));
+
+    await waitFor(() => expect(onNotify).toHaveBeenCalledWith('동기화했습니다', true));
   });
 
   it('reports when the server document could not be read', async () => {
@@ -163,9 +162,19 @@ describe('manual sync', () => {
     expect(screen.getByText(/보내지 못한 변경/)).toBeInTheDocument();
   });
 
-  it('reports being in sync otherwise', async () => {
+  it('only reports that this device has no unsent changes otherwise', async () => {
     render({ pendingSync: false });
 
-    expect(screen.getByText(/서버와 동기화됨/)).toBeInTheDocument();
+    expect(screen.getByText(/보내지 않은 변경 없음/)).toBeInTheDocument();
+    expect(screen.queryByText(/서버와 동기화됨/)).not.toBeInTheDocument();
+  });
+
+  it('does not claim server confirmation when the server is unreachable', async () => {
+    fetchDeployedVersion.mockResolvedValue({ ok: false, reason: 'unreachable', status: 0, version: null, builtAt: null });
+    render({ pendingSync: false });
+
+    await screen.findByText(/서버 응답 없음/);
+    expect(screen.getByText(/보내지 않은 변경 없음/)).toBeInTheDocument();
+    expect(screen.queryByText(/서버와 동기화됨/)).not.toBeInTheDocument();
   });
 });

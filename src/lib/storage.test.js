@@ -10,7 +10,9 @@ import {
   normalizeState,
   loadState,
   loadPendingSync,
+  loadLastSyncedState,
   savePendingSync,
+  saveLastSyncedState,
   saveState,
   loadLastEntryDate,
   saveLastEntryDate,
@@ -18,7 +20,7 @@ import {
   SAMPLE_SEED_ENABLED,
   SCHEMA_VERSION,
 } from './storage.js';
-import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, STORAGE_KEYS } from './finance.js';
+import { ACTIVE_STORAGE_KEY, LAST_ENTRY_DATE_KEY, LAST_SYNCED_STATE_KEY, STORAGE_KEYS } from './finance.js';
 import { SAMPLE_WALLETS } from './sampleData.js';
 
 describe('inferCategoryIcon', () => {
@@ -795,6 +797,50 @@ describe('pending sync flag', () => {
 
     expect(loadPendingSync()).toBe(false);
     expect(savePendingSync(true).ok).toBe(false);
+
+    getItem.mockRestore();
+    setItem.mockRestore();
+  });
+});
+
+describe('last synced document', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('is absent before the first confirmed sync', () => {
+    expect(loadLastSyncedState()).toBeNull();
+  });
+
+  it('round-trips the exact confirmed document', () => {
+    const state = { version: 5, wallets: [{ id: 'w1', entries: [] }], updatedAt: 1234 };
+
+    expect(saveLastSyncedState(state)).toEqual({ ok: true });
+    expect(loadLastSyncedState()).toEqual(state);
+  });
+
+  it('returns null for malformed storage', () => {
+    localStorage.setItem(LAST_SYNCED_STATE_KEY, '{broken');
+
+    expect(loadLastSyncedState()).toBeNull();
+  });
+
+  it('never participates in state migration or exported user data', () => {
+    expect(STORAGE_KEYS).not.toContain(LAST_SYNCED_STATE_KEY);
+    expect(normalizeState({ wallets: [], categories: [], labels: [], lastSyncedState: { secret: true } }))
+      .not.toHaveProperty('lastSyncedState');
+  });
+
+  it('survives unavailable storage without throwing', () => {
+    const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('denied');
+    });
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('denied');
+    });
+
+    expect(loadLastSyncedState()).toBeNull();
+    expect(saveLastSyncedState({ version: 5 }).ok).toBe(false);
 
     getItem.mockRestore();
     setItem.mockRestore();

@@ -11,6 +11,7 @@ export const LAST_ENTRY_DATE_KEY = "spending-tracker-last-entry-date";
 // known about after a reload — `updatedAt` alone cannot say it, because it only
 // ever advances when the server confirms.
 export const PENDING_SYNC_KEY = "spending-tracker-pending-sync";
+export const LAST_SYNCED_STATE_KEY = "spending-tracker-last-synced-state";
 export const MAX_WALLETS = 5;
 
 export const REPEAT_OPTIONS = [
